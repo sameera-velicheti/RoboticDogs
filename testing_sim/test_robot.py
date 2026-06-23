@@ -11,4 +11,5 @@ payload = {
 response = requests.post(ROBOT_IP, json=payload)
 
 print("Status:", response.status_code)
+
 print("Response:", response.text)

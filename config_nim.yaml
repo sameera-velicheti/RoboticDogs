@@ -1,0 +1,4 @@
+nim:
+  base_url: "http://localhost:8000/v1/chat/completions"
+  model: "meta/llama-3.1-8b-instruct"
+  api_key: "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"
