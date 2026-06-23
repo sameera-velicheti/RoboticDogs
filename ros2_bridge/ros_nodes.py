@@ -1,17 +1,47 @@
+import rospy
+from pug_control.msg import Velocity
+
+
 class RosPugBridge:
     """
-    Placeholder bridge on laptop side.
-    Sends commands instead of executing ROS locally.
+    Direct ROS publisher from laptop to robot.
+    No Flask, no HTTP, no robot-side changes.
     """
 
+    def __init__(self):
+        rospy.init_node("nim_laptop_bridge", anonymous=True)
+
+        self.pub = rospy.Publisher(
+            "/app_control/velocity_move",
+            Velocity,
+            queue_size=10
+        )
+
+        rospy.sleep(1.0)
+
     def cautious_walk(self, speed=0.2, duration=1.0, safety_level="medium"):
-        print(f"[SEND → ROBOT] cautious_walk speed={speed} duration={duration} safety={safety_level}")
+        msg = Velocity()
+        msg.x = float(speed)
+        msg.y = 0.0
+        msg.yaw_rate = 0.0
+        msg.stop = False
+        self.pub.publish(msg)
 
     def sit(self):
-        print("[SEND → ROBOT] sit")
+        msg = Velocity()
+        msg.x = 0.0
+        msg.y = 0.0
+        msg.yaw_rate = 0.0
+        msg.stop = True
+        self.pub.publish(msg)
 
     def stop(self):
-        print("[SEND → ROBOT] stop")
+        self.sit()
 
     def turn_left(self, speed=0.2, duration=1.0):
-        print(f"[SEND → ROBOT] turn_left speed={speed} duration={duration}")
+        msg = Velocity()
+        msg.x = 0.0
+        msg.y = 0.0
+        msg.yaw_rate = float(speed)
+        msg.stop = False
+        self.pub.publish(msg)
