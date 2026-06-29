@@ -1,9 +1,9 @@
 from ros2_bridge.ros_nodes import RosPugBridge
 
-bridge = RosPugBridge()
-
 
 def execute_command(command: dict):
+    bridge = RosPugBridge()
+    
     action = command.get("action")
 
     if action == "cautious_walk":
@@ -27,3 +27,5 @@ def execute_command(command: dict):
 
     else:
         raise ValueError(f"Unknown ROS action: {action}")
+
+    bridge.close()

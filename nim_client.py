@@ -1,11 +1,19 @@
 import requests
 import json
+import os
+
+headers = {
+    "Authorization": f"Bearer {os.environ.get('NIM_API_KEY')}",
+    "Content-Type": "application/json"
+}
+
+r = requests.post(NIM_URL, json=payload, headers=headers)
 
 NIM_URL = "http://localhost:8000/v1/chat/completions"
 
 def send_prompt(prompt):
     payload = {
-        "model": "meta/llama-3.1-8b-instruct",
+        "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.2
     }

@@ -1,4 +1,4 @@
-#!/home/aiuser/RoboticDogs/venv/bin/python3
+#!/home/demo_user/RoboticDogs/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -3,7 +3,7 @@ import requests
 NIM_URL = "http://localhost:8000/v1/chat/completions"
 
 payload = {
-    "model": "meta/llama-3.1-8b-instruct",
+    "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
     "messages": [
         {"role": "system", "content": "You are a robotics control assistant."},
         {"role": "user", "content": "Say 'ready' if you are connected."}

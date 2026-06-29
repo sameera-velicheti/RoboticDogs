@@ -1,6 +1,6 @@
 {
   "action": "cautious_walk",
-  "speed": 0.25,
-  "duration": 5,
+  "speed": 0.15,
+  "duration": 5.0,
   "safety_level": "high"
 }

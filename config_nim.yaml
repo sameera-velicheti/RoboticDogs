@@ -1,4 +1,4 @@
 nim:
   base_url: "http://localhost:8000/v1/chat/completions"
-  model: "meta/llama-3.1-8b-instruct"
-  api_key: "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"
+  model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
+  api_key: "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"
