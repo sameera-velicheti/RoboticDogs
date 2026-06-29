@@ -1,0 +1,6 @@
+{
+  "action": "turn_left",
+  "speed": 0.25,
+  "duration": 8.0,
+  "safety_level": "high"
+}

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 ROBOT_IP = "192.168.149.1"
 ROBOT_PORT = 9090
-WATCHDOG_TIMEOUT = 4.0  
+WATCHDOG_TIMEOUT = 60.0  
 
 
 class RosPugBridge:
@@ -46,12 +46,13 @@ class RosPugBridge:
             "stop": stop
         }))
 
-    def cautious_walk(self, speed=0.10, duration=2.0, safety_level="high"):
+    def cautious_walk(self, speed=0.115, duration=3.0, safety_level="high"):
         logger.info(f"cautious_walk: speed={speed}, duration={duration}")
         self._start_watchdog(WATCHDOG_TIMEOUT)
-        self._publish(x=speed)
+        self._publish(x=speed, y=0.001, yaw_rate=0.0, stop=False)
         time.sleep(duration)
         self._cancel_watchdog()
+        time.sleep(0.2)  # brief pause before stop
         self.stop()
 
     def turn_left(self, speed=0.10, duration=1.0):
@@ -62,15 +63,49 @@ class RosPugBridge:
         self._cancel_watchdog()
         self.stop()
 
-    def sit(self):
-        logger.info("sit")
+    def turn_right(self, speed=0.10, duration=1.0):
+        logger.info(f"turn_right: speed={speed}, duration={duration}")
+        self._start_watchdog(WATCHDOG_TIMEOUT)
+        self._publish(yaw_rate=-speed)
+        time.sleep(duration)
         self._cancel_watchdog()
+        self.stop()
+
+    def set_pose(self, height=0.05, pitch=0.0, roll=0.0, yaw=0.0, run_time=0.5):
+        logger.info(f"set_pose: height={height}")
+        pose_publisher = roslibpy.Topic(
+            self.client,
+            "/pug_control/pose",
+            "pug_control/Pose"
+    )
+        pose_publisher.publish(roslibpy.Message({
+        "roll": roll,
+        "pitch": pitch,
+        "yaw": yaw,
+        "height": height,
+        "x_shift": 0.0,
+        "stance_x": 0.0,
+        "stance_y": 0.0,
+        "run_time": run_time
+    }))
+        time.sleep(run_time + 0.2)
+
+    def sit(self, height=0.05):
+        logger.info(f"sit: height={height}")
+        self._cancel_watchdog()
+        self.stop()
+        time.sleep(0.3)
+        self.set_pose(height=height)
         self._publish(stop=True)
 
     def stop(self):
         logger.info("stop")
         self._cancel_watchdog()
-        self._publish(x=0.0, y=0.0, yaw_rate=0.0, stop=False)
+        for _ in range(3):  # send 3 times to ensure it registers
+            self._publish(x=0.0, y=0.0, yaw_rate=0.0, stop=True)
+            time.sleep(0.1)
+    # Then send a hard sit
+        self._publish(stop=True)
 
     def close(self):
         self.stop()

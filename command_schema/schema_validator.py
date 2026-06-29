@@ -2,11 +2,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left"}
+ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right"}
 
 # Safe limits based on your lab testing
-MAX_SPEED = 0.15        # reduced from 0.25 since dog is falling
-MAX_DURATION = 3.0      # max 3 seconds per command, was 5 which is too long
+MAX_SPEED = 0.20        # reduced from 0.25 since dog is falling
+MAX_DURATION = 60.0     # max 60 seconds per command
 MIN_SPEED = 0.05
 
 

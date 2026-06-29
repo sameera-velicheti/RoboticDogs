@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NemoClaw — ROSPug Control</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg:        #0a0e14;
+    --surface:   #111722;
+    --border:    #1e2a3a;
+    --accent:    #00d4ff;
+    --accent2:   #76b900; /* NVIDIA green */
+    --warn:      #ff6b35;
+    --text:      #c9d8e8;
+    --muted:     #4a6080;
+    --success:   #00c896;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .dog-icon {
+    font-size: 22px;
+  }
+
+  header h1 {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+
+  }
+
+  header .sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+   
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Main layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 240px;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-section h3 {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .sample-cmd {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+
+  .sample-cmd:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 212, 255, 0.05);
+  }
+
+  .capability {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .capability:last-child { border-bottom: none; }
+
+  .cap-icon {
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+  }
+
+  /* ── Chat area ── */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+
+  /* Welcome message */
+  .welcome {
+    background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(118,185,0,0.05));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .welcome h2 {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .welcome p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Message bubbles */
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 100%;
+  }
+
+  .msg-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .msg-user .msg-label { color: var(--accent); }
+
+  .msg-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: var(--mono);
+  }
+
+  .msg-user .msg-bubble {
+    border-color: rgba(0,212,255,0.3);
+    background: rgba(0,212,255,0.05);
+    color: var(--accent);
+  }
+
+  /* Execution panel */
+  .exec-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .exec-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .exec-header .spinner {
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .exec-header .spinner.done {
+    border-color: var(--success);
+    animation: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .exec-log {
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .log-line { display: flex; align-items: center; gap: 6px; }
+  .log-line.info { color: var(--muted); }
+  .log-line.success { color: var(--success); }
+  .log-line.error { color: var(--warn); }
+  .log-line.warn { color: #f0a500; }
+
+  /* Action steps */
+  .action-steps {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .action-step {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .step-num {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-num.active {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .step-num.complete {
+    background: var(--success);
+    color: var(--bg);
+  }
+
+  .step-name { color: var(--text); }
+  .step-meta { color: var(--muted); font-size: 10px; margin-left: auto; }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-left: 26px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.1s linear;
+    width: 0%;
+  }
+
+  .progress-bar-fill.complete {
+    background: var(--success);
+  }
+
+  .step-elapsed {
+    margin-left: 26px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ── Input area ── */
+  .input-area {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .input-field {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .input-field:focus {
+    border-color: var(--accent);
+  }
+
+  .input-field::placeholder { color: var(--muted); }
+
+  .input-field:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .send-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: #33ddff; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .stop-btn {
+    background: transparent;
+    color: var(--warn);
+    border: 1px solid var(--warn);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .stop-btn:hover {
+    background: rgba(255,107,53,0.1);
+  }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-top: 8px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Agentic Henrik</h1>
+</header>
+
+<div class="main">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <h3>Sample Commands</h3>
+      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 5 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">turn left for 2 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 20 seconds then turn right</button>
+      <button class="sample-cmd" onclick="useCommand(this)">walk for 3 seconds, turn left, then walk for 3 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">turn left for 1 second then turn right for 1 second</button>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Limits</h3>
+      <div class="capability">Max speed: 0.15 m/s</div>
+      <div class="capability">Max duration: 60s</div>
+    </div>
+  </aside>
+
+  <!-- Chat -->
+  <div class="chat-area">
+    <div class="messages" id="messages">
+      <div class="welcome">
+        <h2>// NemoClaw Terminal</h2>
+        <p>Type a natural language command below and the robot will execute it. Commands are validated and safety-clamped before execution. Type <strong style="color:var(--accent)">stop</strong> at any time to halt immediately.</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <input
+          type="text"
+          class="input-field"
+          id="inputField"
+          placeholder="walk forward for 5 seconds then sit..."
+          autocomplete="off"
+          onkeydown="if(event.key==='Enter') sendCommand()"
+        />
+        <button class="send-btn" id="sendBtn" onclick="sendCommand()">SEND</button>
+        <button class="stop-btn" onclick="emergencyStop()">■ STOP</button>
+      </div>
+      <div class="hint">↵ Enter to send &nbsp;·&nbsp; ■ STOP for emergency halt &nbsp;·&nbsp; Click any sample command to load it</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('inputField');
+const sendBtn = document.getElementById('sendBtn');
+
+let isRunning = false;
+
+function useCommand(btn) {
+  inputEl.value = btn.textContent.trim();
+  inputEl.focus();
+}
+
+function scrollBottom() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-user';
+  div.innerHTML = `
+    <div class="msg-label">You</div>
+    <div class="msg-bubble">${text}</div>
+  `;
+  messagesEl.appendChild(div);
+  scrollBottom();
+}
+
+function createExecPanel() {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg';
+  wrap.innerHTML = `
+    <div class="msg-label">NemoClaw</div>
+    <div class="exec-panel">
+      <div class="exec-header">
+        <div class="spinner" id="spinner"></div>
+        <span id="exec-status">Connecting to NIM...</span>
+      </div>
+      <div class="exec-log" id="exec-log"></div>
+      <div class="action-steps" id="action-steps"></div>
+    </div>
+  `;
+  messagesEl.appendChild(wrap);
+  scrollBottom();
+  return wrap;
+}
+
+function addLog(text, type='info') {
+  const log = document.getElementById('exec-log');
+  const icons = { info: '·', success: '✓', error: '✗', warn: '⚠' };
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  line.textContent = `${icons[type]} ${text}`;
+  log.appendChild(line);
+  scrollBottom();
+}
+
+function setStatus(text, done=false) {
+  document.getElementById('exec-status').textContent = text;
+  if (done) {
+    const s = document.getElementById('spinner');
+    s.classList.add('done');
+  }
+}
+
+let stepEls = [];
+
+function buildSteps(actions) {
+  const container = document.getElementById('action-steps');
+  stepEls = [];
+  actions.forEach((action, i) => {
+    const step = document.createElement('div');
+    step.className = 'action-step';
+    step.innerHTML = `
+      <div class="step-header">
+        <div class="step-num" id="step-num-${i}">${i+1}</div>
+        <span class="step-name">${action}</span>
+        <span class="step-meta" id="step-meta-${i}">pending</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="step-bar-${i}"></div>
+      </div>
+      <div class="step-elapsed" id="step-elapsed-${i}"></div>
+    `;
+    container.appendChild(step);
+    stepEls.push(step);
+  });
+  scrollBottom();
+}
+
+function updateStep(index, pct, elapsed) {
+  const bar = document.getElementById(`step-bar-${index}`);
+  const elapsedEl = document.getElementById(`step-elapsed-${index}`);
+  const num = document.getElementById(`step-num-${index}`);
+  const meta = document.getElementById(`step-meta-${index}`);
+  if (bar) bar.style.width = pct + '%';
+  if (elapsedEl && elapsed > 0) elapsedEl.textContent = `${elapsed}s elapsed`;
+  if (num) { num.classList.remove('active'); num.classList.add('active'); }
+  if (meta) meta.textContent = `${pct}%`;
+  scrollBottom();
+}
+
+function completeStep(index, action) {
+  const bar = document.getElementById(`step-bar-${index}`);
+  const num = document.getElementById(`step-num-${index}`);
+  const meta = document.getElementById(`step-meta-${index}`);
+  if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
+  if (num) { num.classList.remove('active'); num.classList.add('complete'); num.textContent = '✓'; }
+  if (meta) meta.textContent = 'done';
+  scrollBottom();
+}
+
+function setRunning(val) {
+  isRunning = val;
+  sendBtn.disabled = val;
+  inputEl.disabled = val;
+}
+
+async function sendCommand() {
+  const text = inputEl.value.trim();
+  if (!text || isRunning) return;
+
+  inputEl.value = '';
+  setRunning(true);
+  addUserMsg(text);
+  const panel = createExecPanel();
+
+  try {
+    const resp = await fetch('/command', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: text })
+    });
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const evt = JSON.parse(line.slice(6));
+        handleEvent(evt);
+      }
+    }
+  } catch (e) {
+    addLog(`Connection error: ${e}`, 'error');
+  } finally {
+    setRunning(false);
+    setStatus('Complete', true);
+  }
+}
+
+function handleEvent(evt) {
+  switch (evt.type) {
+    case 'log':
+      addLog(evt.msg, 'info');
+      setStatus(evt.msg);
+      break;
+    case 'plan':
+      addLog(`Plan: ${evt.actions.join(' → ')}`, 'info');
+      buildSteps(evt.actions);
+      setStatus(`Executing ${evt.total} action(s)...`);
+      break;
+    case 'action_start':
+      setStatus(`Running: ${evt.action}`);
+      updateStep(evt.index, 0, 0);
+      break;
+    case 'progress':
+      updateStep(evt.index, evt.pct, evt.elapsed);
+      break;
+    case 'action_done':
+      completeStep(evt.index, evt.action);
+      addLog(`✓ ${evt.action} complete`, 'success');
+      break;
+    case 'done':
+      addLog(evt.msg, 'success');
+      setStatus('Done', true);
+      break;
+    case 'error':
+      addLog(evt.msg, 'error');
+      setStatus('Error', true);
+      break;
+  }
+}
+
+function emergencyStop() {
+  inputEl.value = 'stop';
+  sendCommand();
+}
+
+// Focus input on load
+inputEl.focus();
+</script>
+</body>
+</html>
