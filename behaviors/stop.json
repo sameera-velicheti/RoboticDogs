@@ -1,6 +1,6 @@
 {
   "speed": 0.0,
-  "duration": 0,
+  "duration": 5.0,
   "emergency_stop": true,
   "safety_level": "high"
 }

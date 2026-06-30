@@ -1,3 +1,5 @@
+from turtle import speed
+
 import roslibpy
 import time
 import threading
@@ -46,14 +48,34 @@ class RosPugBridge:
             "stop": stop
         }))
 
-    def cautious_walk(self, speed=0.115, duration=3.0, safety_level="high"):
-        logger.info(f"cautious_walk: speed={speed}, duration={duration}")
-        self._start_watchdog(WATCHDOG_TIMEOUT)
-        self._publish(x=speed, y=0.001, yaw_rate=0.0, stop=False)
-        time.sleep(duration)
-        self._cancel_watchdog()
-        time.sleep(0.2)  # brief pause before stop
-        self.stop()
+    def cautious_walk(self, speed=0.15, duration=2.0, safety_level="high", capture_each_segment=False):
+        SEGMENT = 2.0
+    
+        logger.info(f"cautious_walk: speed={speed}, total_duration={duration}, segment={SEGMENT}")
+    
+        remaining = duration
+        segment_num = 0
+    
+        while remaining > 0:
+            this_segment = min(SEGMENT, remaining)
+            segment_num += 1
+        
+            self._start_watchdog(WATCHDOG_TIMEOUT)
+            self._publish(x=speed, y=0.0, yaw_rate=0.0, stop=False)
+            time.sleep(this_segment)
+            self._cancel_watchdog()
+        
+            self.stop()  # reliably stop, sent 3x
+            time.sleep(0.3)  # settle before next segment / capture
+        
+            if capture_each_segment:
+                try:
+                    filepath = self.take_picture()
+                    logger.info(f"Segment {segment_num} capture: {filepath}")
+                except Exception as e:
+                    logger.warning(f"Capture failed on segment {segment_num}: {e}")
+        
+            remaining -= this_segment
 
     def turn_left(self, speed=0.10, duration=1.0):
         logger.info(f"turn_left: speed={speed}, duration={duration}")

@@ -16,7 +16,9 @@ def execute_command(command: dict, bridge=None):
     elif action == "sit":
         bridge.sit(height=command.get("height", 0.05))
     elif action == "stop":
-        bridge.stop()
+        bridge.stop(
+            duration=command.get("duration", 5.0)
+        )
     elif action == "turn_left":
         bridge.turn_left(
             speed=command.get("speed", 0.15),

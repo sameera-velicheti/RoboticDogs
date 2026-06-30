@@ -20,7 +20,7 @@ NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 
 ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right"}
 MAX_SPEED = 0.15
-MAX_DURATION = 10.0
+MAX_DURATION = 60.0
 
 # Global bridge — one connection, reused across commands
 _bridge = None
@@ -153,13 +153,25 @@ def stream_command(user_input):
         # Execute with progress ticks
         try:
             if action_name == "cautious_walk":
-                bridge._publish(x=speed, stop=False)
-                steps = int(duration * 10)
-                for step in range(steps):
-                    time.sleep(0.1)
-                    pct = int(((step + 1) / steps) * 100)
-                    yield event("progress", {"index": i, "pct": pct, "elapsed": round((step + 1) * 0.1, 1)})
-                bridge.stop()
+                SEGMENT = 2.0
+                remaining = duration
+                elapsed_total = 0
+    
+                while remaining > 0:
+                    this_segment = min(SEGMENT, remaining)
+        
+                    bridge._publish(x=speed, stop=False)
+                    steps = int(this_segment * 10)
+                    for step in range(steps):
+                        time.sleep(0.1)
+                        elapsed_total += 0.1
+                        pct = int((elapsed_total / duration) * 100)
+                        yield event("progress", {"index": i, "pct": pct, "elapsed": round(elapsed_total, 1)})
+        
+                    bridge.stop()
+                    time.sleep(0.3)
+        
+                    remaining -= this_segment
 
             elif action_name == "turn_left":
                 bridge._publish(yaw_rate=speed, stop=False)
