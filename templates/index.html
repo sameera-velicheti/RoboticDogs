@@ -12,7 +12,7 @@
     --surface:   #111722;
     --border:    #1e2a3a;
     --accent:    #00d4ff;
-    --accent2:   #76b900; /* NVIDIA green */
+    --accent2:   #76b900;
     --warn:      #ff6b35;
     --text:      #c9d8e8;
     --muted:     #4a6080;
@@ -33,7 +33,6 @@
     overflow: hidden;
   }
 
-  /* ── Header ── */
   header {
     display: flex;
     align-items: center;
@@ -45,9 +44,7 @@
     flex-shrink: 0;
   }
 
-  .dog-icon {
-    font-size: 22px;
-  }
+  .dog-icon { font-size: 22px; }
 
   header h1 {
     font-family: var(--mono);
@@ -55,14 +52,12 @@
     font-weight: 700;
     color: var(--accent);
     letter-spacing: 0.05em;
-
   }
 
   header .sub {
     font-size: 11px;
     color: var(--muted);
     font-family: var(--mono);
-   
   }
 
   .status-dot {
@@ -79,14 +74,12 @@
     50% { opacity: 0.4; }
   }
 
-  /* ── Main layout ── */
   .main {
     display: flex;
     flex: 1;
     overflow: hidden;
   }
 
-  /* ── Sidebar ── */
   .sidebar {
     width: 240px;
     border-right: 1px solid var(--border);
@@ -104,7 +97,7 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--muted);
     margin-bottom: 10px;
   }
 
@@ -137,19 +130,13 @@
     gap: 8px;
     padding: 6px 0;
     font-size: 12px;
-    color: var(--text);
+    color: var(--muted);
     border-bottom: 1px solid var(--border);
   }
 
   .capability:last-child { border-bottom: none; }
+  .cap-icon { font-size: 14px; width: 20px; text-align: center; }
 
-  .cap-icon {
-    font-size: 14px;
-    width: 20px;
-    text-align: center;
-  }
-
-  /* ── Chat area ── */
   .chat-area {
     flex: 1;
     display: flex;
@@ -167,7 +154,6 @@
     scroll-behavior: smooth;
   }
 
-  /* Welcome message */
   .welcome {
     background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(118,185,0,0.05));
     border: 1px solid var(--border);
@@ -188,7 +174,6 @@
     line-height: 1.6;
   }
 
-  /* Message bubbles */
   .msg {
     display: flex;
     flex-direction: column;
@@ -222,7 +207,6 @@
     color: var(--accent);
   }
 
-  /* Execution panel */
   .exec-panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -237,6 +221,7 @@
     font-family: var(--mono);
     color: var(--muted);
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 8px;
   }
@@ -274,7 +259,6 @@
   .log-line.error { color: var(--warn); }
   .log-line.warn { color: #f0a500; }
 
-  /* Action steps */
   .action-steps {
     padding: 10px 14px;
     display: flex;
@@ -282,11 +266,7 @@
     gap: 10px;
   }
 
-  .action-step {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  .action-step { display: flex; flex-direction: column; gap: 4px; }
 
   .step-header {
     display: flex;
@@ -309,20 +289,11 @@
     flex-shrink: 0;
   }
 
-  .step-num.active {
-    background: var(--accent);
-    color: var(--bg);
-  }
-
-  .step-num.complete {
-    background: var(--success);
-    color: var(--bg);
-  }
-
+  .step-num.active { background: var(--accent); color: var(--bg); }
+  .step-num.complete { background: var(--success); color: var(--bg); }
   .step-name { color: var(--text); }
   .step-meta { color: var(--muted); font-size: 10px; margin-left: auto; }
 
-  /* Progress bar */
   .progress-bar-wrap {
     height: 4px;
     background: var(--border);
@@ -339,10 +310,7 @@
     width: 0%;
   }
 
-  .progress-bar-fill.complete {
-    background: var(--success);
-  }
-
+  .progress-bar-fill.complete { background: var(--success); }
   .step-elapsed {
     margin-left: 26px;
     font-family: var(--mono);
@@ -350,7 +318,66 @@
     color: var(--muted);
   }
 
-  /* ── Input area ── */
+  /* Captured image card */
+  .captured-image-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .captured-image-card img {
+    width: 100%;
+    display: block;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .captured-image-card .img-label {
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* Report card */
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .report-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+  }
+
+  .report-body {
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .finding-row {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .finding-row:last-child { border-bottom: none; }
+
+  .finding-fail { color: var(--warn); }
+  .finding-pass { color: var(--success); }
+
+  .finding-remediation {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
   .input-area {
     padding: 16px 24px;
     border-top: 1px solid var(--border);
@@ -377,16 +404,9 @@
     transition: border-color 0.15s;
   }
 
-  .input-field:focus {
-    border-color: var(--accent);
-  }
-
+  .input-field:focus { border-color: var(--accent); }
   .input-field::placeholder { color: var(--muted); }
-
-  .input-field:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  .input-field:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .send-btn {
     background: var(--accent);
@@ -420,9 +440,7 @@
     flex-shrink: 0;
   }
 
-  .stop-btn:hover {
-    background: rgba(255,107,53,0.1);
-  }
+  .stop-btn:hover { background: rgba(255,107,53,0.1); }
 
   .hint {
     font-size: 11px;
@@ -431,7 +449,51 @@
     margin-top: 8px;
   }
 
-  /* Scrollbar */
+  .right-panel {
+    width: 320px;
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .right-panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .right-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;  /* critical — allows flex child to scroll properly */
+  }
+
+  .resize-handle {
+    width: 5px;
+    background: var(--border);
+    cursor: col-resize;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .resize-handle:hover {
+    background: var(--accent);
+  }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -445,30 +507,29 @@
 
 <div class="main">
 
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-section">
       <h3>Sample Commands</h3>
-      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 5 seconds</button>
-      <button class="sample-cmd" onclick="useCommand(this)">turn left for 2 seconds</button>
-      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 20 seconds then turn right</button>
-      <button class="sample-cmd" onclick="useCommand(this)">walk for 3 seconds, turn left, then walk for 3 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 12 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 5 seconds, then turn left for 2 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 10 seconds, turn right, walk forward for 10 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this)">Walk forward for 5 seconds</button>
       <button class="sample-cmd" onclick="useCommand(this)">turn left for 1 second then turn right for 1 second</button>
     </div>
 
     <div class="sidebar-section">
       <h3>Limits</h3>
-      <div class="capability">Max speed: 0.15 m/s</div>
-      <div class="capability">Max duration: 60s</div>
+      <div class="capability"> Max speed: 0.15 m/s</div>
+      <div class="capability"> Max duration: 60s</div>
+      <div class="capability"> Capture every: 5s</div>
     </div>
   </aside>
 
-  <!-- Chat -->
   <div class="chat-area">
     <div class="messages" id="messages">
       <div class="welcome">
         <h2>// NemoClaw Terminal</h2>
-        <p>Type a natural language command below and the robot will execute it. Commands are validated and safety-clamped before execution. Type <strong style="color:var(--accent)">stop</strong> at any time to halt immediately.</p>
+        <p>Type a natural language command below and the robot will execute it. During walks, images are captured every 5 seconds and a compliance report is generated at the end. Type <strong style="color:var(--accent)">stop</strong> at any time to halt immediately.</p>
       </div>
     </div>
 
@@ -478,14 +539,23 @@
           type="text"
           class="input-field"
           id="inputField"
-          placeholder="walk forward for 5 seconds then sit..."
+          placeholder="walk forward for 10 seconds..."
           autocomplete="off"
           onkeydown="if(event.key==='Enter') sendCommand()"
         />
         <button class="send-btn" id="sendBtn" onclick="sendCommand()">SEND</button>
         <button class="stop-btn" onclick="emergencyStop()">■ STOP</button>
       </div>
-      <div class="hint">↵ Enter to send &nbsp;·&nbsp; ■ STOP for emergency halt &nbsp;·&nbsp; Click any sample command to load it</div>
+      <div class="hint">↵ Enter to send &nbsp;·&nbsp; ■ STOP for emergency halt &nbsp;·&nbsp; Images captured every 5s during walk</div>
+    </div>
+  </div>
+  <div class="resize-handle" id="resizeHandle"></div>
+  <div class="right-panel">
+    <div class="right-panel-header"> Images &amp; Reports</div>
+    <div class="right-panel-content" id="right-panel-content">
+      <div style="color:var(--muted); font-family:var(--mono); font-size:11px; text-align:center; margin-top:20px;">
+        Images and compliance reports will appear here during inspection.
+      </div>
     </div>
   </div>
 
@@ -497,6 +567,8 @@ const inputEl = document.getElementById('inputField');
 const sendBtn = document.getElementById('sendBtn');
 
 let isRunning = false;
+let pendingFindings = {};  // add this near the top with other let declarations
+
 
 function useCommand(btn) {
   inputEl.value = btn.textContent.trim();
@@ -548,10 +620,11 @@ function addLog(text, type='info') {
 }
 
 function setStatus(text, done=false) {
-  document.getElementById('exec-status').textContent = text;
+  const el = document.getElementById('exec-status');
+  if (el) el.textContent = text;
   if (done) {
     const s = document.getElementById('spinner');
-    s.classList.add('done');
+    if (s) { s.classList.add('done'); }
   }
 }
 
@@ -592,7 +665,7 @@ function updateStep(index, pct, elapsed) {
   scrollBottom();
 }
 
-function completeStep(index, action) {
+function completeStep(index) {
   const bar = document.getElementById(`step-bar-${index}`);
   const num = document.getElementById(`step-num-${index}`);
   const meta = document.getElementById(`step-meta-${index}`);
@@ -600,6 +673,106 @@ function completeStep(index, action) {
   if (num) { num.classList.remove('active'); num.classList.add('complete'); num.textContent = '✓'; }
   if (meta) meta.textContent = 'done';
   scrollBottom();
+}
+
+function addCapturedImage(src, label) {
+  const panel = document.getElementById('right-panel-content');
+  if (panel.querySelector('[data-placeholder]')) {
+    panel.innerHTML = '';
+  }
+  const wrap = document.createElement('div');
+  wrap.id = `img-${label}`;
+  wrap.style.cssText = 'border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-shrink:0;';
+  wrap.innerHTML = `
+    <div style="max-height:220px; overflow:hidden;">
+      <img src="${src}" alt="${label}" style="width:100%; height:220px; object-fit:contain; background:var(--bg); display:block; border-bottom:1px solid var(--border);" />
+    </div>
+    <div style="padding:6px 10px; font-family:var(--mono); font-size:10px; color:var(--muted);">📷 ${label}</div>
+    <div id="findings-${label}" style="padding:0 10px 8px 10px; font-family:var(--mono); font-size:11px; display:none;"></div>
+  `;
+  panel.appendChild(wrap);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function attachFindingsToImage(filename, status, findings) {
+    const container = document.getElementById(`findings-${filename}`);
+    if (!container) return;
+
+    const statusColor = status === 'PASS' ? 'var(--success)' : 'var(--warn)';
+    const fails = findings.filter(f => f.status === 'FAIL');
+    const passes = findings.filter(f => f.status === 'PASS');
+
+    const failRows = fails.map(f => `
+        <div style="padding:6px 0; border-bottom:1px solid var(--border);">
+            <span style="color:var(--warn); font-weight:700;">[${f.severity}]</span>
+            <span style="color:var(--text); margin-left:6px;">${f.rule_name}</span>
+            <div style="color:var(--muted); font-size:10px; margin-top:2px;">↳ ${f.remediation}</div>
+        </div>
+    `).join('');
+
+    const passRows = passes.map(f => `
+        <div style="padding:4px 0; color:var(--success); font-size:10px;">✓ ${f.rule_name}</div>
+    `).join('');
+
+    container.innerHTML = `
+        <div style="padding:8px 0 6px 0; border-top:1px solid var(--border); margin-top:4px;">
+            <span style="color:${statusColor}; font-weight:700; font-size:11px;">
+                ${status === 'PASS' ? '✓ PASS' : '✗ FAIL'} — ${fails.length} issue(s)
+            </span>
+        </div>
+        ${failRows || '<div style="color:var(--success); padding:4px 0; font-size:11px;">✓ No issues found</div>'}
+        ${passes.length > 0 ? `
+            <div style="margin-top:6px; padding-top:6px; border-top:1px solid var(--border);">
+                ${passRows}
+            </div>` : ''}
+    `;
+    container.style.display = 'block';
+    scrollBottom();
+}
+
+function addReportSummary(data) {
+    const statusColor = data.overall === 'PASS' ? 'var(--success)' : 'var(--warn)';
+    const statusIcon = data.overall === 'PASS' ? '✓' : '✗';
+
+    // Keep summary in exec log
+    const log = document.getElementById('exec-log');
+    if (log) {
+        const div = document.createElement('div');
+        div.style.cssText = 'margin-top:10px; padding:10px; border:1px solid var(--border); border-radius:6px;';
+        div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; font-family:var(--mono);">
+                <span style="font-size:16px;">${statusIcon}</span>
+                <span style="color:${statusColor}; font-weight:700; font-size:13px;">INSPECTION ${data.overall}</span>
+                <span style="margin-left:auto; color:var(--muted); font-size:10px;">
+                    ${data.total_images} image(s) · ${data.total_fails} issue(s)
+                </span>
+            </div>
+            <div style="margin-top:8px; font-size:10px; color:var(--muted); font-family:var(--mono);">
+                <a href="/reports/${data.report_file}" target="_blank" style="color:var(--accent);">${data.report_file}</a>
+            </div>
+        `;
+        log.appendChild(div);
+        scrollBottom();
+    }
+
+    // Also add summary to right panel
+    const panel = document.getElementById('right-panel-content');
+    if (panel) {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:10px; border:1px solid var(--border); border-radius:6px;';
+        div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; font-family:var(--mono);">
+                <span style="font-size:16px;">${statusIcon}</span>
+                <span style="color:${statusColor}; font-weight:700; font-size:13px;">INSPECTION ${data.overall}</span>
+            </div>
+            <div style="margin-top:6px; font-size:10px; color:var(--muted); font-family:var(--mono);">
+                ${data.total_images} image(s) · ${data.total_fails} issue(s)<br>
+                <a href="/reports/${data.report_file}" target="_blank" style="color:var(--accent);">${data.report_file}</a>
+            </div>
+        `;
+        panel.appendChild(div);
+        panel.scrollTop = panel.scrollHeight;
+    }
 }
 
 function setRunning(val) {
@@ -615,7 +788,7 @@ async function sendCommand() {
   inputEl.value = '';
   setRunning(true);
   addUserMsg(text);
-  const panel = createExecPanel();
+  createExecPanel();
 
   try {
     const resp = await fetch('/command', {
@@ -667,8 +840,13 @@ function handleEvent(evt) {
       updateStep(evt.index, evt.pct, evt.elapsed);
       break;
     case 'action_done':
-      completeStep(evt.index, evt.action);
-      addLog(`✓ ${evt.action} complete`, 'success');
+      completeStep(evt.index);
+      break;
+    case 'image':
+      addCapturedImage(evt.src, evt.label);
+      break;
+    case 'report':
+      addReport(evt);
       break;
     case 'done':
       addLog(evt.msg, 'success');
@@ -678,7 +856,13 @@ function handleEvent(evt) {
       addLog(evt.msg, 'error');
       setStatus('Error', true);
       break;
-  }
+    case 'image_findings':
+      attachFindingsToImage(evt.filename, evt.status, evt.findings);
+      break;
+    case 'report_summary':
+      addReportSummary(evt);
+      break;  
+    }
 }
 
 function emergencyStop() {
@@ -686,8 +870,42 @@ function emergencyStop() {
   sendCommand();
 }
 
-// Focus input on load
 inputEl.focus();
+
+// Resize handle
+const handle = document.getElementById('resizeHandle');
+const rightPanel = handle ? handle.nextElementSibling : null;
+const MIN_WIDTH = 320; // can't go smaller than original
+
+if (handle && rightPanel) {
+  let dragging = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  handle.addEventListener('mousedown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startWidth = rightPanel.offsetWidth;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const delta = startX - e.clientX;
+    const newWidth = Math.max(MIN_WIDTH, startWidth + delta);
+    
+    // Don't let right panel cover more than 2/3 of the window
+    const maxWidth = Math.floor(window.innerWidth * 0.60);
+    rightPanel.style.width = Math.min(newWidth, maxWidth) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+}
 </script>
 </body>
 </html>

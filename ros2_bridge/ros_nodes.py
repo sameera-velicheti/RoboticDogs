@@ -48,16 +48,18 @@ class RosPugBridge:
             "stop": stop
         }))
 
-    def cautious_walk(self, speed=0.15, duration=2.0, safety_level="high", capture_each_segment=False):
+    def cautious_walk(self, speed=0.15, duration=2.0, safety_level="high",
+                  capture_interval=None):
         SEGMENT = 2.0
         logger.info(f"cautious_walk: speed={speed}, total_duration={duration}, segment={SEGMENT}")
 
         remaining = duration
-        segment_num = 0
+        elapsed_total = 0
+        last_capture_at = 0
+        captured_images = []
 
         while remaining > 0:
             this_segment = min(SEGMENT, remaining)
-            segment_num += 1
 
             self._start_watchdog(WATCHDOG_TIMEOUT)
             self._publish(x=speed, y=0.0, yaw_rate=0.0, stop=False)
@@ -67,14 +69,21 @@ class RosPugBridge:
             self.stop()
             time.sleep(0.3)
 
-            if capture_each_segment:
+            elapsed_total += this_segment
+
+        # Capture every N seconds if interval is set
+            if capture_interval and (elapsed_total - last_capture_at) >= capture_interval:
                 try:
                     filepath = self.take_picture()
-                    logger.info(f"Segment {segment_num} capture: {filepath}")
+                    captured_images.append(filepath)
+                    last_capture_at = elapsed_total
+                    logger.info(f"Captured at {elapsed_total}s: {filepath}")
                 except Exception as e:
-                    logger.warning(f"Capture failed on segment {segment_num}: {e}")
+                    logger.warning(f"Capture failed at {elapsed_total}s: {e}")
 
             remaining -= this_segment
+
+        return captured_images  # return all captured images for compliance check at end
 
     def turn_left(self, speed=0.10, duration=1.0):
         logger.info(f"turn_left: speed={speed}, duration={duration}")

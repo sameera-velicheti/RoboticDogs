@@ -6,10 +6,10 @@ Drop this into your RoboticDogs/ root folder and run:
 Then open http://localhost:5000 in your browser.
 """
 
-from flask import Flask, render_template, request, Response, stream_with_context
+import os
+from flask import Flask, render_template, request, Response, stream_with_context, send_from_directory
 import json
 import time
-import queue
 import threading
 import requests as http_requests
 
@@ -18,11 +18,10 @@ app = Flask(__name__)
 NIM_URL = "http://localhost:8000/v1/chat/completions"
 NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 
-ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right"}
+ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right", "take_picture"}
 MAX_SPEED = 0.15
 MAX_DURATION = 60.0
 
-# Global bridge — one connection, reused across commands
 _bridge = None
 _bridge_lock = threading.Lock()
 
@@ -43,14 +42,14 @@ def get_prompt(user_instruction):
     return f"""
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
 
-Allowed actions: cautious_walk, sit, stop, turn_left, turn_right
+Allowed actions: cautious_walk, sit, stop, turn_left, turn_right, take_picture
 
 Rules:
 - Always include speed and duration for movement actions
 - If given multiple actions, complete one full movement before starting the next
 - Default speed is 0.10, default duration is 3.0
 - Use the exact duration the user specifies if they mention seconds
-- Maximum duration is 60.0, maximum speed is 0.20
+- Maximum duration is 60.0, maximum speed is 0.15
 - Users should not enter unrelated instructions or questions; only robot movement commands are allowed
 
 Return a list of actions in order:
@@ -109,7 +108,7 @@ def stream_command(user_input):
         yield event("error", {"msg": f"NIM error: {e}"})
         return
 
-    yield event("log", {"msg": f"Model response received"})
+    yield event("log", {"msg": "Model response received"})
 
     # Parse
     try:
@@ -129,6 +128,9 @@ def stream_command(user_input):
         yield event("error", {"msg": str(e)})
         return
 
+    all_captured_images = []
+    CAPTURE_INTERVAL = 5.0  # capture every 5 seconds during walk
+
     # Execute each action
     for i, action in enumerate(actions):
         try:
@@ -139,8 +141,8 @@ def stream_command(user_input):
             return
 
         action_name = action.get("action")
-        duration = action.get("duration", 0)
-        speed = action.get("speed", 0)
+        duration = float(action.get("duration", 3.0))
+        speed = float(action.get("speed", 0.10))
 
         yield event("action_start", {
             "index": i,
@@ -150,28 +152,59 @@ def stream_command(user_input):
             "total": len(actions)
         })
 
-        # Execute with progress ticks
         try:
             if action_name == "cautious_walk":
-                SEGMENT = 2.0
+                SEGMENT = 5.0
                 remaining = duration
-                elapsed_total = 0
-    
+                elapsed_total = 0.0
+                last_capture_at = -CAPTURE_INTERVAL  # trigger first capture at 5s
+                elapsed_for_ui = 0.0
+
                 while remaining > 0:
                     this_segment = min(SEGMENT, remaining)
-        
-                    bridge._publish(x=speed, stop=False)
+
+                    # Walk
+                    bridge._publish(x=speed, y=0.0, yaw_rate=0.0, stop=False)
                     steps = int(this_segment * 10)
                     for step in range(steps):
                         time.sleep(0.1)
-                        elapsed_total += 0.1
-                        pct = int((elapsed_total / duration) * 100)
-                        yield event("progress", {"index": i, "pct": pct, "elapsed": round(elapsed_total, 1)})
-        
+                        elapsed_for_ui += 0.1
+                        pct = int((elapsed_for_ui / duration) * 100)
+                        yield event("progress", {"index": i, "pct": pct, "elapsed": round(elapsed_for_ui, 1)})
+
+                    # Stop and settle
                     bridge.stop()
                     time.sleep(0.3)
-        
+
+                    # Update elapsed by segment (clean math, no float drift)
                     remaining -= this_segment
+                    elapsed_total += this_segment
+
+                    # Capture if interval reached
+                    if round(elapsed_total - last_capture_at, 1) >= CAPTURE_INTERVAL:
+                        time.sleep(1.2)  # extra settle for clear image
+                        try:
+                            yield event("log", {"msg": f"📷 Capturing image at {round(elapsed_total, 1)}s..."})
+                            filepath = bridge.take_picture()
+                            all_captured_images.append(filepath)
+                            last_capture_at = elapsed_total
+                            filename = os.path.basename(filepath)
+                            yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                            yield event("log", {"msg": f"✓ Image saved: {filename}"})
+                        except Exception as e:
+                            yield event("log", {"msg": f"Capture failed: {e}"})
+
+            elif action_name == "take_picture":
+                try:
+                    yield event("log", {"msg": "📷 Taking picture..."})
+                    filepath = bridge.take_picture()
+                    all_captured_images.append(filepath)
+                    filename = os.path.basename(filepath)
+                    yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                    yield event("log", {"msg": f"✓ Image saved: {filename}"})
+                    yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
+                except Exception as e:
+                    yield event("error", {"msg": f"Camera failed: {e}"})
 
             elif action_name == "turn_left":
                 bridge._publish(yaw_rate=speed, stop=False)
@@ -209,12 +242,69 @@ def stream_command(user_input):
 
         yield event("action_done", {"index": i, "action": action_name})
 
-    yield event("done", {"msg": f"Completed {len(actions)} action(s)."})
+    # After ALL actions complete — run compliance on all captured images
+    # After ALL actions complete — run compliance on all captured images
+    # After ALL actions complete — run compliance on all captured images
+    if all_captured_images:
+        yield event("log", {"msg": f"🔍 Running compliance check on {len(all_captured_images)} image(s)..."})
 
+        from vision.compliance_checker import check_compliance_with_nim
+        from vision.report_generator import generate_report
+        from datetime import datetime
+
+        all_findings = []
+        for img_path in all_captured_images:
+            filename = os.path.basename(img_path)
+            yield event("log", {"msg": f"Checking: {filename}"})
+            findings = check_compliance_with_nim(
+                filepath=img_path,
+                timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+            )
+            all_findings.append(findings)
+
+            # Send findings for this specific image immediately after checking it
+            fails = [f for f in findings if f["status"] == "FAIL"]
+            yield event("image_findings", {
+                "filename": filename,
+                "status": "FAIL" if fails else "PASS",
+                "findings": [
+                    {
+                        "rule_name": f["rule_name"],
+                        "severity": f["severity"],
+                        "status": f["status"],
+                        "remediation": f["remediation"]
+                    }
+                    for f in findings
+                ]
+            })
+
+        report, json_path, txt_path = generate_report(
+            all_findings=all_findings,
+            location="SHI Lab",
+            inspector="NemoClaw"
+        )
+
+        total_fails = sum(1 for findings in all_findings for f in findings if f["status"] == "FAIL")
+        yield event("report_summary", {
+            "overall": "FAIL" if total_fails > 0 else "PASS",
+            "total_images": len(all_captured_images),
+            "total_fails": total_fails,
+            "report_file": os.path.basename(txt_path)
+        })
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/captures/<filename>")
+def serve_capture(filename):
+    return send_from_directory('/home/demo_user/RoboticDogs/captures', filename)
+
+
+@app.route("/reports/<filename>")
+def serve_report(filename):
+    return send_from_directory('/home/demo_user/RoboticDogs/reports', filename)
 
 
 @app.route("/command", methods=["POST"])

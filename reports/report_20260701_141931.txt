@@ -1,0 +1,32 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260701_141931
+Timestamp:    20260701_141931
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      FAIL
+========================================
+
+SUMMARY
+-------
+Images captured:  2
+Issues found:     2
+  HIGH severity:  2
+  MEDIUM severity:0
+
+ISSUES REQUIRING ACTION
+-----------------------
+[HIGH] Unsecured Power Cables
+  Rule ID:    CABLE_002
+  Image:      captures/capture_20260701_141842.jpg
+  Timestamp:  20260701_141851
+  Keywords:   Unsecured Power Cables
+  Action:     Secure cables with cable ties or management system
+
+[HIGH] Unsecured Power Cables
+  Rule ID:    CABLE_002
+  Image:      captures/capture_20260701_141849.jpg
+  Timestamp:  20260701_141912
+  Keywords:   Unsecured Power Cables
+  Action:     Secure cables with cable ties or management system
+
