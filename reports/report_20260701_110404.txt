@@ -1,0 +1,46 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260701_110404
+Timestamp:    20260701_110404
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      FAIL
+========================================
+
+SUMMARY
+-------
+Images captured:  1
+Issues found:     4
+  HIGH severity:  3
+  MEDIUM severity:1
+
+ISSUES REQUIRING ACTION
+-----------------------
+[HIGH] Loose Cables on Floor
+  Rule ID:    CABLE_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg
+  Timestamp:  20260701_110321
+  Keywords:   trip hazard, floor
+  Action:     Route cables through cable management or secure to walls/desk
+
+[MEDIUM] Open Door
+  Rule ID:    DOOR_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg
+  Timestamp:  20260701_110321
+  Keywords:   doorway
+  Action:     Close and latch door
+
+[HIGH] Unsecured Power Cables
+  Rule ID:    CABLE_002
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg
+  Timestamp:  20260701_110321
+  Keywords:   hanging
+  Action:     Secure cables with cable ties or management system
+
+[HIGH] Blocked Walkway
+  Rule ID:    OBST_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg
+  Timestamp:  20260701_110321
+  Keywords:   obstruction, path
+  Action:     Remove obstruction from walkway immediately
+

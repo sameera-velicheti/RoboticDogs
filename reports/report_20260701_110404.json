@@ -1,0 +1,67 @@
+{
+  "report_id": "INSPECTION_20260701_110404",
+  "timestamp": "20260701_110404",
+  "location": "SHI Lab",
+  "inspector": "NemoClaw",
+  "overall_status": "FAIL",
+  "summary": {
+    "total_images": 1,
+    "total_findings": 4,
+    "total_fails": 4,
+    "high_severity": 3,
+    "medium_severity": 1,
+    "passes": 0
+  },
+  "findings": [
+    {
+      "rule_id": "CABLE_001",
+      "rule_name": "Loose Cables on Floor",
+      "severity": "HIGH",
+      "matched_keywords": [
+        "trip hazard",
+        "floor"
+      ],
+      "remediation": "Route cables through cable management or secure to walls/desk",
+      "image_path": "/home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg",
+      "timestamp": "20260701_110321",
+      "status": "FAIL"
+    },
+    {
+      "rule_id": "DOOR_001",
+      "rule_name": "Open Door",
+      "severity": "MEDIUM",
+      "matched_keywords": [
+        "doorway"
+      ],
+      "remediation": "Close and latch door",
+      "image_path": "/home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg",
+      "timestamp": "20260701_110321",
+      "status": "FAIL"
+    },
+    {
+      "rule_id": "CABLE_002",
+      "rule_name": "Unsecured Power Cables",
+      "severity": "HIGH",
+      "matched_keywords": [
+        "hanging"
+      ],
+      "remediation": "Secure cables with cable ties or management system",
+      "image_path": "/home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg",
+      "timestamp": "20260701_110321",
+      "status": "FAIL"
+    },
+    {
+      "rule_id": "OBST_001",
+      "rule_name": "Blocked Walkway",
+      "severity": "HIGH",
+      "matched_keywords": [
+        "obstruction",
+        "path"
+      ],
+      "remediation": "Remove obstruction from walkway immediately",
+      "image_path": "/home/demo_user/RoboticDogs/captures/capture_20260701_110321_open_door.jpg",
+      "timestamp": "20260701_110321",
+      "status": "FAIL"
+    }
+  ]
+}

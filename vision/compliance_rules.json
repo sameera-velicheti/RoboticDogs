@@ -1,0 +1,48 @@
+{
+  "inspection_version": "1.0",
+  "location": "SHI Lab",
+  "rules": [
+    {
+      "id": "CABLE_001",
+      "name": "Loose Cables on Floor",
+      "keywords": ["cable lying on floor", "wire on floor", "cord on floor", "loose cable", "cable not secured", "wire not secured", "cable creating trip hazard", "tangled wire on ground", "cable draped across floor"],
+      "severity": "HIGH",
+      "remediation": "Route cables through cable management or secure to walls/desk"
+    },
+    {
+      "id": "DOOR_001",
+      "name": "Open Door",
+      "keywords": ["door is open", "open door", "door left open", "door ajar", "door wide open", "door not closed", "door standing open", "fire door open", "exit door open", "door swung open", "door propped open"],
+      "severity": "MEDIUM",
+      "remediation": "Close and latch door"
+    },
+    {
+      "id": "SPILL_001",
+      "name": "Water or Liquid Spill",
+      "keywords": ["spill on floor", "liquid on floor", "puddle on floor", "wet floor", "water on ground", "liquid spill", "spilled liquid", "wet spot", "floor is wet"],
+      "severity": "HIGH",
+      "remediation": "Clean up spill immediately and place wet floor sign"
+    },
+    {
+      "id": "CABLE_002",
+      "name": "Unsecured Power Cables",
+      "keywords": ["power cable on floor", "power cord on floor", "power cable not secured", "unsecured power cable", "power cable loose", "power cord loose", "electrical cable on floor", "power cable draped"],
+      "severity": "HIGH",
+      "remediation": "Secure cables with cable ties or management system"
+    },
+    {
+      "id": "OBST_001",
+      "name": "Blocked Walkway",
+      "keywords": ["walkway is blocked", "path is blocked", "corridor is blocked", "exit is blocked", "object blocking walkway", "obstruction in walkway", "blocking the path", "blocking the exit", "aisle blocked"],
+      "severity": "HIGH",
+      "remediation": "Remove obstruction from walkway immediately"
+    },
+    {
+      "id": "BROOM_001",
+      "name": "Unsecured Cleaning Equipment",
+      "keywords": ["broom leaning against wall", "mop leaning", "dustpan on floor", "cleaning equipment not stored", "broom not stored", "mop not stored", "cleaning tool left out", "broom left unsecured"],
+      "severity": "MEDIUM",
+      "remediation": "Store cleaning equipment in designated area"
+    }
+  ]
+}
