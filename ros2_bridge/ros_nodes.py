@@ -1,15 +1,16 @@
-from turtle import speed
-
 import roslibpy
 import time
 import threading
 import logging
+import os
+import base64
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 ROBOT_IP = "192.168.149.1"
 ROBOT_PORT = 9090
-WATCHDOG_TIMEOUT = 60.0  
+WATCHDOG_TIMEOUT = 60.0
 
 
 class RosPugBridge:
@@ -27,7 +28,6 @@ class RosPugBridge:
         self._watchdog_timer = None
 
     def _start_watchdog(self, timeout):
-        """Force stop if motion runs longer than timeout."""
         self._watchdog_timer = threading.Timer(timeout, self._watchdog_stop)
         self._watchdog_timer.start()
 
@@ -50,31 +50,30 @@ class RosPugBridge:
 
     def cautious_walk(self, speed=0.15, duration=2.0, safety_level="high", capture_each_segment=False):
         SEGMENT = 2.0
-    
         logger.info(f"cautious_walk: speed={speed}, total_duration={duration}, segment={SEGMENT}")
-    
+
         remaining = duration
         segment_num = 0
-    
+
         while remaining > 0:
             this_segment = min(SEGMENT, remaining)
             segment_num += 1
-        
+
             self._start_watchdog(WATCHDOG_TIMEOUT)
             self._publish(x=speed, y=0.0, yaw_rate=0.0, stop=False)
             time.sleep(this_segment)
             self._cancel_watchdog()
-        
-            self.stop()  # reliably stop, sent 3x
-            time.sleep(0.3)  # settle before next segment / capture
-        
+
+            self.stop()
+            time.sleep(0.3)
+
             if capture_each_segment:
                 try:
                     filepath = self.take_picture()
                     logger.info(f"Segment {segment_num} capture: {filepath}")
                 except Exception as e:
                     logger.warning(f"Capture failed on segment {segment_num}: {e}")
-        
+
             remaining -= this_segment
 
     def turn_left(self, speed=0.10, duration=1.0):
@@ -93,43 +92,80 @@ class RosPugBridge:
         self._cancel_watchdog()
         self.stop()
 
-    def set_pose(self, height=0.05, pitch=0.0, roll=0.0, yaw=0.0, run_time=0.5):
+    def set_pose(self, height=-0.13, pitch=0.0, roll=0.0, yaw=0.0, run_time=0.5):
         logger.info(f"set_pose: height={height}")
         pose_publisher = roslibpy.Topic(
             self.client,
             "/pug_control/pose",
             "pug_control/Pose"
-    )
+        )
         pose_publisher.publish(roslibpy.Message({
-        "roll": roll,
-        "pitch": pitch,
-        "yaw": yaw,
-        "height": height,
-        "x_shift": 0.0,
-        "stance_x": 0.0,
-        "stance_y": 0.0,
-        "run_time": run_time
-    }))
+            "roll": roll,
+            "pitch": pitch,
+            "yaw": yaw,
+            "height": height,
+            "x_shift": 0.0,
+            "stance_x": 0.0,
+            "stance_y": 0.0,
+            "run_time": run_time
+        }))
         time.sleep(run_time + 0.2)
 
-    def sit(self, height=0.05):
+    def sit(self, height=-0.15):
         logger.info(f"sit: height={height}")
         self._cancel_watchdog()
         self.stop()
         time.sleep(0.3)
         self.set_pose(height=height)
-        self._publish(stop=True)
 
     def stop(self):
         logger.info("stop")
         self._cancel_watchdog()
-        for _ in range(3):  # send 3 times to ensure it registers
+        for _ in range(3):
             self._publish(x=0.0, y=0.0, yaw_rate=0.0, stop=True)
             time.sleep(0.1)
-    # Then send a hard sit
-        self._publish(stop=True)
+
+    def take_picture(self, save_dir="captures"):
+        os.makedirs(save_dir, exist_ok=True)
+
+        captured = {"data": None}
+
+        def callback(msg):
+            if captured["data"] is None:
+                captured["data"] = msg["data"]
+
+        listener = roslibpy.Topic(
+            self.client,
+            "/csi_camera/image_color/compressed",
+            "sensor_msgs/CompressedImage"
+        )
+        listener.subscribe(callback)
+
+        timeout = 5
+        waited = 0
+        while captured["data"] is None and waited < timeout:
+            time.sleep(0.1)
+            waited += 0.1
+
+        listener.unsubscribe()
+
+        if captured["data"] is None:
+            raise RuntimeError("No image received from camera within timeout")
+
+        img_bytes = base64.b64decode(captured["data"])
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filepath = os.path.join(save_dir, f"capture_{timestamp}.jpg")
+
+        with open(filepath, "wb") as f:
+            f.write(img_bytes)
+
+        logger.info(f"Image saved: {filepath}")
+        return filepath
 
     def close(self):
-        self.stop()
-        self.publisher.unadvertise()
-        self.client.terminate()
+        try:
+            self.stop()
+            self.publisher.unadvertise()
+            self.client.terminate()
+        except Exception as e:
+            logger.warning(f"Error during close: {e}")
