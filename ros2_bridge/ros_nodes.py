@@ -1,3 +1,5 @@
+import math
+
 import roslibpy
 import time
 import threading
@@ -26,6 +28,19 @@ class RosPugBridge:
             "pug_control/Velocity"
         )
         self._watchdog_timer = None
+
+        # Persistent LiDAR subscription — stays open for instant readings
+        self._latest_scan = None
+        self._lidar_subscriber = roslibpy.Topic(
+            self.client,
+            "/scan",
+            "sensor_msgs/LaserScan"
+        )
+        self._lidar_subscriber.subscribe(
+            lambda msg: setattr(self, '_latest_scan', msg.get("ranges"))
+        )
+        time.sleep(1.0)  # wait for first scan to arrive
+        logger.info(f"LiDAR ready: {self._latest_scan is not None}")
 
     def _start_watchdog(self, timeout):
         self._watchdog_timer = threading.Timer(timeout, self._watchdog_stop)
@@ -171,6 +186,38 @@ class RosPugBridge:
         logger.info(f"Image saved: {filepath}")
         return filepath
 
+    def get_lidar_distance(self, forward_cone_degrees=10):
+        import math
+
+        if self._latest_scan is None:
+            logger.warning("No LiDAR scan available")
+            return None
+
+        ranges = self._latest_scan
+
+        # Forward is indices 0-10 based on calibration (0° to 8°)
+        # Also check end of array (350°-360°) for full forward cone
+        forward_indices = list(range(0, 12)) + list(range(436, 448))
+
+        valid = []
+        for i in forward_indices:
+            if i >= len(ranges):
+                continue
+            r = ranges[i]
+            try:
+                r = float(r)
+            except (TypeError, ValueError):
+                continue
+            if math.isnan(r) or math.isinf(r):
+                continue
+            # Filter out own body (readings < 0.15m) and too far
+            if 0.15 < r < 10.0:
+                valid.append(r)
+
+        if not valid:
+            return None
+
+        return min(valid)
     def close(self):
         try:
             self.stop()
@@ -178,3 +225,5 @@ class RosPugBridge:
             self.client.terminate()
         except Exception as e:
             logger.warning(f"Error during close: {e}")
+
+    

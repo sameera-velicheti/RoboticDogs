@@ -21,6 +21,7 @@ NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right", "take_picture"}
 MAX_SPEED = 0.15
 MAX_DURATION = 60.0
+SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
 
 _bridge = None
 _bridge_lock = threading.Lock()
@@ -82,70 +83,22 @@ def validate_and_clamp(action):
         action["duration"] = min(float(action["duration"]), MAX_DURATION)
     return action
 
-def check_obstacle_first(filepath, timestamp):
-    """
-    Run OBST_001 first.
-    If blocked: run full compliance checklist, return (True, all_findings)
-    If clear: return (False, []) — no checklist, keep walking
-    """
-    from vision.compliance_checker import load_rules, check_compliance_with_nim
-    import base64
 
-    with open(filepath, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("utf-8")
+def emergency_stop_robot(bridge):
+    """Send stop command as aggressively as possible."""
+    try:
+        # Send stop=True 15 times with minimal delay
+        for _ in range(15):
+            bridge._publish(x=0.0, y=0.0, yaw_rate=0.0, stop=True)
+            time.sleep(0.02)
+        # Then call the full stop method
+        bridge.stop()
+        time.sleep(0.3)
+        # One more for good measure
+        bridge.stop()
+    except Exception as e:
+        pass
 
-    rules_data = load_rules()
-    obstacle_rule = next((r for r in rules_data["rules"] if r["id"] == "OBST_001"), None)
-
-    if not obstacle_rule:
-        return False, []
-
-    keywords_str = ", ".join(obstacle_rule["keywords"])
-    prompt = """You are controlling a small robot dog that is only 15cm (6 inches) tall.
-The camera is at ground level looking forward.
-
-Look at this image and answer ONE question:
-Is there ANY object or surface blocking the robot's path?
-
-This includes:
-- Laptops, boxes, bags, shoes, furniture legs, walls, bins, or ANY solid object on the floor
-- A wall or surface that fills most of the image — this means the robot is dangerously close
-- A mostly white, grey, or uniform colored image — this means the robot is RIGHT UP AGAINST a wall
-- Any surface that takes up more than 30% of the image frame
-
-If the image looks blank, white, grey, or uniform in color — answer YES immediately, the robot is against a wall.
-If you can see ANY object on the floor in the forward path — answer YES.
-If the floor ahead is completely empty and open with clear distance visible — answer NO.
-
-YOUR FIRST WORD MUST BE YES OR NO. Nothing else before it."""
-
-    payload = {
-        "model": NIM_MODEL,
-        "messages": [{"role": "user", "content": [
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
-            {"type": "text", "text": prompt}
-        ]}],
-        "temperature": 0.1,
-        "max_tokens": 200
-    }
-
-    r = http_requests.post(NIM_URL, json=payload, timeout=30)
-    data = r.json()
-    message = data["choices"][0]["message"]
-    answer = (message.get("reasoning") or message.get("content") or "").strip().upper()
-
-    is_blocked = (
-    answer.startswith("YES") or
-    answer[:100].count("YES") > 0  # check first 100 chars
-    )
-
-    if is_blocked:
-        # Path blocked — run full checklist before stopping
-        all_findings = check_compliance_with_nim(filepath=filepath, timestamp=timestamp)
-        return True, all_findings
-
-    # Path clear — skip checklist, keep walking
-    return False, []
 
 def stream_command(user_input):
     """Generator that yields SSE events for the UI to consume."""
@@ -158,7 +111,7 @@ def stream_command(user_input):
         yield event("log", {"msg": "⚠ Emergency stop triggered"})
         try:
             bridge = get_bridge()
-            bridge.stop()
+            emergency_stop_robot(bridge)
             yield event("done", {"msg": "Robot stopped."})
         except Exception as e:
             yield event("error", {"msg": str(e)})
@@ -201,7 +154,7 @@ def stream_command(user_input):
             validate_and_clamp(action)
         except ValueError as e:
             yield event("error", {"msg": str(e)})
-            bridge.stop()
+            emergency_stop_robot(bridge)
             return
 
         action_name = action.get("action")
@@ -228,23 +181,41 @@ def stream_command(user_input):
                 while remaining > 0:
                     this_segment = min(SEGMENT, remaining)
 
-                    # Walk
+                    # Start walking
                     bridge._publish(x=speed, y=0.0, yaw_rate=0.0, stop=False)
                     steps = int(this_segment * 10)
+
                     for step in range(steps):
                         time.sleep(0.1)
                         elapsed_for_ui += 0.1
                         pct = int((elapsed_for_ui / duration) * 100)
                         yield event("progress", {"index": i, "pct": pct, "elapsed": round(elapsed_for_ui, 1)})
 
-                    # Stop and settle
+                        # Check LiDAR every 3 steps (every 0.3s) for faster response
+                        if step % 3 == 0:
+                            dist = bridge.get_lidar_distance()
+                            if dist is not None and dist < SAFE_DISTANCE:
+                                # STOP IMMEDIATELY — aggressive multi-send
+                                emergency_stop_robot(bridge)
+                                yield event("log", {"msg": f"⚠ LiDAR: obstacle at {dist:.2f}m — STOPPED!"})
+                                yield event("obstacle", {
+                                    "msg": f"⚠ Obstacle detected at {dist:.2f}m — robot stopped. Please give new instructions.",
+                                    "image": ""
+                                })
+                                obstacle_hit = True
+                                break
+
+                    if obstacle_hit:
+                        break
+
+                    # Normal end-of-segment stop
                     bridge.stop()
                     time.sleep(0.3)
 
                     remaining -= this_segment
                     elapsed_total += this_segment
 
-                    # Capture if interval reached
+                    # Capture image if interval reached
                     if round(elapsed_total - last_capture_at, 1) >= CAPTURE_INTERVAL:
                         time.sleep(1.2)
                         try:
@@ -257,44 +228,11 @@ def stream_command(user_input):
                             filename = os.path.basename(filepath)
                             yield event("image", {"src": f"/captures/{filename}", "label": filename})
                             yield event("log", {"msg": f"✓ Image saved: {filename}"})
-
-                            # Check for obstacle first
-                            yield event("log", {"msg": "🔍 Checking for obstacles..."})
-                            is_blocked, findings = check_obstacle_first(filepath, timestamp)
-
-                            if is_blocked:
-                                # Obstacle found — show full checklist findings then stop
-                                yield event("log", {"msg": "⚠ Obstacle detected — running full compliance check..."})
-                                fails = [f for f in findings if f["status"] == "FAIL"]
-                                yield event("image_findings", {
-                                    "filename": filename,
-                                    "status": "FAIL" if fails else "PASS",
-                                    "findings": [
-                                        {
-                                            "rule_name": f["rule_name"],
-                                            "severity": f["severity"],
-                                            "status": f["status"],
-                                            "remediation": f["remediation"]
-                                        }
-                                        for f in findings
-                                    ]
-                                })
-                                yield event("obstacle", {
-                                    "msg": "⚠ Obstacle detected — robot stopped. Please give new instructions.",
-                                    "image": f"/captures/{filename}"
-                                })
-                                bridge.stop()
-                                obstacle_hit = True
-                                break  # exit the while loop
-
-                            # Path clear — keep walking, skip checklist
                             yield event("log", {"msg": "✓ Path clear — continuing..."})
-
                         except Exception as e:
-                            yield event("log", {"msg": f"Capture/check failed: {e}"})
+                            yield event("log", {"msg": f"Capture failed: {e}"})
 
                 if obstacle_hit:
-                    # Exit the actions loop too — wait for new command
                     yield event("done", {"msg": "Robot stopped due to obstacle. Enter a new command."})
                     return
 
@@ -333,13 +271,13 @@ def stream_command(user_input):
                 yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
 
             elif action_name == "stop":
-                bridge.stop()
+                emergency_stop_robot(bridge)
                 yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
 
         except Exception as e:
             yield event("error", {"msg": f"Execution error: {e}"})
             try:
-                bridge.stop()
+                emergency_stop_robot(bridge)
             except Exception:
                 pass
             return
@@ -394,6 +332,7 @@ def stream_command(user_input):
         })
 
     yield event("done", {"msg": f"Completed {len(actions)} action(s)."})
+
 
 @app.route("/")
 def index():
