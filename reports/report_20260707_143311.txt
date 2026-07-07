@@ -1,0 +1,60 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260707_143311
+Timestamp:    20260707_143311
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      FAIL
+========================================
+
+SUMMARY
+-------
+Images captured:  5
+Issues found:     6
+  HIGH severity:  6
+  MEDIUM severity:0
+
+ISSUES REQUIRING ACTION
+-----------------------
+[HIGH] Loose Cables on Floor
+  Rule ID:    CABLE_001
+  Image:      captures/capture_20260707_143021.jpg
+  Timestamp:  20260707_143111
+  Keywords:   Loose Cables on Floor
+  Action:     Route cables through cable management or secure to walls/desk
+
+[HIGH] Unsecured Power Cables
+  Rule ID:    CABLE_002
+  Image:      captures/capture_20260707_143021.jpg
+  Timestamp:  20260707_143111
+  Keywords:   Unsecured Power Cables
+  Action:     Secure cables with cable ties or management system
+
+[HIGH] Blocked Walkway
+  Rule ID:    OBST_001
+  Image:      captures/capture_20260707_143021.jpg
+  Timestamp:  20260707_143111
+  Keywords:   Blocked Walkway
+  Action:     Remove obstruction from walkway immediately
+
+[HIGH] Loose Cables on Floor
+  Rule ID:    CABLE_001
+  Image:      captures/capture_20260707_143032.jpg
+  Timestamp:  20260707_143134
+  Keywords:   Loose Cables on Floor
+  Action:     Route cables through cable management or secure to walls/desk
+
+[HIGH] Unsecured Power Cables
+  Rule ID:    CABLE_002
+  Image:      captures/capture_20260707_143032.jpg
+  Timestamp:  20260707_143134
+  Keywords:   Unsecured Power Cables
+  Action:     Secure cables with cable ties or management system
+
+[HIGH] Blocked Walkway
+  Rule ID:    OBST_001
+  Image:      captures/capture_20260707_143032.jpg
+  Timestamp:  20260707_143134
+  Keywords:   Blocked Walkway
+  Action:     Remove obstruction from walkway immediately
+

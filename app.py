@@ -82,6 +82,70 @@ def validate_and_clamp(action):
         action["duration"] = min(float(action["duration"]), MAX_DURATION)
     return action
 
+def check_obstacle_first(filepath, timestamp):
+    """
+    Run OBST_001 first.
+    If blocked: run full compliance checklist, return (True, all_findings)
+    If clear: return (False, []) — no checklist, keep walking
+    """
+    from vision.compliance_checker import load_rules, check_compliance_with_nim
+    import base64
+
+    with open(filepath, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode("utf-8")
+
+    rules_data = load_rules()
+    obstacle_rule = next((r for r in rules_data["rules"] if r["id"] == "OBST_001"), None)
+
+    if not obstacle_rule:
+        return False, []
+
+    keywords_str = ", ".join(obstacle_rule["keywords"])
+    prompt = """You are controlling a small robot dog that is only 15cm (6 inches) tall.
+The camera is at ground level looking forward.
+
+Look at this image and answer ONE question:
+Is there ANY object or surface blocking the robot's path?
+
+This includes:
+- Laptops, boxes, bags, shoes, furniture legs, walls, bins, or ANY solid object on the floor
+- A wall or surface that fills most of the image — this means the robot is dangerously close
+- A mostly white, grey, or uniform colored image — this means the robot is RIGHT UP AGAINST a wall
+- Any surface that takes up more than 30% of the image frame
+
+If the image looks blank, white, grey, or uniform in color — answer YES immediately, the robot is against a wall.
+If you can see ANY object on the floor in the forward path — answer YES.
+If the floor ahead is completely empty and open with clear distance visible — answer NO.
+
+YOUR FIRST WORD MUST BE YES OR NO. Nothing else before it."""
+
+    payload = {
+        "model": NIM_MODEL,
+        "messages": [{"role": "user", "content": [
+            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+            {"type": "text", "text": prompt}
+        ]}],
+        "temperature": 0.1,
+        "max_tokens": 200
+    }
+
+    r = http_requests.post(NIM_URL, json=payload, timeout=30)
+    data = r.json()
+    message = data["choices"][0]["message"]
+    answer = (message.get("reasoning") or message.get("content") or "").strip().upper()
+
+    is_blocked = (
+    answer.startswith("YES") or
+    answer[:100].count("YES") > 0  # check first 100 chars
+    )
+
+    if is_blocked:
+        # Path blocked — run full checklist before stopping
+        all_findings = check_compliance_with_nim(filepath=filepath, timestamp=timestamp)
+        return True, all_findings
+
+    # Path clear — skip checklist, keep walking
+    return False, []
 
 def stream_command(user_input):
     """Generator that yields SSE events for the UI to consume."""
@@ -129,7 +193,7 @@ def stream_command(user_input):
         return
 
     all_captured_images = []
-    CAPTURE_INTERVAL = 5.0  # capture every 5 seconds during walk
+    CAPTURE_INTERVAL = 2.0
 
     # Execute each action
     for i, action in enumerate(actions):
@@ -154,11 +218,12 @@ def stream_command(user_input):
 
         try:
             if action_name == "cautious_walk":
-                SEGMENT = 5.0
+                SEGMENT = 2.0
                 remaining = duration
                 elapsed_total = 0.0
-                last_capture_at = -CAPTURE_INTERVAL  # trigger first capture at 5s
+                last_capture_at = -CAPTURE_INTERVAL
                 elapsed_for_ui = 0.0
+                obstacle_hit = False
 
                 while remaining > 0:
                     this_segment = min(SEGMENT, remaining)
@@ -176,14 +241,15 @@ def stream_command(user_input):
                     bridge.stop()
                     time.sleep(0.3)
 
-                    # Update elapsed by segment (clean math, no float drift)
                     remaining -= this_segment
                     elapsed_total += this_segment
 
                     # Capture if interval reached
                     if round(elapsed_total - last_capture_at, 1) >= CAPTURE_INTERVAL:
-                        time.sleep(1.2)  # extra settle for clear image
+                        time.sleep(1.2)
                         try:
+                            from datetime import datetime
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                             yield event("log", {"msg": f"📷 Capturing image at {round(elapsed_total, 1)}s..."})
                             filepath = bridge.take_picture()
                             all_captured_images.append(filepath)
@@ -191,8 +257,46 @@ def stream_command(user_input):
                             filename = os.path.basename(filepath)
                             yield event("image", {"src": f"/captures/{filename}", "label": filename})
                             yield event("log", {"msg": f"✓ Image saved: {filename}"})
+
+                            # Check for obstacle first
+                            yield event("log", {"msg": "🔍 Checking for obstacles..."})
+                            is_blocked, findings = check_obstacle_first(filepath, timestamp)
+
+                            if is_blocked:
+                                # Obstacle found — show full checklist findings then stop
+                                yield event("log", {"msg": "⚠ Obstacle detected — running full compliance check..."})
+                                fails = [f for f in findings if f["status"] == "FAIL"]
+                                yield event("image_findings", {
+                                    "filename": filename,
+                                    "status": "FAIL" if fails else "PASS",
+                                    "findings": [
+                                        {
+                                            "rule_name": f["rule_name"],
+                                            "severity": f["severity"],
+                                            "status": f["status"],
+                                            "remediation": f["remediation"]
+                                        }
+                                        for f in findings
+                                    ]
+                                })
+                                yield event("obstacle", {
+                                    "msg": "⚠ Obstacle detected — robot stopped. Please give new instructions.",
+                                    "image": f"/captures/{filename}"
+                                })
+                                bridge.stop()
+                                obstacle_hit = True
+                                break  # exit the while loop
+
+                            # Path clear — keep walking, skip checklist
+                            yield event("log", {"msg": "✓ Path clear — continuing..."})
+
                         except Exception as e:
-                            yield event("log", {"msg": f"Capture failed: {e}"})
+                            yield event("log", {"msg": f"Capture/check failed: {e}"})
+
+                if obstacle_hit:
+                    # Exit the actions loop too — wait for new command
+                    yield event("done", {"msg": "Robot stopped due to obstacle. Enter a new command."})
+                    return
 
             elif action_name == "take_picture":
                 try:
@@ -242,11 +346,9 @@ def stream_command(user_input):
 
         yield event("action_done", {"index": i, "action": action_name})
 
-    # After ALL actions complete — run compliance on all captured images
-    # After ALL actions complete — run compliance on all captured images
-    # After ALL actions complete — run compliance on all captured images
+    # After ALL actions complete — run full compliance on all captured images
     if all_captured_images:
-        yield event("log", {"msg": f"🔍 Running compliance check on {len(all_captured_images)} image(s)..."})
+        yield event("log", {"msg": f"📄 Running final compliance check on all {len(all_captured_images)} image(s)..."})
 
         from vision.compliance_checker import check_compliance_with_nim
         from vision.report_generator import generate_report
@@ -262,7 +364,6 @@ def stream_command(user_input):
             )
             all_findings.append(findings)
 
-            # Send findings for this specific image immediately after checking it
             fails = [f for f in findings if f["status"] == "FAIL"]
             yield event("image_findings", {
                 "filename": filename,
@@ -291,6 +392,8 @@ def stream_command(user_input):
             "total_fails": total_fails,
             "report_file": os.path.basename(txt_path)
         })
+
+    yield event("done", {"msg": f"Completed {len(actions)} action(s)."})
 
 @app.route("/")
 def index():

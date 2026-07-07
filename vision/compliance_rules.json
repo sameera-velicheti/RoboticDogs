@@ -31,12 +31,12 @@
       "remediation": "Secure cables with cable ties or management system"
     },
     {
-      "id": "OBST_001",
-      "name": "Blocked Walkway",
-      "keywords": ["walkway is blocked", "path is blocked", "corridor is blocked", "exit is blocked", "object blocking walkway", "obstruction in walkway", "blocking the path", "blocking the exit", "aisle blocked"],
-      "severity": "HIGH",
-      "remediation": "Remove obstruction from walkway immediately"
-    },
+  "id": "OBST_001",
+  "name": "Blocked Walkway",
+  "keywords": ["table leg", "chair leg", "furniture blocking", "wall blocking path", "object in path", "robot will collide", "blocking the walkway", "blocking the exit", "obstructing the path", "blocks the corridor", "walkway is blocked"],
+  "severity": "HIGH",
+  "remediation": "Remove obstruction from walkway immediately"
+  },
     {
       "id": "BROOM_001",
       "name": "Unsecured Cleaning Equipment",
