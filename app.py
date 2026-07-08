@@ -25,6 +25,7 @@ SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
 
 _bridge = None
 _bridge_lock = threading.Lock()
+cancel_event = threading.Event()
 
 
 def get_bridge():
@@ -87,7 +88,7 @@ def validate_and_clamp(action):
 def emergencystop_robot(bridge):
     """Send stop command as aggressively as possible."""
     try:
-        # Send stop=True 15 times with minimal delay
+        # Send stop=True 15 times with minimal delay #
         for _ in range(15):
             bridge._publish(x=0.0, y=0.0, yaw_rate=0.0, stop=True)
             time.sleep(0.02)
@@ -102,7 +103,7 @@ def emergencystop_robot(bridge):
 
 def stream_command(user_input):
     """Generator that yields SSE events for the UI to consume."""
-
+    cancel_event.clear()
     def event(kind, data):
         return f"data: {json.dumps({'type': kind, **data})}\n\n"
 
@@ -324,37 +325,64 @@ def stream_command(user_input):
 
         all_findings = []
         for img_path in all_captured_images:
-            filename = os.path.basename(img_path)
-            yield event("log", {"msg": f"Checking: {filename}"})
-            findings = check_compliance_with_nim(
-                filepath=img_path,
-                timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
-            )
-            all_findings.append(findings)
 
-            fails = [f for f in findings if f["status"] == "FAIL"]
-            yield event("image_findings", {
-                "filename": filename,
-                "status": "FAIL" if fails else "PASS",
-                "findings": [
-                    {
-                        "rule_name": f["rule_name"],
-                        "severity": f["severity"],
-                        "status": f["status"],
-                        "remediation": f["remediation"]
-                    }
-                    for f in findings
-                ]
+            if cancel_event.is_set():
+                yield event("log", {
+                    "msg": "Compliance cancelled by user."
+                })
+
+                yield event("done", {
+                    "msg": "Cancelled."
+                })
+
+                return
+
+            filename = os.path.basename(img_path)
+
+            yield event("log", {
+            "msg": f"Checking: {filename}"
+        })
+
+        findings = check_compliance_with_nim(
+            filepath=img_path,
+            timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+        )
+
+        all_findings.append(findings)
+
+        fails = [f for f in findings if f["status"] == "FAIL"]
+
+        yield event("image_findings", {
+            "filename": filename,
+            "status": "FAIL" if fails else "PASS",
+            "findings": [
+                {
+                    "rule_name": f["rule_name"],
+                    "severity": f["severity"],
+                    "status": f["status"],
+                    "remediation": f["remediation"]
+                }
+                for f in findings
+            ]
+        })
+        if cancel_event.is_set():
+            yield event("log", {
+                "msg": "Report generation cancelled."
             })
 
-        report, json_path, txt_path = generate_report(
+            yield event("done", {
+                "msg": "Cancelled."
+            })
+
+    return
+    report, json_path, txt_path = generate_report(
             all_findings=all_findings,
             location="SHI Lab",
             inspector="NemoClaw"
         )
 
-        total_fails = sum(1 for findings in all_findings for f in findings if f["status"] == "FAIL")
-        yield event("report_summary", {
+    total_fails = sum(1 for findings in all_findings for f in findings if f["status"] == "FAIL")
+    yield event("report_summary", {
             "overall": "FAIL" if total_fails > 0 else "PASS",
             "total_images": len(all_captured_images),
             "total_fails": total_fails,
@@ -378,6 +406,12 @@ def serve_capture(filename):
 def serve_report(filename):
     return send_from_directory('/home/demo_user/RoboticDogs/reports', filename)
 
+@app.route("/cancel", methods=["POST"])
+def cancel():
+
+    cancel_event.set()
+
+    return {"status": "cancelled"}
 
 @app.route("/command", methods=["POST"])
 def command():

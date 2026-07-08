@@ -545,7 +545,7 @@
           onkeydown="if(event.key==='Enter') sendCommand()"
         />
         <button class="send-btn" id="sendBtn" onclick="sendCommand()">SEND</button>
-        <button class="stop-btn" onclick="emergencyStop()">■ STOP</button>
+        <button class="stop-btn" onclick="cancelRequest()">■ STOP</button>
       </div>
       <div class="hint">↵ Enter to send &nbsp;·&nbsp; Images captured every 5s during walk</div>
     </div>
@@ -568,7 +568,10 @@ const inputEl = document.getElementById('inputField');
 const sendBtn = document.getElementById('sendBtn');
 
 let isRunning = false;
-let pendingFindings = {};  // add this near the top with other let declarations
+let pendingFindings = {};
+
+let currentController = null;
+let currentReader = null;
 
 
 function useCommand(btn) {
@@ -787,6 +790,7 @@ async function sendCommand() {
   if (!text || isRunning) return;
 
   inputEl.value = '';
+  currentController = new AbortController();
   setRunning(true);
   addUserMsg(text);
   createExecPanel();
@@ -794,16 +798,21 @@ async function sendCommand() {
   try {
     const resp = await fetch('/command', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input: text })
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        input: text
+      }),
+      signal: currentController.signal
     });
 
-    const reader = resp.body.getReader();
+    currentReader = resp.body.getReader();
     const decoder = new TextDecoder();
     let buf = '';
 
     while (true) {
-      const { done, value } = await reader.read();
+      const { done, value } = await currentReader.read();
       if (done) break;
       buf += decoder.decode(value, { stream: true });
       const lines = buf.split('\n');
@@ -815,11 +824,26 @@ async function sendCommand() {
       }
     }
   } catch (e) {
-    addLog(`Connection error: ${e}`, 'error');
+
+    if (e.name === "AbortError") {
+
+        addLog("Analysis cancelled.", "warn");
+        setStatus("Cancelled", true);
+
+    } else {
+
+        addLog(`Connection error: ${e}`, "error");
+        setStatus("Error", true);
+
+    }
+
   } finally {
+    currentReader = null;
+    currentController = null;
+
     setRunning(false);
-    setStatus('Complete', true);
-  }
+
+}
 }
 
 function handleEvent(evt) {
@@ -866,9 +890,20 @@ function handleEvent(evt) {
     }
 }
 
-function emergencyStop() {
-  inputEl.value = 'stop';
-  sendCommand();
+async function cancelRequest() {
+
+    if (!isRunning)
+        return;
+
+    await fetch("/cancel", {
+        method: "POST"
+    });
+
+    if (currentReader)
+        currentReader.cancel();
+
+    if (currentController)
+        currentController.abort();
 }
 
 inputEl.focus();
