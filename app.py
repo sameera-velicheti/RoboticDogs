@@ -84,7 +84,7 @@ def validate_and_clamp(action):
     return action
 
 
-def emergency_stop_robot(bridge):
+def emergencystop_robot(bridge):
     """Send stop command as aggressively as possible."""
     try:
         # Send stop=True 15 times with minimal delay
@@ -256,6 +256,21 @@ def stream_command(user_input):
                     pct = int(((step + 1) / steps) * 100)
                     yield event("progress", {"index": i, "pct": pct, "elapsed": round((step + 1) * 0.1, 1)})
                 bridge.stop()
+                time.sleep(0.3)
+
+                # Capture after turn if duration >= 4 seconds
+                if duration >= 4.0:
+                    time.sleep(1.2)  # settle before capture
+                    try:
+                        from datetime import datetime
+                        yield event("log", {"msg": "📷 Capturing image after turn..."})
+                        filepath = bridge.take_picture()
+                        all_captured_images.append(filepath)
+                        filename = os.path.basename(filepath)
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                        yield event("log", {"msg": f"✓ Image saved: {filename}"})
+                    except Exception as e:
+                        yield event("log", {"msg": f"Capture failed: {e}"})
 
             elif action_name == "turn_right":
                 bridge._publish(yaw_rate=-speed, stop=False)
@@ -265,6 +280,21 @@ def stream_command(user_input):
                     pct = int(((step + 1) / steps) * 100)
                     yield event("progress", {"index": i, "pct": pct, "elapsed": round((step + 1) * 0.1, 1)})
                 bridge.stop()
+                time.sleep(0.3)
+
+                # Capture after turn if duration >= 4 seconds
+                if duration >= 4.0:
+                    time.sleep(1.2)  # settle before capture
+                    try:
+                        from datetime import datetime
+                        yield event("log", {"msg": "📷 Capturing image after turn..."})
+                        filepath = bridge.take_picture()
+                        all_captured_images.append(filepath)
+                        filename = os.path.basename(filepath)
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                        yield event("log", {"msg": f"✓ Image saved: {filename}"})
+                    except Exception as e:
+                        yield event("log", {"msg": f"Capture failed: {e}"})
 
             elif action_name == "sit":
                 bridge.sit()

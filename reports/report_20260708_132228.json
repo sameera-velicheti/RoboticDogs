@@ -1,0 +1,81 @@
+{
+  "report_id": "INSPECTION_20260708_132228",
+  "timestamp": "20260708_132228",
+  "location": "SHI Lab",
+  "inspector": "NemoClaw",
+  "overall_status": "FAIL",
+  "summary": {
+    "total_images": 1,
+    "total_findings": 6,
+    "total_fails": 2,
+    "high_severity": 2,
+    "medium_severity": 0,
+    "passes": 4
+  },
+  "findings": [
+    {
+      "rule_id": "CABLE_001",
+      "rule_name": "Loose Cables on Floor",
+      "severity": "NONE",
+      "matched_keywords": [],
+      "remediation": "None required",
+      "image_path": "captures/capture_20260708_132146.jpg",
+      "timestamp": "20260708_132151",
+      "status": "PASS"
+    },
+    {
+      "rule_id": "DOOR_001",
+      "rule_name": "Open Door",
+      "severity": "NONE",
+      "matched_keywords": [],
+      "remediation": "None required",
+      "image_path": "captures/capture_20260708_132146.jpg",
+      "timestamp": "20260708_132151",
+      "status": "PASS"
+    },
+    {
+      "rule_id": "SPILL_001",
+      "rule_name": "Water or Liquid Spill",
+      "severity": "NONE",
+      "matched_keywords": [],
+      "remediation": "None required",
+      "image_path": "captures/capture_20260708_132146.jpg",
+      "timestamp": "20260708_132151",
+      "status": "PASS"
+    },
+    {
+      "rule_id": "CABLE_002",
+      "rule_name": "Unsecured Power Cables",
+      "severity": "HIGH",
+      "matched_keywords": [
+        "Unsecured Power Cables"
+      ],
+      "remediation": "Secure cables with cable ties or management system",
+      "image_path": "captures/capture_20260708_132146.jpg",
+      "timestamp": "20260708_132151",
+      "status": "FAIL"
+    },
+    {
+      "rule_id": "OBST_001",
+      "rule_name": "Blocked Walkway",
+      "severity": "HIGH",
+      "matched_keywords": [
+        "Blocked Walkway"
+      ],
+      "remediation": "Remove obstruction from walkway immediately",
+      "image_path": "captures/capture_20260708_132146.jpg",
+      "timestamp": "20260708_132151",
+      "status": "FAIL"
+    },
+    {
+      "rule_id": "BROOM_001",
+      "rule_name": "Unsecured Cleaning Equipment",
+      "severity": "NONE",
+      "matched_keywords": [],
+      "remediation": "None required",
+      "image_path": "captures/capture_20260708_132146.jpg",
+      "timestamp": "20260708_132151",
+      "status": "PASS"
+    }
+  ]
+}
