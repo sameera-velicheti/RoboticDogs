@@ -30,8 +30,18 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
     medium = [f for f in fails if f["severity"] == "MEDIUM"]
 
     # Overall status
-    overall = "PASS" if len(fails) == 0 else "FAIL"
+    # Overall status — only FAIL if there are HIGH severity issues
+    high_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] == "HIGH"]
+    medium_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] == "MEDIUM"]
+    low_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] == "LOW"]
 
+    if high_fails:
+        overall = "FAIL"
+    elif medium_fails or low_fails:
+        overall = "WARNING"
+    else:
+        overall = "PASS"
+        
     report = {
         "report_id": f"INSPECTION_{timestamp}",
         "timestamp": timestamp,

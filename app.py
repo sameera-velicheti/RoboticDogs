@@ -315,82 +315,67 @@ def stream_command(user_input):
 
         yield event("action_done", {"index": i, "action": action_name})
 
-    # After ALL actions complete — run full compliance on all captured images
-    if all_captured_images:
-        yield event("log", {"msg": f"📄 Running final compliance check on all {len(all_captured_images)} image(s)..."})
+        yield event("done", {"msg": f"Completed {len(actions)} action(s)."})
 
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    data = request.get_json()
+    filepath = data.get("filepath", "").strip()
+
+    if not filepath:
+        return {"error": "No filepath provided"}, 400
+
+    if not filepath.startswith('/home/demo_user/RoboticDogs/captures/'):
+        return {"error": "Invalid filepath"}, 400
+
+    def generate():
         from vision.compliance_checker import check_compliance_with_nim
         from vision.report_generator import generate_report
         from datetime import datetime
 
-        all_findings = []
-        for img_path in all_captured_images:
+        filename = os.path.basename(filepath)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            if cancel_event.is_set():
-                yield event("log", {
-                    "msg": "Compliance cancelled by user."
-                })
+        yield f"data: {json.dumps({'type': 'log', 'msg': f'Analyzing {filename}...'})}\n\n"
 
-                yield event("done", {
-                    "msg": "Cancelled."
-                })
+        try:
+            findings = check_compliance_with_nim(
+                filepath=filepath,
+                timestamp=timestamp
+            )
 
-                return
+            high_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] == "HIGH"]
+            medium_low_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] in ("MEDIUM", "LOW")]
 
-            filename = os.path.basename(img_path)
+            if high_fails:
+                image_status = "FAIL"
+            elif medium_low_fails:
+                image_status = "WARNING"
+            else:
+                image_status = "PASS"
 
-            yield event("log", {
-            "msg": f"Checking: {filename}"
-        })
+            yield f"data: {json.dumps({'type': 'image_findings', 'filename': filename, 'status': image_status, 'findings': [{'rule_name': f['rule_name'], 'severity': f['severity'], 'status': f['status'], 'remediation': f['remediation']} for f in findings]})}\n\n"
 
-        findings = check_compliance_with_nim(
-            filepath=img_path,
-            timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
-        )
+            report, json_path, txt_path = generate_report(
+                all_findings=[findings],
+                location="SHI Lab",
+                inspector="NemoClaw"
+            )
 
-        all_findings.append(findings)
+            total_fails = len(high_fails) + len(medium_low_fails)
+            overall = "FAIL" if high_fails else "WARNING" if medium_low_fails else "PASS"
 
-        fails = [f for f in findings if f["status"] == "FAIL"]
+            yield f"data: {json.dumps({'type': 'report_summary', 'overall': overall, 'total_images': 1, 'total_fails': total_fails, 'report_file': os.path.basename(txt_path)})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'msg': 'Analysis complete.'})}\n\n"
 
-        yield event("image_findings", {
-            "filename": filename,
-            "status": "FAIL" if fails else "PASS",
-            "findings": [
-                {
-                    "rule_name": f["rule_name"],
-                    "severity": f["severity"],
-                    "status": f["status"],
-                    "remediation": f["remediation"]
-                }
-                for f in findings
-            ]
-        })
-        if cancel_event.is_set():
-            yield event("log", {
-                "msg": "Report generation cancelled."
-            })
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'msg': str(e)})}\n\n"
 
-            yield event("done", {
-                "msg": "Cancelled."
-            })
-
-    return
-    report, json_path, txt_path = generate_report(
-            all_findings=all_findings,
-            location="SHI Lab",
-            inspector="NemoClaw"
-        )
-
-    total_fails = sum(1 for findings in all_findings for f in findings if f["status"] == "FAIL")
-    yield event("report_summary", {
-            "overall": "FAIL" if total_fails > 0 else "PASS",
-            "total_images": len(all_captured_images),
-            "total_fails": total_fails,
-            "report_file": os.path.basename(txt_path)
-        })
-
-    yield event("done", {"msg": f"Completed {len(actions)} action(s)."})
-
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+    )
 
 @app.route("/")
 def index():
