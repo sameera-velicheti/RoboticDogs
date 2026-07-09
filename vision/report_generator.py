@@ -27,11 +27,12 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
 
     # Count by severity
     high = [f for f in fails if f["severity"] == "HIGH"]
+    alert = [f for f in fails if f["severity"] == "ALERT"]
     medium = [f for f in fails if f["severity"] == "MEDIUM"]
 
     # Overall status
     # Overall status — only FAIL if there are HIGH severity issues
-    high_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] == "HIGH"]
+    high_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] in ("HIGH", "ALERT")]
     medium_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] == "MEDIUM"]
     low_fails = [f for f in flat_findings if f["status"] == "FAIL" and f["severity"] == "LOW"]
 
@@ -53,6 +54,7 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
             "total_findings": len(flat_findings),
             "total_fails": len(fails),
             "high_severity": len(high),
+            "alert_severity": len(alert),
             "medium_severity": len(medium),
             "passes": len(passes)
         },
@@ -81,6 +83,7 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
         f.write(f"Images captured:  {report['summary']['total_images']}\n")
         f.write(f"Issues found:     {len(fails)}\n")
         f.write(f"  HIGH severity:  {len(high)}\n")
+        f.write(f"  ALERT severity: {len(alert)}\n")
         f.write(f"  MEDIUM severity:{len(medium)}\n")
         f.write(f"\n")
 

@@ -7,6 +7,7 @@ Then open http://localhost:5000 in your browser.
 """
 
 import os
+from datetime import datetime
 from flask import Flask, render_template, request, Response, stream_with_context, send_from_directory
 import json
 import time
@@ -15,10 +16,20 @@ import requests as http_requests
 
 app = Flask(__name__)
 
+CAPTURE_DIR = "/home/demo_user/RoboticDogs/captures"
+REPORT_DIR = "/home/demo_user/RoboticDogs/reports"
 NIM_URL = "http://localhost:8000/v1/chat/completions"
 NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 
 ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right", "take_picture"}
+# Build a set of user-facing keywords to match common input variants
+ALLOWED_KEYWORDS = set()
+for a in ALLOWED_ACTIONS:
+    ALLOWED_KEYWORDS.add(a)
+    spaced = a.replace("_", " ")
+    ALLOWED_KEYWORDS.add(spaced)
+    for part in a.split("_"):
+        ALLOWED_KEYWORDS.add(part)
 MAX_SPEED = 0.15
 MAX_DURATION = 60.0
 SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
@@ -85,7 +96,7 @@ def validate_and_clamp(action):
     return action
 
 
-def emergencystop_robot(bridge):
+def emergency_stop_robot(bridge):
     """Send stop command as aggressively as possible."""
     try:
         # Send stop=True 15 times with minimal delay #
@@ -116,6 +127,14 @@ def stream_command(user_input):
             yield event("done", {"msg": "Robot stopped."})
         except Exception as e:
             yield event("error", {"msg": str(e)})
+        return
+
+    # Reject unrelated inputs that don't mention allowed actions
+    lowered = user_input.strip().lower()
+    if not any(k in lowered for k in ALLOWED_KEYWORDS):
+        yield event("log", {"msg": "Input does not appear to be a robot command."})
+        yield event("log", {"msg": "Please enter a valid command from: cautious_walk, sit, stop, turn_left, turn_right, take_picture"})
+        yield event("done", {"msg": "No actions executed."})
         return
 
     # Ask the NIM
@@ -192,6 +211,12 @@ def stream_command(user_input):
                         pct = int((elapsed_for_ui / duration) * 100)
                         yield event("progress", {"index": i, "pct": pct, "elapsed": round(elapsed_for_ui, 1)})
 
+                        if cancel_event.is_set():
+                            emergency_stop_robot(bridge)
+                            yield event("log", {"msg": "⚠ Stop requested — halting robot."})
+                            yield event("done", {"msg": "Command stopped."})
+                            return
+
                         # Check LiDAR every 3 steps (every 0.3s) for faster response
                         if step % 3 == 0:
                             dist = bridge.get_lidar_distance()
@@ -227,7 +252,8 @@ def stream_command(user_input):
                             all_captured_images.append(filepath)
                             last_capture_at = elapsed_total
                             filename = os.path.basename(filepath)
-                            yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                            captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
                             yield event("log", {"msg": f"✓ Image saved: {filename}"})
                             yield event("log", {"msg": "✓ Path clear — continuing..."})
                         except Exception as e:
@@ -243,7 +269,8 @@ def stream_command(user_input):
                     filepath = bridge.take_picture()
                     all_captured_images.append(filepath)
                     filename = os.path.basename(filepath)
-                    yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                    captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
                     yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
                 except Exception as e:
@@ -254,10 +281,20 @@ def stream_command(user_input):
                 steps = int(duration * 10)
                 for step in range(steps):
                     time.sleep(0.1)
+                    if cancel_event.is_set():
+                        emergency_stop_robot(bridge)
+                        yield event("log", {"msg": "⚠ Stop requested — halting robot."})
+                        yield event("done", {"msg": "Command stopped."})
+                        return
                     pct = int(((step + 1) / steps) * 100)
                     yield event("progress", {"index": i, "pct": pct, "elapsed": round((step + 1) * 0.1, 1)})
                 bridge.stop()
                 time.sleep(0.3)
+
+                if cancel_event.is_set():
+                    yield event("log", {"msg": "⚠ Stop requested — halting robot."})
+                    yield event("done", {"msg": "Command stopped."})
+                    return
 
                 # Capture after turn if duration >= 4 seconds
                 if duration >= 4.0:
@@ -268,7 +305,8 @@ def stream_command(user_input):
                         filepath = bridge.take_picture()
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                        captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -278,10 +316,20 @@ def stream_command(user_input):
                 steps = int(duration * 10)
                 for step in range(steps):
                     time.sleep(0.1)
+                    if cancel_event.is_set():
+                        emergency_stop_robot(bridge)
+                        yield event("log", {"msg": "⚠ Stop requested — halting robot."})
+                        yield event("done", {"msg": "Command stopped."})
+                        return
                     pct = int(((step + 1) / steps) * 100)
                     yield event("progress", {"index": i, "pct": pct, "elapsed": round((step + 1) * 0.1, 1)})
                 bridge.stop()
                 time.sleep(0.3)
+
+                if cancel_event.is_set():
+                    yield event("log", {"msg": "⚠ Stop requested — halting robot."})
+                    yield event("done", {"msg": "Command stopped."})
+                    return
 
                 # Capture after turn if duration >= 4 seconds
                 if duration >= 4.0:
@@ -292,7 +340,8 @@ def stream_command(user_input):
                         filepath = bridge.take_picture()
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename})
+                        captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -312,6 +361,9 @@ def stream_command(user_input):
             except Exception:
                 pass
             return
+        
+        #hey everyone 
+
 
         yield event("action_done", {"index": i, "action": action_name})
 
@@ -344,7 +396,7 @@ def analyze():
                 timestamp=timestamp
             )
 
-            high_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] == "HIGH"]
+            high_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] in ("HIGH", "ALERT")]
             medium_low_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] in ("MEDIUM", "LOW")]
 
             if high_fails:
@@ -353,6 +405,11 @@ def analyze():
                 image_status = "WARNING"
             else:
                 image_status = "PASS"
+
+            # If a lost cellphone is detected, emit a prominent alert message
+            phone_flags = [f for f in findings if f.get('rule_id') == 'PHONE_001' and f.get('status') == 'FAIL']
+            if phone_flags:
+                yield f"data: {json.dumps({'type': 'log', 'msg': 'Lost cellphone detected'})}\n\n"
 
             yield f"data: {json.dumps({'type': 'image_findings', 'filename': filename, 'status': image_status, 'findings': [{'rule_name': f['rule_name'], 'severity': f['severity'], 'status': f['status'], 'remediation': f['remediation']} for f in findings]})}\n\n"
 
@@ -382,17 +439,45 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/clear-image", methods=["POST"])
+def clear_image():
+    data = request.get_json(silent=True) or {}
+    filename = (data.get("filename") or "").strip()
+
+    if not filename:
+        return {"error": "No filename provided"}, 400
+
+    safe_name = os.path.basename(filename)
+    if not safe_name or safe_name != filename:
+        return {"error": "Invalid filename"}, 400
+
+    target_path = os.path.abspath(os.path.join(CAPTURE_DIR, safe_name))
+    if os.path.commonpath([os.path.abspath(CAPTURE_DIR), target_path]) != os.path.abspath(CAPTURE_DIR):
+        return {"error": "Invalid filename"}, 400
+
+    if os.path.exists(target_path):
+        os.remove(target_path)
+
+    return {"status": "deleted", "filename": safe_name}
+
+
 @app.route("/captures/<filename>")
 def serve_capture(filename):
-    return send_from_directory('/home/demo_user/RoboticDogs/captures', filename)
+    return send_from_directory(CAPTURE_DIR, filename)
 
 
 @app.route("/reports/<filename>")
 def serve_report(filename):
-    return send_from_directory('/home/demo_user/RoboticDogs/reports', filename)
+    return send_from_directory(REPORT_DIR, filename)
 
 @app.route("/cancel", methods=["POST"])
 def cancel():
+
+    try:
+        bridge = get_bridge()
+        emergency_stop_robot(bridge)
+    except Exception:
+        pass
 
     cancel_event.set()
 

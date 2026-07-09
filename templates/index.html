@@ -554,7 +554,7 @@
   <div class="right-panel">
     <div class="right-panel-header"> Images &amp; Reports</div>
     <div class="right-panel-content" id="right-panel-content">
-      <div style="color:var(--muted); font-family:var(--mono); font-size:11px; text-align:center; margin-top:20px;">
+      <div data-placeholder style="color:var(--muted); font-family:var(--mono); font-size:11px; text-align:center; margin-top:20px;">
         Images and compliance reports will appear here during inspection.
       </div>
     </div>
@@ -572,6 +572,7 @@ let pendingFindings = {};
 
 let currentController = null;
 let currentReader = null;
+let currentExecPanel = null;
 
 
 function useCommand(btn) {
@@ -601,20 +602,26 @@ function createExecPanel() {
     <div class="msg-label">NemoClaw</div>
     <div class="exec-panel">
       <div class="exec-header">
-        <div class="spinner" id="spinner"></div>
-        <span id="exec-status">Connecting to NIM...</span>
+        <div class="spinner"></div>
+        <span>Connecting to NIM...</span>
       </div>
-      <div class="exec-log" id="exec-log"></div>
-      <div class="action-steps" id="action-steps"></div>
+      <div class="exec-log"></div>
+      <div class="action-steps"></div>
     </div>
   `;
   messagesEl.appendChild(wrap);
+  currentExecPanel = wrap;
   scrollBottom();
   return wrap;
 }
 
+function getActiveExecElement(selector) {
+  if (!currentExecPanel) return null;
+  return currentExecPanel.querySelector(selector);
+}
+
 function addLog(text, type='info') {
-  const log = document.getElementById('exec-log');
+  const log = getActiveExecElement('.exec-log');
   const icons = { info: '·', success: '✓', error: '✗', warn: '⚠' };
   const line = document.createElement('div');
   line.className = `log-line ${type}`;
@@ -624,10 +631,10 @@ function addLog(text, type='info') {
 }
 
 function setStatus(text, done=false) {
-  const el = document.getElementById('exec-status');
+  const el = getActiveExecElement('.exec-header span');
   if (el) el.textContent = text;
   if (done) {
-    const s = document.getElementById('spinner');
+    const s = getActiveExecElement('.spinner');
     if (s) { s.classList.add('done'); }
   }
 }
@@ -635,7 +642,7 @@ function setStatus(text, done=false) {
 let stepEls = [];
 
 function buildSteps(actions) {
-  const container = document.getElementById('action-steps');
+  const container = getActiveExecElement('.action-steps');
   stepEls = [];
   actions.forEach((action, i) => {
     const step = document.createElement('div');
@@ -658,10 +665,10 @@ function buildSteps(actions) {
 }
 
 function updateStep(index, pct, elapsed) {
-  const bar = document.getElementById(`step-bar-${index}`);
-  const elapsedEl = document.getElementById(`step-elapsed-${index}`);
-  const num = document.getElementById(`step-num-${index}`);
-  const meta = document.getElementById(`step-meta-${index}`);
+  const bar = currentExecPanel ? currentExecPanel.querySelector(`#step-bar-${index}`) : null;
+  const elapsedEl = currentExecPanel ? currentExecPanel.querySelector(`#step-elapsed-${index}`) : null;
+  const num = currentExecPanel ? currentExecPanel.querySelector(`#step-num-${index}`) : null;
+  const meta = currentExecPanel ? currentExecPanel.querySelector(`#step-meta-${index}`) : null;
   if (bar) bar.style.width = pct + '%';
   if (elapsedEl && elapsed > 0) elapsedEl.textContent = `${elapsed}s elapsed`;
   if (num) { num.classList.remove('active'); num.classList.add('active'); }
@@ -670,16 +677,45 @@ function updateStep(index, pct, elapsed) {
 }
 
 function completeStep(index) {
-  const bar = document.getElementById(`step-bar-${index}`);
-  const num = document.getElementById(`step-num-${index}`);
-  const meta = document.getElementById(`step-meta-${index}`);
+  const bar = currentExecPanel ? currentExecPanel.querySelector(`#step-bar-${index}`) : null;
+  const num = currentExecPanel ? currentExecPanel.querySelector(`#step-num-${index}`) : null;
+  const meta = currentExecPanel ? currentExecPanel.querySelector(`#step-meta-${index}`) : null;
   if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
   if (num) { num.classList.remove('active'); num.classList.add('complete'); num.textContent = '✓'; }
   if (meta) meta.textContent = 'done';
   scrollBottom();
 }
 
-function addCapturedImage(src, label) {
+async function clearCapturedImage(label) {
+  const card = document.getElementById(`img-${label}`);
+  if (!card) return;
+
+  try {
+    const resp = await fetch('/clear-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: label })
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Unable to clear image');
+
+    card.remove();
+
+    const panel = document.getElementById('right-panel-content');
+    if (panel && panel.children.length === 0) {
+      panel.innerHTML = `
+        <div data-placeholder style="color:var(--muted); font-family:var(--mono); font-size:11px; text-align:center; margin-top:20px;">
+          Images and compliance reports will appear here during inspection.
+        </div>
+      `;
+    }
+  } catch (e) {
+    console.error('Clear image error:', e);
+  }
+}
+
+function addCapturedImage(src, label, capturedAt='') {
   const panel = document.getElementById('right-panel-content');
   if (panel.querySelector('[data-placeholder]')) {
     panel.innerHTML = '';
@@ -694,14 +730,25 @@ function addCapturedImage(src, label) {
     <div style="max-height:220px; overflow:hidden;">
       <img src="${src}" alt="${label}" style="width:100%; height:220px; object-fit:contain; background:var(--bg); display:block; border-bottom:1px solid var(--border);" />
     </div>
-    <div style="padding:6px 10px; font-family:var(--mono); font-size:10px; color:var(--muted); display:flex; align-items:center; justify-content:space-between;">
-      <span>📷 ${label}</span>
-      <button 
-        id="analyze-btn-${label}"
-        onclick="analyzeImage('${fullPath}', '${label}')"
-        style="background:var(--border); color:var(--accent); border:none; border-radius:4px; padding:4px 10px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer;">
-        ANALYZE
-      </button>
+    <div style="padding:6px 10px; font-family:var(--mono); font-size:10px; color:var(--muted); display:flex; align-items:center; justify-content:space-between; gap:8px;">
+      <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+        <span>📷 ${label}</span>
+        ${capturedAt ? `<span style="color:var(--accent); font-size:9px;">${capturedAt}</span>` : ''}
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+        <button 
+          id="analyze-btn-${label}"
+          onclick="analyzeImage('${fullPath}', '${label}')"
+          style="background:var(--border); color:var(--accent); border:none; border-radius:4px; padding:4px 10px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer;">
+          ANALYZE
+        </button>
+        <button
+          id="clear-btn-${label}"
+          onclick="clearCapturedImage('${label}')"
+          style="background:#8b1e1e; color:#fff; border:none; border-radius:4px; padding:4px 10px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer;">
+          CLEAR
+        </button>
+      </div>
     </div>
     <div id="findings-${label}" style="padding:0 10px 8px 10px; font-family:var(--mono); font-size:11px; display:none;"></div>
   `;
@@ -943,7 +990,7 @@ function handleEvent(evt) {
       completeStep(evt.index);
       break;
     case 'image':
-      addCapturedImage(evt.src, evt.label);
+      addCapturedImage(evt.src, evt.label, evt.captured_at);
       break;
     case 'report':
       addReport(evt);

@@ -44,5 +44,13 @@
       "severity": "MEDIUM",
       "remediation": "Store cleaning equipment in designated area"
     }
+    ,
+    {
+      "id": "PHONE_001",
+      "name": "Lost Cellphone",
+      "keywords": ["cell phone", "cellphone", "mobile phone", "phone on table", "lost phone", "smartphone", "mobile device", "phone left on", "phone lying", "phone on floor"],
+      "severity": "ALERT",
+      "remediation": "Secure the phone and return it to the owner; report to lost-and-found if appropriate"
+    }
   ]
 }
