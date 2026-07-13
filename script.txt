@@ -1,0 +1,161 @@
+THE SCRIPT
+[0:00 — Intro]
+NARRATOR:
+
+"What you're looking at is NemoClaw — an AI-powered safety inspection system built entirely on NVIDIA technology, running locally on a DGX GB10 Superchip. No cloud. No latency. Everything you're about to see is processed on this single machine."
+
+
+"The brain is NVIDIA Nemotron — a large language model running locally via NVIDIA NIM. It understands natural language and converts it into real robot commands in real time."
+
+
+"The robot is Henrik — a ROSPug quadruped. Henrik is going to inspect this room for us."
+
+
+[0:30 — Type the command]
+TYPIST types:
+walk forward and inspect the room for safety hazards
+NARRATOR:
+
+"We just gave Henrik a natural language instruction. No code, no manual controls, no programming. Nemotron is parsing that right now and generating a structured action plan."
+
+[UI shows: Sending to NIM model... → Model response received → Plan: cautious_walk]
+
+"In under 3 seconds, Nemotron has converted plain English into a sequence of robot commands. Henrik is now executing."
+
+
+[1:00 — Henrik starts walking]
+[Henrik starts walking, images appear in right panel every 2 seconds]
+NARRATOR:
+
+"As Henrik moves through the space, his onboard camera is capturing images every 2 seconds. You can see those appearing live in the right panel."
+
+
+"At the same time, Henrik's MS-200 LiDAR sensor is scanning 360 degrees, 10 times per second, measuring distance to every surface around him in real time."
+
+
+[1:45 — Henrik has passed the phone, images are in the panel]
+NARRATOR:
+
+"Henrik has completed his inspection route. Let's see what he found."
+
+TYPIST clicks ANALYZE on the image that captured the phone
+NARRATOR:
+
+"We're asking Nemotron to analyze this image for safety compliance violations."
+
+[Compliance check runs — 10-15 seconds]
+
+"Now watch this."
+
+[Findings appear — phone flagged]
+
+"Nemotron has identified a personal device — a phone — left on the floor. We didn't tell it to look for a phone. We didn't program a phone detector. Nemotron examined the scene the same way a trained safety inspector would and flagged it as a hazard."
+
+[Pause for audience reaction]
+
+"That's the power of a 30-billion parameter reasoning model. Henrik saw something a human walkthrough might miss. Nemotron caught it, categorized it, and told us exactly what to do about it."
+
+
+[2:30 — Analyze more images]
+TYPIST clicks ANALYZE on a second image
+NARRATOR:
+
+"Every image Henrik captured is available for analysis independently. Let's check this one."
+
+[Second findings appear — open door or loose cable flagged]
+
+"Open door flagged — that's a security and fire safety violation in most facility compliance frameworks. Loose cable — trip hazard, flagged as HIGH severity."
+
+
+"Each finding is categorized. HIGH means immediate action required. WARNING means attention needed. PASS means compliant."
+
+
+"Henrik just did in 2 minutes what a manual inspection checklist takes 30 minutes to cover — and produced documented, photographic evidence for every finding."
+
+
+[3:15 — Show the report]
+NARRATOR:
+
+"Every analysis generates a timestamped compliance report with image evidence, severity ratings, and remediation guidance."
+
+
+"This is an auditable record. If a regulator asks when that cable was last inspected and what action was taken — this report is your answer."
+
+
+[3:45 — Give Henrik new instructions]
+TYPIST types:
+turn right and continue inspection
+NARRATOR:
+
+"We can give Henrik new instructions at any point in plain English. He resumes from where he stopped."
+
+[Henrik turns and continues]
+
+"The entire system — language model, vision model, robot control stack — runs locally on a single DGX GB10. No internet connection required during operation. No data leaves the facility. For customers in regulated industries, that's not a nice-to-have. That's a requirement."
+
+
+[4:30 — Closing]
+NARRATOR:
+
+"What you just saw is Phase 1 of NemoClaw. Henrik autonomously navigated a space, captured photographic evidence of the environment, and Nemotron identified real safety hazards from those images — all from a single natural language command."
+
+
+"Phase 2 integrates NVIDIA Isaac Sim for a live digital twin of the inspection environment — a 3D map of every finding, exactly where it was flagged, updated in real time as Henrik moves through the facility."
+
+
+"This is NemoClaw. Built on NVIDIA NIM. Running on DGX GB10. Deployed on a ROSPug quadruped. Thank you."
+
+
+BACKUP LINES
+If NIM is slow responding:
+
+"Nemotron is a 30-billion parameter reasoning model running entirely on local hardware — give it just a moment."
+
+If Henrik drifts off course:
+
+"Henrik's gait resets every 2 seconds to prevent drift accumulation — you'll notice him self-correcting his path."
+
+If compliance check takes long:
+
+"Nemotron is examining every detail of this image against our safety ruleset — the same model that understood your natural language command is now doing computer vision analysis."
+
+If someone asks about cloud:
+
+"Everything runs on the GB10. The NIM endpoint is localhost. No data leaves this machine."
+
+If someone asks about other robots:
+
+"NemoClaw is robot-agnostic — any ROS-compatible robot can be swapped in. We chose Henrik for his quadruped mobility in confined spaces."
+
+If obstacle stop triggers unexpectedly:
+
+"Henrik's LiDAR detected something within his safety threshold and stopped automatically — exactly as designed. We can redirect him with a new command."
+
+If the demo breaks entirely:
+
+"Let me show you what this looks like when it's running —" [pull up screenshots or previous report]
+
+
+STARTUP CHEAT SHEET
+1. NIM:
+   [your exact NIM start command here]
+
+2. NoMachine Terminal 1:
+   roslaunch rosbridge_server rosbridge_websocket.launch
+
+3. NoMachine Terminal 2:
+   sudo systemctl stop start_app_node.service
+   roslaunch pug_control pug_control.launch
+
+4. GB10:
+   cd ~/RoboticDogs
+   source venv/bin/activate
+   python3 app.py
+
+5. Browser:
+   http://localhost:5000
+
+6. Demo room ROBOT_IP: [fill in Tuesday]
+
+ONE PAGE TALKING POINTS
+PhaseWhat happensWhat to sayCommandType NL command"No code, no manual control"WalkingHenrik moves, images appear"Camera every 2s, LiDAR 10x per second"AnalyzeClick on phone image"We didn't tell it to look for a phone"FindingsPhone, door, cable flagged"Same model, now doing computer vision"ReportTimestamped findings"Auditable record for regulators"New commandHenrik resumes"Plain English, any time"CloseThank you"Local, no cloud, data stays here"
