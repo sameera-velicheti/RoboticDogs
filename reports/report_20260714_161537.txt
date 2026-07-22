@@ -1,0 +1,33 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260714_161537
+Timestamp:    20260714_161537
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      FAIL
+========================================
+
+SUMMARY
+-------
+Images captured:  1
+Issues found:     2
+  HIGH severity:  1
+  ALERT severity: 1
+  MEDIUM severity:0
+
+ISSUES REQUIRING ACTION
+-----------------------
+[HIGH] Blocked Walkway
+  Rule ID:    OBST_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260714_161429.jpg
+  Timestamp:  20260714_161442
+  Keywords:   Blocked Walkway
+  Action:     Remove obstruction from walkway immediately
+
+[ALERT] Lost Cellphone
+  Rule ID:    PHONE_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260714_161429.jpg
+  Timestamp:  20260714_161442
+  Keywords:   Lost Cellphone
+  Action:     Secure the phone and return it to the owner; report to lost-and-found if appropriate
+

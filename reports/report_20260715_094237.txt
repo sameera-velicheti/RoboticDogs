@@ -1,0 +1,26 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260715_094237
+Timestamp:    20260715_094237
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      WARNING
+========================================
+
+SUMMARY
+-------
+Images captured:  1
+Issues found:     1
+  HIGH severity:  0
+  ALERT severity: 0
+  MEDIUM severity:0
+
+ISSUES REQUIRING ACTION
+-----------------------
+[LOW] Loose Cables on Floor
+  Rule ID:    CABLE_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260715_094048.jpg
+  Timestamp:  20260715_094151
+  Keywords:   Loose Cables on Floor
+  Action:     Route cables through cable management or secure to walls/desk
+

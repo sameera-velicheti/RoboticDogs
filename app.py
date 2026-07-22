@@ -34,23 +34,31 @@ MAX_SPEED = 0.15
 MAX_DURATION = 60.0
 SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
 
-_bridge = None
+DOG_IPS = {
+    "dog1": "192.168.0.60",
+    "dog2": "192.168.0.85",  
+    "dog3": "192.168.0.111"  
+}
+
+_bridges = {}
 _bridge_lock = threading.Lock()
 cancel_event = threading.Event()
 
 
-def get_bridge():
-    global _bridge
+def get_bridge(dog_id):
+    global _bridges
     with _bridge_lock:
-        if _bridge is None:
+        if dog_id not in _bridges or _bridges[dog_id] is None:
             try:
                 from ros2_bridge.ros_nodes import RosPugBridge
-                _bridge = RosPugBridge()
+                ip = DOG_IPS.get(dog_id)
+                if not ip:
+                    raise ValueError(f"Unknown dog_id: {dog_id}")
+                _bridges[dog_id] = RosPugBridge(ip)
             except Exception as e:
-                raise RuntimeError(f"Could not connect to robot: {e}")
-        return _bridge
-
-
+                raise RuntimeError(f"Could not connect to {dog_id}: {e}")
+        return _bridges[dog_id]
+    
 def get_prompt(user_instruction):
     return f"""
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
@@ -111,7 +119,6 @@ def emergency_stop_robot(bridge):
     except Exception as e:
         pass
 
-
 def stream_command(user_input):
     """Generator that yields SSE events for the UI to consume."""
     cancel_event.clear()
@@ -122,7 +129,7 @@ def stream_command(user_input):
     if user_input.strip().lower() in ("stop", "halt", "emergency stop"):
         yield event("log", {"msg": "⚠ Emergency stop triggered"})
         try:
-            bridge = get_bridge()
+            bridge = get_bridge(dog_id)
             emergency_stop_robot(bridge)
             yield event("done", {"msg": "Robot stopped."})
         except Exception as e:
@@ -160,7 +167,7 @@ def stream_command(user_input):
 
     # Connect to robot
     try:
-        bridge = get_bridge()
+        bridge = get_bridge(dog_id)
     except Exception as e:
         yield event("error", {"msg": str(e)})
         return
@@ -369,6 +376,7 @@ def stream_command(user_input):
 
         yield event("done", {"msg": f"Completed {len(actions)} action(s)."})
 
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
@@ -472,26 +480,27 @@ def serve_report(filename):
 
 @app.route("/cancel", methods=["POST"])
 def cancel():
-
+    data = request.get_json(silent=True) or {}
+    dog_id = data.get("dog_id", "dog1")
     try:
-        bridge = get_bridge()
+        bridge = get_bridge(dog_id)
         emergency_stop_robot(bridge)
     except Exception:
         pass
-
     cancel_event.set()
-
     return {"status": "cancelled"}
 
 @app.route("/command", methods=["POST"])
 def command():
     data = request.get_json()
     user_input = data.get("input", "").strip()
+    dog_id = data.get("dog_id", "dog1")
+
     if not user_input:
         return {"error": "Empty input"}, 400
 
     return Response(
-        stream_with_context(stream_command(user_input)),
+        stream_with_context(stream_command(user_input, dog_id)),
         mimetype="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -503,3 +512,4 @@ def command():
 if __name__ == "__main__":
     print("NemoClaw UI running at http://localhost:5000")
     app.run(debug=False, threaded=True, port=5000)
+

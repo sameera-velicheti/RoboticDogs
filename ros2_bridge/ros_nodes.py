@@ -10,17 +10,18 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-ROBOT_IP = "192.168.149.1"
+ROBOT_IP = "192.168.0.60"
 ROBOT_PORT = 9090
 WATCHDOG_TIMEOUT = 60.0
 
 
 class RosPugBridge:
-    def __init__(self):
-        self.client = roslibpy.Ros(host=ROBOT_IP, port=ROBOT_PORT)
+    def __init__(self, robot_ip):
+        self.robot_ip = robot_ip
+        self.client = roslibpy.Ros(host=robot_ip, port=9090)
         self.client.run()
         time.sleep(1.0)
-        logger.info(f"Connected to ROSPug: {self.client.is_connected}")
+        logger.info(f"Connected to ROSPug at {robot_ip}: {self.client.is_connected}")
 
         self.publisher = roslibpy.Topic(
             self.client,
@@ -29,7 +30,6 @@ class RosPugBridge:
         )
         self._watchdog_timer = None
 
-        # Persistent LiDAR subscription — stays open for instant readings
         self._latest_scan = None
         self._lidar_subscriber = roslibpy.Topic(
             self.client,
@@ -39,8 +39,7 @@ class RosPugBridge:
         self._lidar_subscriber.subscribe(
             lambda msg: setattr(self, '_latest_scan', msg.get("ranges"))
         )
-        time.sleep(1.0)  # wait for first scan to arrive
-        logger.info(f"LiDAR ready: {self._latest_scan is not None}")
+        time.sleep(1.0)
 
     def _start_watchdog(self, timeout):
         self._watchdog_timer = threading.Timer(timeout, self._watchdog_stop)

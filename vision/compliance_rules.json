@@ -4,8 +4,8 @@
   "rules": [
     {
       "id": "CABLE_001",
-      "name": "Loose Cables on Floor",
-      "keywords": ["cable lying on floor", "wire on floor", "cord on floor", "loose cable", "cable not secured", "wire not secured", "cable creating trip hazard", "tangled wire on ground", "cable draped across floor"],
+      "name": "Loose Cables",
+      "keywords": ["cable lying on surface", "wire on surface", "cord on surface", "loose cable", "cable not secured", "wire not secured", "cable creating trip hazard", "tangled wire on ground", "cable draped across floor or surface"],
       "severity": "LOW",
       "remediation": "Route cables through cable management or secure to walls/desk"
     },
@@ -26,7 +26,7 @@
     {
       "id": "CABLE_002",
       "name": "Unsecured Power Cables",
-      "keywords": ["power cable on floor", "power cord on floor", "power cable not secured", "unsecured power cable", "power cable loose", "power cord loose", "electrical cable on floor", "power cable draped"],
+      "keywords": ["power cable on surface", "power cord on surface", "power cable not secured", "unsecured power cable", "power cable loose", "power cord loose", "electrical cable on floor", "power cable draped"],
       "severity": "MEDIUM",
       "remediation": "Secure cables with cable ties or management system"
     },
@@ -48,7 +48,7 @@
     {
       "id": "PHONE_001",
       "name": "Lost Cellphone",
-      "keywords": ["cell phone", "cellphone", "mobile phone", "phone on table", "lost phone", "smartphone", "mobile device", "phone left on", "phone lying", "phone on floor"],
+      "keywords": ["cell phone", "cellphone", "mobile phone", "phone on table", "lost phone", "smartphone", "mobile device", "phone left on", "phone lying", "phone on floor", "phone on table or surface"],
       "severity": "ALERT",
       "remediation": "Secure the phone and return it to the owner; report to lost-and-found if appropriate"
     }

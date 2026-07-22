@@ -1,0 +1,40 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260716_102953
+Timestamp:    20260716_102953
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      WARNING
+========================================
+
+SUMMARY
+-------
+Images captured:  1
+Issues found:     3
+  HIGH severity:  0
+  ALERT severity: 0
+  MEDIUM severity:2
+
+ISSUES REQUIRING ACTION
+-----------------------
+[LOW] Loose Cables
+  Rule ID:    CABLE_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260716_102743.jpg
+  Timestamp:  20260716_102853
+  Keywords:   Loose Cables
+  Action:     Route cables through cable management or secure to walls/desk
+
+[MEDIUM] Open Door
+  Rule ID:    DOOR_001
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260716_102743.jpg
+  Timestamp:  20260716_102853
+  Keywords:   Open Door
+  Action:     Close and latch door
+
+[MEDIUM] Unsecured Power Cables
+  Rule ID:    CABLE_002
+  Image:      /home/demo_user/RoboticDogs/captures/capture_20260716_102743.jpg
+  Timestamp:  20260716_102853
+  Keywords:   Unsecured Power Cables
+  Action:     Secure cables with cable ties or management system
+
