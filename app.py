@@ -119,7 +119,7 @@ def emergency_stop_robot(bridge):
     except Exception as e:
         pass
 
-def stream_command(user_input):
+def stream_command(user_input, dog_id="dog1"):
     """Generator that yields SSE events for the UI to consume."""
     cancel_event.clear()
     def event(kind, data):

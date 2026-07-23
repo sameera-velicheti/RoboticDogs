@@ -571,7 +571,7 @@
 <body>
 
 <header>
-  <h1>Agentic Henrik</h1>
+  <h1>Hogan's Heros</h1>
 </header>
 
 <div class="main">
@@ -604,28 +604,26 @@
     </div>
 
     <div class="input-area">
-  <div style="display:flex; gap:8px; margin-bottom:10px;">
-    <button class="dog-select-btn active" id="dog-btn-dog1" onclick="selectDog('dog1', this)">🐾 Dog 1</button>
-    <button class="dog-select-btn" id="dog-btn-dog2" onclick="selectDog('dog2', this)">🐾 Dog 2</button>
-    <button class="dog-select-btn" id="dog-btn-dog3" onclick="selectDog('dog3', this)">🐾 Dog 3</button>
-  </div>
-  <div class="input-row">
-  
-      <div class="input-row">
-        <input
-          type="text"
-          class="input-field"
-          id="inputField"
-          placeholder="walk forward for 10 seconds..."
-          autocomplete="off"
-          onkeydown="if(event.key==='Enter') sendCommand()"
-        />
-        <button class="send-btn" id="sendBtn" onclick="sendCommand()">SEND</button>
-        <button class="stop-btn" onclick="cancelRequest()">■ STOP</button>
-      </div>
-      <div class="hint">↵ Enter to send &nbsp;·&nbsp; Images captured every 2s during walk</div>
+  <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;">
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Henrik</span>
+      <input type="text" class="input-field" id="inputField-dog1" placeholder="walk forward for 10 seconds..." autocomplete="off" />
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Hicks</span>
+      <input type="text" class="input-field" id="inputField-dog2" placeholder="turn left for 5 seconds..." autocomplete="off" />
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Hogan</span>
+      <input type="text" class="input-field" id="inputField-dog3" placeholder="turn right for 5 seconds..." autocomplete="off" />
     </div>
   </div>
+  <div class="input-row">
+    <button class="send-btn" id="sendAllBtn" onclick="sendAllCommands()" style="flex:1;">SEND ALL — MOVE SIMULTANEOUSLY</button>
+    <button class="stop-btn" onclick="stopAllDogs()">■ STOP ALL</button>
+  </div>
+  <div class="hint">Each dog gets its own instruction — all three execute at the same time</div>
+</div>
   <div class="resize-handle" id="resizeHandle"></div>
   <div class="right-panel">
     <div class="right-panel-header"> Images &amp; Reports</div>
@@ -649,6 +647,10 @@ let selectedDog = 'dog1';
 let currentController = null;
 let currentReader = null;
 let currentExecPanel = null;
+
+let dogControllers = {};
+let dogReaders = {};
+let execPanels = {};
 
 function selectDog(dogId, btn) {
     selectedDog = dogId;
@@ -677,11 +679,12 @@ function addUserMsg(text) {
   scrollBottom();
 }
 
-function createExecPanel() {
+function createExecPanel(dogId) {
   const wrap = document.createElement('div');
   wrap.className = 'msg';
+  wrap.id = `exec-${dogId}`;
   wrap.innerHTML = `
-    <div class="msg-label">NemoClaw</div>
+    <div class="msg-label">🐾 ${dogId.toUpperCase()}</div>
     <div class="exec-panel">
       <div class="exec-header">
         <div class="spinner"></div>
@@ -692,18 +695,20 @@ function createExecPanel() {
     </div>
   `;
   messagesEl.appendChild(wrap);
-  currentExecPanel = wrap;
+  execPanels[dogId] = wrap;
   scrollBottom();
   return wrap;
 }
 
-function getActiveExecElement(selector) {
-  if (!currentExecPanel) return null;
-  return currentExecPanel.querySelector(selector);
+function getExecElement(dogId, selector) {
+  const panel = execPanels[dogId];
+  if (!panel) return null;
+  return panel.querySelector(selector);
 }
 
-function addLog(text, type='info') {
-  const log = getActiveExecElement('.exec-log');
+function addLog(text, type='info', dogId) {
+  const log = getExecElement(dogId, '.exec-log');
+  if (!log) return;
   const icons = { info: '·', success: '✓', error: '✗', warn: '⚠' };
   const line = document.createElement('div');
   line.className = `log-line ${type}`;
@@ -712,45 +717,44 @@ function addLog(text, type='info') {
   scrollBottom();
 }
 
-function setStatus(text, done=false) {
-  const el = getActiveExecElement('.exec-header span');
+function setStatus(text, done=false, dogId) {
+  const el = getExecElement(dogId, '.exec-header span');
   if (el) el.textContent = text;
   if (done) {
-    const s = getActiveExecElement('.spinner');
+    const s = getExecElement(dogId, '.spinner');
     if (s) { s.classList.add('done'); }
   }
 }
 
-let stepEls = [];
-
-function buildSteps(actions) {
-  const container = getActiveExecElement('.action-steps');
-  stepEls = [];
+function buildSteps(actions, dogId) {
+  const container = getExecElement(dogId, '.action-steps');
+  if (!container) return;
   actions.forEach((action, i) => {
     const step = document.createElement('div');
     step.className = 'action-step';
     step.innerHTML = `
       <div class="step-header">
-        <div class="step-num" id="step-num-${i}">${i+1}</div>
+        <div class="step-num" id="step-num-${dogId}-${i}">${i+1}</div>
         <span class="step-name">${action}</span>
-        <span class="step-meta" id="step-meta-${i}">pending</span>
+        <span class="step-meta" id="step-meta-${dogId}-${i}">pending</span>
       </div>
       <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="step-bar-${i}"></div>
+        <div class="progress-bar-fill" id="step-bar-${dogId}-${i}"></div>
       </div>
-      <div class="step-elapsed" id="step-elapsed-${i}"></div>
+      <div class="step-elapsed" id="step-elapsed-${dogId}-${i}"></div>
     `;
     container.appendChild(step);
-    stepEls.push(step);
   });
   scrollBottom();
 }
 
-function updateStep(index, pct, elapsed) {
-  const bar = currentExecPanel ? currentExecPanel.querySelector(`#step-bar-${index}`) : null;
-  const elapsedEl = currentExecPanel ? currentExecPanel.querySelector(`#step-elapsed-${index}`) : null;
-  const num = currentExecPanel ? currentExecPanel.querySelector(`#step-num-${index}`) : null;
-  const meta = currentExecPanel ? currentExecPanel.querySelector(`#step-meta-${index}`) : null;
+function updateStep(index, pct, elapsed, dogId) {
+  const panel = execPanels[dogId];
+  if (!panel) return;
+  const bar = panel.querySelector(`#step-bar-${dogId}-${index}`);
+  const elapsedEl = panel.querySelector(`#step-elapsed-${dogId}-${index}`);
+  const num = panel.querySelector(`#step-num-${dogId}-${index}`);
+  const meta = panel.querySelector(`#step-meta-${dogId}-${index}`);
   if (bar) bar.style.width = pct + '%';
   if (elapsedEl && elapsed > 0) elapsedEl.textContent = `${elapsed}s elapsed`;
   if (num) { num.classList.remove('active'); num.classList.add('active'); }
@@ -758,10 +762,12 @@ function updateStep(index, pct, elapsed) {
   scrollBottom();
 }
 
-function completeStep(index) {
-  const bar = currentExecPanel ? currentExecPanel.querySelector(`#step-bar-${index}`) : null;
-  const num = currentExecPanel ? currentExecPanel.querySelector(`#step-num-${index}`) : null;
-  const meta = currentExecPanel ? currentExecPanel.querySelector(`#step-meta-${index}`) : null;
+function completeStep(index, dogId) {
+  const panel = execPanels[dogId];
+  if (!panel) return;
+  const bar = panel.querySelector(`#step-bar-${dogId}-${index}`);
+  const num = panel.querySelector(`#step-num-${dogId}-${index}`);
+  const meta = panel.querySelector(`#step-meta-${dogId}-${index}`);
   if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
   if (num) { num.classList.remove('active'); num.classList.add('complete'); num.textContent = '✓'; }
   if (meta) meta.textContent = 'done';
@@ -989,35 +995,53 @@ async function analyzeImage(filepath, label) {
     }
 }
 
-async function sendCommand() {
-  const text = inputEl.value.trim();
-  if (!text || isRunning) return;
+async function sendAllCommands() {
+  if (isRunning) return;
 
-  inputEl.value = '';
-  currentController = new AbortController();
+  const commands = {
+    dog1: document.getElementById('inputField-dog1').value.trim(),
+    dog2: document.getElementById('inputField-dog2').value.trim(),
+    dog3: document.getElementById('inputField-dog3').value.trim()
+  };
+
+  // Only send to dogs that have a command typed
+  const activeDogs = Object.entries(commands).filter(([id, text]) => text.length > 0);
+
+  if (activeDogs.length === 0) return;
+
   setRunning(true);
-  addUserMsg(text);
-  createExecPanel();
+
+  // Fire all commands at the exact same time
+  await Promise.all(
+    activeDogs.map(([dogId, text]) => {
+      addUserMsg(`${dogId}: ${text}`);
+      return runCommandForDog(text, dogId);
+    })
+  );
+
+  setRunning(false);
+}
+
+async function runCommandForDog(text, dogId) {
+  const controller = new AbortController();
+  dogControllers[dogId] = controller;
+  createExecPanel(dogId);
 
   try {
     const resp = await fetch('/command', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    input: text,
-    dog_id: selectedDog
-  }),
-  signal: currentController.signal
-  });
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: text, dog_id: dogId }),
+      signal: controller.signal
+    });
 
-    currentReader = resp.body.getReader();
+    const reader = resp.body.getReader();
+    dogReaders[dogId] = reader;
     const decoder = new TextDecoder();
     let buf = '';
 
     while (true) {
-      const { done, value } = await currentReader.read();
+      const { done, value } = await reader.read();
       if (done) break;
       buf += decoder.decode(value, { stream: true });
       const lines = buf.split('\n');
@@ -1025,52 +1049,48 @@ async function sendCommand() {
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const evt = JSON.parse(line.slice(6));
-        handleEvent(evt);
+        handleEvent(evt, dogId);
       }
     }
   } catch (e) {
-
-    if (e.name === "AbortError") {
-
-        addLog("Analysis cancelled.", "warn");
-        setStatus("Cancelled", true);
-
-    } else {
-
-        addLog(`Connection error: ${e}`, "error");
-        setStatus("Error", true);
-
+    if (e.name !== 'AbortError') {
+      addLog(`${dogId}: ${e}`, 'error', dogId);
     }
-
-  } finally {
-    currentReader = null;
-    currentController = null;
-
-    setRunning(false);
-
-}
+  }
 }
 
-function handleEvent(evt) {
+async function stopAllDogs() {
+  for (const dogId of ['dog1', 'dog2', 'dog3']) {
+    await fetch('/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dog_id: dogId })
+    });
+    if (dogReaders[dogId]) dogReaders[dogId].cancel();
+    if (dogControllers[dogId]) dogControllers[dogId].abort();
+  }
+}
+
+function handleEvent(evt, dogId) {
   switch (evt.type) {
     case 'log':
-      addLog(evt.msg, 'info');
-      setStatus(evt.msg);
+      addLog(evt.msg, 'info', dogId);
+      setStatus(evt.msg, false, dogId);
       break;
     case 'plan':
-      addLog(`Plan: ${evt.actions.join(' → ')}`, 'info');
-      buildSteps(evt.actions);
-      setStatus(`Executing ${evt.total} action(s)...`);
+      addLog(`Plan: ${evt.actions.join(' → ')}`, 'info', dogId);
+      buildSteps(evt.actions, dogId);
+      setStatus(`Executing ${evt.total} action(s)...`, false, dogId);
       break;
     case 'action_start':
-      setStatus(`Running: ${evt.action}`);
-      updateStep(evt.index, 0, 0);
+      setStatus(`Running: ${evt.action}`, false, dogId);
+      updateStep(evt.index, 0, 0, dogId);
       break;
     case 'progress':
-      updateStep(evt.index, evt.pct, evt.elapsed);
+      updateStep(evt.index, evt.pct, evt.elapsed, dogId);
       break;
     case 'action_done':
-      completeStep(evt.index);
+      completeStep(evt.index, dogId);
       break;
     case 'image':
       addCapturedImage(evt.src, evt.label, evt.captured_at);
@@ -1079,20 +1099,20 @@ function handleEvent(evt) {
       addReport(evt);
       break;
     case 'done':
-      addLog(evt.msg, 'success');
-      setStatus('Done', true);
+      addLog(evt.msg, 'success', dogId);
+      setStatus('Done', true, dogId);
       break;
     case 'error':
-      addLog(evt.msg, 'error');
-      setStatus('Error', true);
+      addLog(evt.msg, 'error', dogId);
+      setStatus('Error', true, dogId);
       break;
     case 'image_findings':
       attachFindingsToImage(evt.filename, evt.status, evt.findings);
       break;
     case 'report_summary':
       addReportSummary(evt);
-      break;  
-    }
+      break;
+  }
 }
 
 async function cancelRequest() {
