@@ -579,11 +579,11 @@
   <aside class="sidebar">
     <div class="sidebar-section">
       <h3>Sample Commands</h3>
-      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 12 seconds</button>
-      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 5 seconds, then turn left for 2 seconds</button>
-      <button class="sample-cmd" onclick="useCommand(this)">walk forward for 10 seconds, turn right, walk forward for 10 seconds</button>
-      <button class="sample-cmd" onclick="useCommand(this)">Walk forward for 5 seconds</button>
-      <button class="sample-cmd" onclick="useCommand(this)">turn left for 1 second then turn right for 1 second</button>
+      <button class="sample-cmd" onclick="useCommand(this, event)">walk forward for 12 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this, event)">walk forward for 5 seconds, then turn left for 2 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this, event)">walk forward for 10 seconds, turn right, walk forward for 10 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this, event)">Walk forward for 5 seconds</button>
+      <button class="sample-cmd" onclick="useCommand(this, event)">turn left for 1 second then turn right for 1 second</button>
     </div>
 
     <div class="sidebar-section">
@@ -608,14 +608,17 @@
     <div style="display:flex; gap:8px; align-items:center;">
       <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Henrik</span>
       <input type="text" class="input-field" id="inputField-dog1" placeholder="walk forward for 10 seconds..." autocomplete="off" />
+      <button class="send-btn" style="margin-left:8px; padding:8px 12px; font-size:14px;" id="sendBtn-dog1" onclick="sendSingle('dog1')">SEND</button>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
       <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Hicks</span>
       <input type="text" class="input-field" id="inputField-dog2" placeholder="turn left for 5 seconds..." autocomplete="off" />
+      <button class="send-btn" style="margin-left:8px; padding:8px 12px; font-size:14px;" id="sendBtn-dog2" onclick="sendSingle('dog2')">SEND</button>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
       <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Hogan</span>
       <input type="text" class="input-field" id="inputField-dog3" placeholder="turn right for 5 seconds..." autocomplete="off" />
+      <button class="send-btn" style="margin-left:8px; padding:8px 12px; font-size:14px;" id="sendBtn-dog3" onclick="sendSingle('dog3')">SEND</button>
     </div>
   </div>
   <div class="input-row">
@@ -638,8 +641,8 @@
 
 <script>
 const messagesEl = document.getElementById('messages');
-const inputEl = document.getElementById('inputField');
-const sendBtn = document.getElementById('sendBtn');
+let lastFocusedInput = 'inputField-dog1';
+const sendAllBtnEl = document.getElementById('sendAllBtn');
 let isRunning = false;
 let pendingFindings = {};
 let selectedDog = 'dog1';
@@ -659,9 +662,25 @@ function selectDog(dogId, btn) {
 }
 
 
-function useCommand(btn) {
-  inputEl.value = btn.textContent.trim();
-  inputEl.focus();
+function useCommand(btn, e) {
+  const text = btn.textContent.trim();
+  // prefer the currently focused input if any
+  const active = document.activeElement;
+  const validIds = ['inputField-dog1','inputField-dog2','inputField-dog3'];
+  let target = null;
+  if (active && validIds.includes(active.id)) {
+    target = active;
+  } else {
+    target = document.getElementById(lastFocusedInput) || document.getElementById('inputField-dog1');
+  }
+  if (!target) return;
+  target.value = text;
+  target.focus();
+  // If user shift-clicked the sample, immediately send to that dog
+  if (e && e.shiftKey) {
+    const dogId = target.id.replace('inputField-','');
+    sendSingle(dogId);
+  }
 }
 
 function scrollBottom() {
@@ -950,8 +969,29 @@ function addReportSummary(data) {
 
 function setRunning(val) {
   isRunning = val;
-  sendBtn.disabled = val;
-  inputEl.disabled = val;
+  // disable send-all button and per-dog send buttons and inputs while running
+  if (sendAllBtnEl) sendAllBtnEl.disabled = val;
+  ['dog1','dog2','dog3'].forEach(d => {
+    const inEl = document.getElementById(`inputField-${d}`);
+    const btn = document.getElementById(`sendBtn-${d}`);
+    if (inEl) inEl.disabled = val;
+    if (btn) btn.disabled = val;
+  });
+}
+
+async function sendSingle(dogId) {
+  if (isRunning) return;
+  const input = document.getElementById(`inputField-${dogId}`);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  setRunning(true);
+  addUserMsg(`${dogId}: ${text}`);
+  try {
+    await runCommandForDog(text, dogId);
+  } finally {
+    setRunning(false);
+  }
 }
 
 async function analyzeImage(filepath, label) {
@@ -1128,7 +1168,17 @@ async function cancelRequest() {
     if (currentController) currentController.abort();
 }
 
-inputEl.focus();
+// track last-focused input so sample commands know where to insert
+['inputField-dog1','inputField-dog2','inputField-dog3'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('focus', () => { lastFocusedInput = id; });
+  }
+});
+
+// focus the first dog input by default
+const firstInput = document.getElementById('inputField-dog1');
+if (firstInput) firstInput.focus();
 
 // Resize handle
 const handle = document.getElementById('resizeHandle');
