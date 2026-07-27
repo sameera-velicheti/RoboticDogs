@@ -10,6 +10,18 @@ from ros2_bridge.ros_nodes import RosPugBridge
 CAPTURE_DIR = '/home/demo_user/RoboticDogs/captures'
 
 
+def _normalize_label(label):
+    if label is None:
+        return None
+
+    value = str(label).strip().lower()
+    if value in {'dog1', 'henrik', 'pumbaa', 'pumbaa dog', 'dog one', '1'}:
+        return 'Pumbaa'
+    if value in {'dog2', 'hicks', 'timon', 'timon dog', 'dog two', '2'}:
+        return 'Timon'
+    return str(label).strip()
+
+
 def capture_image(bridge, label=None, save_dir=CAPTURE_DIR):
     """
     Capture a single image from the robot camera.
@@ -46,9 +58,10 @@ def capture_image(bridge, label=None, save_dir=CAPTURE_DIR):
 
     img_bytes = base64.b64decode(captured["data"])
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    normalized_label = _normalize_label(label)
     filename = f"capture_{timestamp}.jpg"
-    if label:
-        filename = f"capture_{timestamp}_{label}.jpg"
+    if normalized_label:
+        filename = f"capture_{timestamp}_{normalized_label}.jpg"
 
     filepath = os.path.join(save_dir, filename)
     with open(filepath, "wb") as f:
@@ -58,7 +71,7 @@ def capture_image(bridge, label=None, save_dir=CAPTURE_DIR):
     metadata = {
         "timestamp": timestamp,
         "filepath": filepath,
-        "label": label,
+        "label": normalized_label,
         "filesize_bytes": os.path.getsize(filepath)
     }
 

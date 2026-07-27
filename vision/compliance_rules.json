@@ -51,6 +51,13 @@
       "keywords": ["cell phone", "cellphone", "mobile phone", "phone on table", "lost phone", "smartphone", "mobile device", "phone left on", "phone lying", "phone on floor", "phone on table or surface"],
       "severity": "ALERT",
       "remediation": "Secure the phone and return it to the owner; report to lost-and-found if appropriate"
+    },
+    {
+      "id": "KEYS_001",
+      "name": "Lost Keys",
+      "keywords": ["keys on the floor", "keys on floor", "key on the floor", "key on floor", "keys on the table", "keys on table", "key on the table", "key on table", "set of keys", "keys left out"],
+      "severity": "ALERT",
+      "remediation": "Secure the keys and return it to the owner; report to lost-and-found if appropriate"
     }
   ]
 }

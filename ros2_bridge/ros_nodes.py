@@ -16,8 +16,9 @@ WATCHDOG_TIMEOUT = 60.0
 
 
 class RosPugBridge:
-    def __init__(self, robot_ip):
+    def __init__(self, robot_ip, robot_name="robot"):
         self.robot_ip = robot_ip
+        self.robot_name = robot_name
         self.client = roslibpy.Ros(host=robot_ip, port=9090)
         self.client.run()
         time.sleep(1.0)
@@ -177,7 +178,7 @@ class RosPugBridge:
 
         img_bytes = base64.b64decode(captured["data"])
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filepath = os.path.join(save_dir, f"capture_{timestamp}.jpg")
+        filepath = os.path.join(save_dir, f"{self.robot_name}_{timestamp}.jpg")
 
         with open(filepath, "wb") as f:
             f.write(img_bytes)

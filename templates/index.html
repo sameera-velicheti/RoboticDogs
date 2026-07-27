@@ -76,17 +76,15 @@ header .sub {
 }
 
 .main {
-  display: grid;
-  grid-template-columns: 240px minmax(450px, 1fr) 10px minmax(320px, 45vw);
-  grid-template-areas: "sidebar chat resizer right";
+  display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
 }
 
 .sidebar {
-  grid-area: sidebar;
-  width: 100%;
+  flex: 0 0 240px;
+  width: 240px;
   min-width: 240px;
   border-right: 1px solid var(--border);
   background: var(--surface);
@@ -95,6 +93,7 @@ header .sub {
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .sidebar-section h3 {
@@ -143,7 +142,7 @@ header .sub {
 .cap-icon { font-size: 14px; width: 20px; text-align: center; }
 
 .chat-area {
-  grid-area: chat;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -151,7 +150,7 @@ header .sub {
 }
 
 .resize-handle {
-  grid-area: resizer;
+  flex: 0 0 10px;
 }
 
 .messages {
@@ -482,8 +481,8 @@ header .sub {
 }
 
 .right-panel {
-  grid-area: right;
-  width: 100%;
+  flex: 0 0 320px;
+  width: 320px;
   min-width: 320px;
   max-width: 45vw;
   border-left: 1px solid var(--border);
@@ -575,6 +574,29 @@ header .sub {
   width: 12px;
   background: var(--accent);
 }
+.panel-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.panel-tab-btn:hover {
+  color: var(--accent);
+}
+
+.panel-tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(0, 212, 255, 0.05);
+}
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -584,7 +606,7 @@ header .sub {
 <body>
 
 <header>
-  <h1>Hogan's Heros</h1>
+  <h1>Hakuna Ma-Data</h1>
 </header>
 
 <div class="main">
@@ -619,37 +641,42 @@ header .sub {
     <div class="input-area">
   <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;">
     <div style="display:flex; gap:8px; align-items:center;">
-      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Henrik</span>
+      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Pumbaa</span>
       <input type="text" class="input-field" id="inputField-dog1" placeholder="walk forward for 10 seconds..." autocomplete="off" />
       <button class="send-btn" style="margin-left:8px; padding:8px 12px; font-size:14px;" id="sendBtn-dog1" onclick="sendSingle('dog1')">SEND</button>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
-      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Hicks</span>
+      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Timon</span>
       <input type="text" class="input-field" id="inputField-dog2" placeholder="turn left for 5 seconds..." autocomplete="off" />
       <button class="send-btn" style="margin-left:8px; padding:8px 12px; font-size:14px;" id="sendBtn-dog2" onclick="sendSingle('dog2')">SEND</button>
     </div>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <span style="font-family:var(--mono); font-size:14px; color:var(--accent); width:70px;">Hogan</span>
-      <input type="text" class="input-field" id="inputField-dog3" placeholder="turn right for 5 seconds..." autocomplete="off" />
-      <button class="send-btn" style="margin-left:8px; padding:8px 12px; font-size:14px;" id="sendBtn-dog3" onclick="sendSingle('dog3')">SEND</button>
-    </div>
+    
   </div>
   <div class="input-row">
     <button class="send-btn" id="sendAllBtn" onclick="sendAllCommands()" style="flex:1;">SEND ALL</button>
     <button class="stop-btn" onclick="stopAllDogs()">■ STOP ALL</button>
   </div>
-  <div class="hint">Each dog gets its own instruction — all three execute at the same time</div>
+  <div class="hint">Each dog gets its own instruction — all dogs execute at the same time</div>
 </div>
 </div>
   <div class="resize-handle" id="resizeHandle"></div>
   <div class="right-panel" id="rightPanel">
-    <div class="right-panel-header">Images &amp; Reports</div>
-    <div class="right-panel-content" id="right-panel-content">
-      <div class="right-panel-placeholder" data-placeholder>
-        Images and compliance reports will appear here during inspection.
-      </div>
+  <div class="right-panel-header">Images &amp; Reports</div>
+  <div style="display:flex; border-bottom:1px solid var(--border);">
+    <button class="panel-tab-btn active" id="tab-btn-dog1" onclick="switchPanelTab('dog1', this)">Pumbaa</button>
+    <button class="panel-tab-btn" id="tab-btn-dog2" onclick="switchPanelTab('dog2', this)">Timon</button>
+  </div>
+  <div class="right-panel-content" id="right-panel-content-dog1">
+    <div class="right-panel-placeholder" data-placeholder>
+      Pumbaa's images and compliance reports will appear here.
     </div>
   </div>
+  <div class="right-panel-content" id="right-panel-content-dog2" style="display:none;">
+    <div class="right-panel-placeholder" data-placeholder>
+      Timon's images and compliance reports will appear here.
+    </div>
+  </div>
+</div>
 
 </div>
 
@@ -675,6 +702,13 @@ function selectDog(dogId, btn) {
     btn.classList.add('active');
 }
 
+function switchPanelTab(dogId, btn) {
+  document.querySelectorAll('.panel-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.getElementById('right-panel-content-dog1').style.display = dogId === 'dog1' ? 'flex' : 'none';
+  document.getElementById('right-panel-content-dog2').style.display = dogId === 'dog2' ? 'flex' : 'none';
+}
 
 function useCommand(btn, e) {
   const text = btn.textContent.trim();
@@ -717,7 +751,7 @@ function createExecPanel(dogId) {
   wrap.className = 'msg';
   wrap.id = `exec-${dogId}`;
   wrap.innerHTML = `
-    <div class="msg-label"> ${dogId.toUpperCase()}</div>
+    <div class="msg-label">${getDogDisplayName(dogId).toUpperCase()}</div>
     <div class="exec-panel">
       <div class="exec-header">
         <div class="spinner"></div>
@@ -743,9 +777,10 @@ function addLog(text, type='info', dogId) {
   const log = getExecElement(dogId, '.exec-log');
   if (!log) return;
   const icons = { info: '·', success: '✓', error: '✗', warn: '⚠' };
+  const prefix = dogId ? `${getDogDisplayName(dogId)}: ` : '';
   const line = document.createElement('div');
   line.className = `log-line ${type}`;
-  line.textContent = `${icons[type]} ${text}`;
+  line.textContent = `${icons[type]} ${prefix}${text}`;
   log.appendChild(line);
   scrollBottom();
 }
@@ -810,6 +845,7 @@ function completeStep(index, dogId) {
 async function clearCapturedImage(label) {
   const card = document.getElementById(`img-${label}`);
   if (!card) return;
+  const parentPanel = card.closest('.right-panel-content');
 
   try {
     const resp = await fetch('/clear-image', {
@@ -823,9 +859,8 @@ async function clearCapturedImage(label) {
 
     card.remove();
 
-    const panel = document.getElementById('right-panel-content');
-    if (panel && panel.children.length === 0) {
-      panel.innerHTML = `
+    if (parentPanel && parentPanel.children.length === 0) {
+      parentPanel.innerHTML = `
         <div class="right-panel-placeholder" data-placeholder>
           Images and compliance reports will appear here during inspection.
         </div>
@@ -836,12 +871,34 @@ async function clearCapturedImage(label) {
   }
 }
 
-function addCapturedImage(src, label, capturedAt='') {
-  const panel = document.getElementById('right-panel-content');
+function normalizeDogId(dogId) {
+  const value = String(dogId || 'dog1').toLowerCase().trim();
+  if (['dog1', 'pumbaa', 'pumbaa dog', 'dog one', '1'].includes(value)) return 'dog1';
+  if (['dog2', 'timon', 'timon dog', 'dog two', '2'].includes(value)) return 'dog2';
+  return value.startsWith('dog') ? value : 'dog1';
+}
+
+function getDogDisplayName(dogId) {
+  const normalized = normalizeDogId(dogId);
+  if (normalized === 'dog1') return 'Pumbaa';
+  if (normalized === 'dog2') return 'Timon';
+  return normalized;
+}
+
+function removeDuplicateCapturedImage(label) {
+  document.querySelectorAll(`[id="img-${label}"]`).forEach(card => card.remove());
+}
+
+function addCapturedImage(src, label, capturedAt='', dogId='dog1') {
+  const targetDogId = normalizeDogId(dogId);
+  const panel = document.getElementById(`right-panel-content-${targetDogId}`);
+  if (!panel) return;
+
+  removeDuplicateCapturedImage(label);
+
   if (panel.querySelector('[data-placeholder]')) {
     panel.innerHTML = '';
   }
-  // Store full captures path for analyze call
   const fullPath = `/home/demo_user/RoboticDogs/captures/${label}`;
 
   const wrap = document.createElement('div');
@@ -853,22 +910,12 @@ function addCapturedImage(src, label, capturedAt='') {
     </div>
     <div style="padding:8px 10px; font-family:var(--mono); font-size:12px; color:var(--muted); display:flex; align-items:center; justify-content:space-between; gap:8px;">
       <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
-        <span>📷 ${label}</span>
+        <span>${label}</span>
         ${capturedAt ? `<span style="color:var(--accent); font-size:11px;">${capturedAt}</span>` : ''}
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-        <button 
-          id="analyze-btn-${label}"
-          onclick="analyzeImage('${fullPath}', '${label}')"
-          class="right-panel-btn analyze">
-          ANALYZE
-        </button>
-        <button
-          id="clear-btn-${label}"
-          onclick="clearCapturedImage('${label}')"
-          class="right-panel-btn clear">
-          CLEAR
-        </button>
+        <button id="analyze-btn-${label}" onclick="analyzeImage('${fullPath}', '${label}')" class="right-panel-btn analyze">ANALYZE</button>
+        <button id="clear-btn-${label}" onclick="clearCapturedImage('${label}')" class="right-panel-btn clear">CLEAR</button>
       </div>
     </div>
     <div id="findings-${label}" class="right-panel-findings" style="padding:0 10px 8px 10px; display:none;"></div>
@@ -1000,7 +1047,7 @@ async function sendSingle(dogId) {
   const text = input.value.trim();
   if (!text) return;
   setRunning(true);
-  addUserMsg(`${dogId}: ${text}`);
+  addUserMsg(`${getDogDisplayName(dogId)}: ${text}`);
   try {
     await runCommandForDog(text, dogId);
   } finally {
@@ -1054,8 +1101,7 @@ async function sendAllCommands() {
 
   const commands = {
     dog1: document.getElementById('inputField-dog1').value.trim(),
-    dog2: document.getElementById('inputField-dog2').value.trim(),
-    dog3: document.getElementById('inputField-dog3').value.trim()
+    dog2: document.getElementById('inputField-dog2').value.trim()
   };
 
   // Only send to dogs that have a command typed
@@ -1068,14 +1114,13 @@ async function sendAllCommands() {
   // Fire all commands at the exact same time
   await Promise.all(
     activeDogs.map(([dogId, text]) => {
-      addUserMsg(`${dogId}: ${text}`);
+      addUserMsg(`${getDogDisplayName(dogId)}: ${text}`);
       return runCommandForDog(text, dogId);
     })
   );
 
   setRunning(false);
 }
-
 async function runCommandForDog(text, dogId) {
   const controller = new AbortController();
   dogControllers[dogId] = controller;
@@ -1108,7 +1153,7 @@ async function runCommandForDog(text, dogId) {
     }
   } catch (e) {
     if (e.name !== 'AbortError') {
-      addLog(`${dogId}: ${e}`, 'error', dogId);
+      addLog(`${e}`, 'error', dogId);
     }
   }
 }
@@ -1147,7 +1192,7 @@ function handleEvent(evt, dogId) {
       completeStep(evt.index, dogId);
       break;
     case 'image':
-      addCapturedImage(evt.src, evt.label, evt.captured_at);
+      addCapturedImage(evt.src, evt.label, evt.captured_at, evt.dog_id);
       break;
     case 'report':
       addReport(evt);
@@ -1204,6 +1249,13 @@ function getMaxRightWidth() {
   return Math.floor(window.innerWidth * MAX_PERCENT);
 }
 
+function setRightPanelWidth(width) {
+  const maxWidth = getMaxRightWidth();
+  const nextWidth = Math.min(Math.max(width, MIN_WIDTH), maxWidth);
+  rightPanel.style.width = `${nextWidth}px`;
+  rightPanel.style.flexBasis = `${nextWidth}px`;
+}
+
 if (handle && rightPanel) {
   let dragging = false;
   let startX = 0;
@@ -1212,17 +1264,17 @@ if (handle && rightPanel) {
   handle.addEventListener('mousedown', e => {
     dragging = true;
     startX = e.clientX;
-    startWidth = rightPanel.offsetWidth;
+    startWidth = rightPanel.getBoundingClientRect().width;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
+    e.preventDefault();
   });
 
   document.addEventListener('mousemove', e => {
     if (!dragging) return;
     const delta = startX - e.clientX;
-    const newWidth = Math.max(MIN_WIDTH, startWidth + delta);
-    const maxWidth = getMaxRightWidth();
-    rightPanel.style.width = Math.min(newWidth, maxWidth) + 'px';
+    const newWidth = startWidth + delta;
+    setRightPanelWidth(newWidth);
   });
 
   document.addEventListener('mouseup', () => {
@@ -1232,8 +1284,7 @@ if (handle && rightPanel) {
   });
 
   window.addEventListener('resize', () => {
-    const maxW = getMaxRightWidth();
-    if (rightPanel.offsetWidth > maxW) rightPanel.style.width = maxW + 'px';
+    setRightPanelWidth(rightPanel.getBoundingClientRect().width);
   });
 }
 </script>

@@ -35,15 +35,24 @@ MAX_DURATION = 60.0
 SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
 
 DOG_IPS = {
-    "dog1": "192.168.0.60",
-    "dog2": "192.168.0.85",  
-    "dog3": "192.168.0.111"  
+    "dog1": "192.168.0.60",  # Pumbaa
+    "dog2": "192.168.0.85",  # Timon
 }
 
 _bridges = {}
 _bridge_lock = threading.Lock()
 cancel_event = threading.Event()
 
+
+DOG_IPS = {
+    "dog1": "192.168.0.60",
+    "dog2": "192.168.0.85",
+}
+
+DOG_NAMES = {
+    "dog1": "Pumbaa",
+    "dog2": "Timon",
+}
 
 def get_bridge(dog_id):
     global _bridges
@@ -52,9 +61,10 @@ def get_bridge(dog_id):
             try:
                 from ros2_bridge.ros_nodes import RosPugBridge
                 ip = DOG_IPS.get(dog_id)
+                name = DOG_NAMES.get(dog_id, dog_id)
                 if not ip:
                     raise ValueError(f"Unknown dog_id: {dog_id}")
-                _bridges[dog_id] = RosPugBridge(ip)
+                _bridges[dog_id] = RosPugBridge(ip, robot_name=name)
             except Exception as e:
                 raise RuntimeError(f"Could not connect to {dog_id}: {e}")
         return _bridges[dog_id]
@@ -254,13 +264,13 @@ def stream_command(user_input, dog_id="dog1"):
                         try:
                             from datetime import datetime
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                            yield event("log", {"msg": f"📷 Capturing image at {round(elapsed_total, 1)}s..."})
+                            yield event("log", {"msg": f"Capturing image at {round(elapsed_total, 1)}s..."})
                             filepath = bridge.take_picture()
                             all_captured_images.append(filepath)
                             last_capture_at = elapsed_total
                             filename = os.path.basename(filepath)
                             captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
+                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
                             yield event("log", {"msg": f"✓ Image saved: {filename}"})
                             yield event("log", {"msg": "✓ Path clear — continuing..."})
                         except Exception as e:
@@ -277,7 +287,7 @@ def stream_command(user_input, dog_id="dog1"):
                     all_captured_images.append(filepath)
                     filename = os.path.basename(filepath)
                     captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
+                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
                     yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
                 except Exception as e:
@@ -308,12 +318,12 @@ def stream_command(user_input, dog_id="dog1"):
                     time.sleep(1.2)  # settle before capture
                     try:
                         from datetime import datetime
-                        yield event("log", {"msg": "📷 Capturing image after turn..."})
+                        yield event("log", {"msg": "Capturing image after turn..."})
                         filepath = bridge.take_picture()
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
                         captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -343,12 +353,12 @@ def stream_command(user_input, dog_id="dog1"):
                     time.sleep(1.2)  # settle before capture
                     try:
                         from datetime import datetime
-                        yield event("log", {"msg": "📷 Capturing image after turn..."})
+                        yield event("log", {"msg": "Capturing image after turn..."})
                         filepath = bridge.take_picture()
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
                         captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at})
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
