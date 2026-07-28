@@ -48,7 +48,7 @@ Rules:
 - If given multiple actions, complete one full movement before starting the next
 - Default speed is 0.10, default duration is 3.0
 - Use the exact duration the user specifies if they mention seconds
-- Maximum duration is 60.0, maximum speed is 0.20
+- There is no maximum duration, maximum speed is 0.20
 
 Return a list of actions in order:
 {{"actions": [

@@ -31,7 +31,6 @@ for a in ALLOWED_ACTIONS:
     for part in a.split("_"):
         ALLOWED_KEYWORDS.add(part)
 MAX_SPEED = 0.15
-MAX_DURATION = 60.0
 SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
 
 DOG_IPS = {
@@ -80,7 +79,7 @@ Rules:
 - If given multiple actions, complete one full movement before starting the next
 - Default speed is 0.10, default duration is 3.0
 - Use the exact duration the user specifies if they mention seconds
-- Maximum duration is 60.0, maximum speed is 0.15
+- There is no maximum duration, maximum speed is 0.15
 - Users should not enter unrelated instructions or questions; only robot movement commands are allowed
 
 Return a list of actions in order:
@@ -110,7 +109,7 @@ def validate_and_clamp(action):
     if "speed" in action:
         action["speed"] = min(float(action["speed"]), MAX_SPEED)
     if "duration" in action:
-        action["duration"] = min(float(action["duration"]), MAX_DURATION)
+        action["duration"] = float(action["duration"])
     return action
 
 
@@ -255,51 +254,46 @@ def stream_command(user_input, dog_id="dog1"):
                                     yield event("log", {"msg": "✓ Turned right 45° — path clear, continuing..."})
                                     path_clear = True
                                 else:
-                                    # Right still blocked — turn left 90° (back past center to 45° left)
-                                    yield event("log", {"msg": "⚠ Right still blocked — trying left..."})
-                                    bridge._publish(yaw_rate=speed, stop=False)
-                                    time.sleep(TURN_45_DEGREES * 2)
+                                    # Both turns blocked — back up and turn 180°
+                                    yield event("log", {"msg": "⚠ Both directions blocked — backing up..."})
+
+                                    # Return to center heading first (was at 45° left, turn back 45° right)
+                                    yield event("log", {"msg": "⚠ Both directions blocked — backing up..."})
+
+                                    # Return to center heading first (was at 45° left, turn back 45° right)
+                                    yield event("log", {"msg": "↩ Returning to center heading..."})                                     
+                                    bridge._publish(yaw_rate=-speed, stop=False)
+                                    time.sleep(TURN_45_DEGREES)
                                     bridge.stop()
                                     time.sleep(0.3)
 
-                                    newer_dist = bridge.get_lidar_distance()
-                                    if newer_dist is None or newer_dist >= SAFE_DISTANCE:
-                                        yield event("log", {"msg": "✓ Turned left 45° — path clear, continuing..."})
+                                    # Walk backward to create clearance
+                                    bridge._publish(x=-speed, y=0.0, yaw_rate=0.0, stop=False)
+                                    time.sleep(2.0)
+                                    bridge.stop()
+                                    time.sleep(0.3)
+
+                                    # Turn a full 180° to face the opposite direction
+                                    TURN_180_DEGREES = TURN_45_DEGREES * 4  # 90°=4.5s, so 180°=9.0s
+                                    yield event("log", {"msg": "↩ Turning 180°..."})
+                                    yield event("log", {"msg": "↩ Turning 180°..."})
+                                    bridge._publish(yaw_rate=-speed, stop=False)
+                                    time.sleep(TURN_180_DEGREES)
+                                    bridge.stop()
+                                    time.sleep(0.3)
+
+                                    final_dist = bridge.get_lidar_distance()
+                                    if final_dist is None or final_dist >= SAFE_DISTANCE:
+                                        yield event("log", {"msg": "✓ Turned around — path clear, continuing in new direction..."})
                                         path_clear = True
                                     else:
-                                        # Both turns blocked — back up and try turning
-                                        yield event("log", {"msg": "⚠ Both directions blocked — backing up..."})
-
-                                        # Return to center heading first (was at 45° left, turn back 45° right)
-                                        bridge._publish(yaw_rate=-speed, stop=False)
-                                        time.sleep(TURN_45_DEGREES)
-                                        bridge.stop()
-                                        time.sleep(0.3)
-
-                                        # Walk backward
-                                        bridge._publish(x=-speed, y=0.0, yaw_rate=0.0, stop=False)
-                                        time.sleep(2.0)
-                                        bridge.stop()
-                                        time.sleep(0.3)
-
-                                        # Turn right 45° after backing up
-                                        bridge._publish(yaw_rate=-speed, stop=False)
-                                        time.sleep(TURN_45_DEGREES)
-                                        bridge.stop()
-                                        time.sleep(0.3)
-
-                                        final_dist = bridge.get_lidar_distance()
-                                        if final_dist is None or final_dist >= SAFE_DISTANCE:
-                                            yield event("log", {"msg": "✓ Backed up and turned — path clear, continuing..."})
-                                            path_clear = True
-                                        else:
-                                            yield event("log", {"msg": "⚠ Still blocked after backing up — stopping for new instructions."})
-                                            yield event("obstacle", {
-                                                "msg": "⚠ Surrounded by obstacles — robot stopped. Please give new instructions.",
-                                                "image": ""
-                                            })
-                                            obstacle_hit = True
-                                            break
+                                        yield event("log", {"msg": "⚠ Still blocked after turning around — stopping for new instructions."})
+                                        yield event("obstacle", {
+                                            "msg": "⚠ Surrounded by obstacles — robot stopped. Please give new instructions.",
+                                            "image": ""
+                                        })
+                                        obstacle_hit = True
+                                        break
 
                                 if path_clear:
                                     # Resume walking forward in the new heading
