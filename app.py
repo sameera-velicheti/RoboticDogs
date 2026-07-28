@@ -21,8 +21,7 @@ REPORT_DIR = "/home/demo_user/RoboticDogs/reports"
 NIM_URL = "http://localhost:8000/v1/chat/completions"
 NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 
-ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right", "take_picture"}
-# Build a set of user-facing keywords to match common input variants
+ALLOWED_ACTIONS = {"cautious_walk", "walk_backward", "sit", "stop", "turn_left", "turn_right", "take_picture"}# Build a set of user-facing keywords to match common input variants
 ALLOWED_KEYWORDS = set()
 for a in ALLOWED_ACTIONS:
     ALLOWED_KEYWORDS.add(a)
@@ -72,7 +71,7 @@ def get_prompt(user_instruction):
     return f"""
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
 
-Allowed actions: cautious_walk, sit, stop, turn_left, turn_right, take_picture
+Allowed actions: cautious_walk, walk_backward, sit, stop, turn_left, turn_right, take_picture
 
 Rules:
 - Always include speed and duration for movement actions
@@ -223,6 +222,12 @@ def stream_command(user_input, dog_id="dog1"):
                     steps = int(this_segment * 10)
 
                     for step in range(steps):
+                        # Check LiDAR every 3 steps (every 0.3s) for faster response
+                        if step % 3 == 0:
+                            dist = bridge.get_lidar_distance()
+                            if dist is not None and dist < SAFE_DISTANCE:
+                                emergency_stop_robot(bridge)
+                                yield event("log", {"msg": f"⚠ LiDAR: obstacle at {dist:.2f}m — avoiding..."})
                         time.sleep(0.1)
                         elapsed_for_ui += 0.1
                         pct = int((elapsed_for_ui / duration) * 100)
@@ -378,7 +383,21 @@ def stream_command(user_input, dog_id="dog1"):
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
-
+            elif action_name == "walk_backward":
+                bridge._publish(x=-speed, y=0.0, yaw_rate=0.0, stop=False)
+                bridge._publish(x=-speed, y=0.0, yaw_rate=0.0, stop=False)  
+                steps = int(duration * 10)
+                for step in range(steps):
+                    time.sleep(0.1)
+                    if cancel_event.is_set():
+                        emergency_stop_robot(bridge)
+                        yield event("log", {"msg": "⚠ Stop requested — halting robot."})
+                        yield event("done", {"msg": "Command stopped."})
+                        return
+                    pct = int(((step + 1) / steps) * 100)
+                    yield event("progress", {"index": i, "pct": pct, "elapsed": round((step + 1) * 0.1, 1)})
+                bridge.stop()
+                time.sleep(0.3)
             elif action_name == "turn_right":
                 bridge._publish(yaw_rate=-speed, stop=False)
                 steps = int(duration * 10)
