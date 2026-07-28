@@ -1,0 +1,33 @@
+NEMOCLAW SAFETY INSPECTION REPORT
+========================================
+Report ID:    INSPECTION_20260728_094152
+Timestamp:    20260728_094152
+Location:     SHI Lab
+Inspector:    NemoClaw
+Overall:      WARNING
+========================================
+
+SUMMARY
+-------
+Images captured:  1
+Issues found:     2
+  HIGH severity:  0
+  ALERT severity: 0
+  MEDIUM severity:2
+
+ISSUES REQUIRING ACTION
+-----------------------
+[MEDIUM] Open Door
+  Rule ID:    DOOR_001
+  Image:      /home/demo_user/RoboticDogs/captures/Pumbaa_20260728_093752.jpg
+  Timestamp:  20260728_094107
+  Keywords:   Open Door
+  Action:     Close and latch door
+
+[MEDIUM] Unsecured Cleaning Equipment
+  Rule ID:    BROOM_001
+  Image:      /home/demo_user/RoboticDogs/captures/Pumbaa_20260728_093752.jpg
+  Timestamp:  20260728_094107
+  Keywords:   Unsecured Cleaning Equipment
+  Action:     Store cleaning equipment in designated area
+
