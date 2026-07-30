@@ -1,0 +1,41 @@
+
+Introductions
+"What you're looking at is our project Agentic Henrik. It is an AI-powered safety inspection system built entirely on NVIDIA technology, which runs locally on our GB10.  
+
+"The brain of our project is NVIDIA’s Nemotron — a large language model running locally via a NVIDIA NIM. It is running both as our chatbot, intaking instructions, as well as our image analyzer.
+
+"The robot is Henrik — a ROSPug quadruped. Henrik is going to inspect this room for us."
+
+"_____ if you could please type a command”
+
+"We are giving Henrik a natural language instruction which our NIM will parse and generate a structured action plan."
+"In just a few seconds, it has converted plain English into a sequence of robot commands. Henrik is now executing."
+...
+"As Henrik moves, Henrik's LiDAR sensor is scanning 360 degrees, 10 times per second, measuring distance to every surface around him in real time obstacle detection."
+
+" At the same time Henrik moves through the space, his onboard camera is capturing images every 2 seconds, which you can see appearing live in the right panel."
+
+ 
+NARRATOR:
+Henrik has completed his inspection route. Let's see what he found. Every image Henrik captured is available for analysis independently. Let's check this one."
+We're asking Nemotron – our AI reasoning model, to analyze this image for safety compliance violations.
+Nemotron is examining every detail of this image against our safety ruleset — the same model that understood your natural language command is now doing computer vision analysis.
+"While Nemotron is processing the image, it's not just looking for objects — it's actually reasoning about the scene. It's identifying people, equipment, environmental conditions, and then comparing those observations against the safety policies we've defined
+
+77
+[Explain results]
+The issues are ranked by severity so there is low, medium, high. This is classified by how hazardous the issue is as well as how fixable it is. Each inspection is also categorized with either FAIL  meaning immediate action required. WARNING means attention needed. Or PASS which means compliant."
+
+Henrik just did in 2 minutes what a manual inspection checklist can take 30 or more minutes to cover — and produced documented, photographic evidence for every finding.
+
+Every analysis generates a timestamped compliance report with image evidence, severity ratings, and remediation guidance. This is an auditable record so If a regulator asks when that cable was last inspected and what action was taken — this report is your answer.
+
+NARRATOR:
+For our next demonstration, we would like to ask if someone wants to volunteer to give us their cell phone. We are going to place it on the ground and have Henrik do a walkthrough and see what he reports back to us!
+"Nemotron is a 30-billion parameter reasoning model running entirely on local hardware, our GB10, so it needs time to process before it gives us results."
+"Nemotron has identified a phone on the floor by examining the scene the same way a trained safety inspector would and alerted us that it is a hazard."
+"This entire system includes a language and vision model, and robot control stack, runs locally on a single GB10 with no internet connection required. And most importantly, no data leaves the facility. For customers in regulated industries, its not just nice-to-have it's a requirement."
+
+Henrik autonomously navigated a space, captured pictures of the environment, and Nemotron identified real safety hazards from those images — all from a single natural language command."
+Before we wrap up, does anyone have any questions?
+Thank you!
