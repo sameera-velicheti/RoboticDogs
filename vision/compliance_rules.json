@@ -36,14 +36,7 @@
   "keywords": ["table leg", "chair leg", "furniture blocking", "wall blocking path", "object in path", "robot will collide", "blocking the walkway", "blocking the exit", "obstructing the path", "blocks the corridor", "walkway is blocked"],
   "severity": "HIGH",
   "remediation": "Remove obstruction from walkway immediately"
-  },
-    {
-      "id": "BROOM_001",
-      "name": "Unsecured Cleaning Equipment",
-      "keywords": ["broom leaning against wall", "mop leaning", "dustpan on floor", "cleaning equipment not stored", "broom not stored", "mop not stored", "cleaning tool left out", "broom left unsecured"],
-      "severity": "MEDIUM",
-      "remediation": "Store cleaning equipment in designated area"
-    }
+  }
     ,
     {
       "id": "PHONE_001",
