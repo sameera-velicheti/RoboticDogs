@@ -50,7 +50,7 @@ Through a web interface, users type plain-English commands (e.g. "walk forward f
 | File | Description |
 |---|---|
 | `app.py` | Flask backend and main application logic — handles UI routes, sends commands to NIM, executes robot movement, manages LiDAR-based obstacle avoidance, coordinates image capture, and triggers compliance analysis |
-| `ros2_bridge/ros_nodes.py` | `RosPugBridge` class — manages the direct ROS connection to each robot, including movement commands, LiDAR readings, and camera capture |
+| `ros_nodes.py` | `RosPugBridge` class — manages the direct ROS connection to each robot, including movement commands, LiDAR readings, and camera capture |
 | `vision/compliance_checker.py` | Sends captured images to the NIM for safety compliance analysis and returns findings |
 | `vision/compliance_rules.json` | Configurable list of safety hazards the system checks for (e.g. loose cables, open doors, spills, blocked walkways) — edit this file to add or adjust compliance rules |
 | `vision/report_generator.py` | Builds timestamped compliance reports (JSON and text) from analysis findings, including severity ratings and remediation guidance |
