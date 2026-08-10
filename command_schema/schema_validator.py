@@ -9,7 +9,7 @@ ALLOWED_ACTIONS = {"cautious_walk", "sit", "stop", "turn_left", "turn_right"}
 
 # Safe limits based on your lab testing
 MAX_SPEED = 0.20        # reduced from 0.25 since dog is falling
-MAX_DURATION = 60.0     # max 60 seconds per command
+MAX_DURATION = 900.0     # max 15 minutes per command
 MIN_SPEED = 0.05
 
 
