@@ -1,3 +1,6 @@
+"""Basic smoke test for capturing a camera image from the robot bridge.
+"""
+
 # testing_sim/test_camera.py
 
 import sys

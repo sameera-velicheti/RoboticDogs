@@ -1,3 +1,6 @@
+"""Validates NIM-generated robot commands against allowed actions and safety limits.
+"""
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,6 +14,7 @@ MIN_SPEED = 0.05
 
 
 def validate_intent(command: dict) -> bool:
+    """Check core command fields and enforce action/speed/duration safety constraints."""
     if not isinstance(command, dict):
         raise ValueError("Command must be a JSON object")
 

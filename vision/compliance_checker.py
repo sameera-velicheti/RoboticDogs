@@ -1,3 +1,6 @@
+"""Evaluates safety compliance rules using keyword matching or NIM-based inspection of images.
+"""
+
 # vision/compliance_checker.py
 
 import json
@@ -11,11 +14,13 @@ RULES_PATH = '/home/demo_user/RoboticDogs/vision/compliance_rules.json'
 
 
 def load_rules():
+    """Load compliance rule definitions from disk."""
     with open(RULES_PATH, 'r') as f:
         return json.load(f)
 
 
 def check_compliance(description, image_path=None, timestamp=None):
+    """Perform a keyword-based compliance scan on description text."""
     """Keyword-based compliance check against NIM description text."""
     rules_data = load_rules()
     rules = rules_data["rules"]
@@ -54,6 +59,7 @@ def check_compliance(description, image_path=None, timestamp=None):
 
 
 def check_compliance_with_nim(filepath, timestamp=None):
+    """Query NIM for rule-by-rule compliance decisions on an image."""
     """Ask the NIM directly about each compliance rule with keyword hints."""
     with open(filepath, "rb") as f:
         b64 = base64.b64encode(f.read()).decode("utf-8")
@@ -128,6 +134,7 @@ NO if the issue is not visible or you are not sure."""
 
 
 def print_findings(findings):
+    """Print human-readable compliance findings to stdout."""
     print("\n--- COMPLIANCE FINDINGS ---")
     for f in findings:
         status_icon = "✓" if f["status"] == "PASS" else "✗"

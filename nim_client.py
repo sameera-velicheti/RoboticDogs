@@ -1,3 +1,6 @@
+"""Simple NIM client for sending prompts and receiving model responses over HTTP.
+"""
+
 import requests
 import json
 import os

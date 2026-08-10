@@ -53,6 +53,7 @@ DOG_NAMES = {
 }
 
 def get_bridge(dog_id):
+    """Return a cached ROS bridge for a specific robot/dog ID."""
     global _bridges
     with _bridge_lock:
         if dog_id not in _bridges or _bridges[dog_id] is None:
@@ -68,6 +69,7 @@ def get_bridge(dog_id):
         return _bridges[dog_id]
     
 def get_prompt(user_instruction):
+    """Build the prompt text for the NIM model from user instructions."""
     return f"""
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
 
@@ -92,6 +94,7 @@ User instruction: {user_instruction}
 
 
 def send_to_nim(prompt):
+    """Send a prompt payload to the NIM inference endpoint and return the raw response."""
     payload = {
         "model": NIM_MODEL,
         "messages": [{"role": "user", "content": prompt}],
@@ -103,6 +106,7 @@ def send_to_nim(prompt):
 
 
 def validate_and_clamp(action):
+    """Validate that the model action is allowed and clamp numeric values to safety bounds."""
     if action.get("action") not in ALLOWED_ACTIONS:
         raise ValueError(f"Invalid action: {action.get('action')}")
     if "speed" in action:
@@ -113,6 +117,7 @@ def validate_and_clamp(action):
 
 
 def emergency_stop_robot(bridge):
+    """Attempt to immediately halt the robot by repeating stop commands."""
     """Send stop command as aggressively as possible."""
     try:
         # Send stop=True 15 times with minimal delay #
@@ -128,6 +133,7 @@ def emergency_stop_robot(bridge):
         pass
 
 def stream_command(user_input, dog_id="dog1"):
+    """Generator for server-sent events that drives command execution and UI feedback."""
     """Generator that yields SSE events for the UI to consume."""
     cancel_event.clear()
     def event(kind, data):

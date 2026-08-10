@@ -1,7 +1,11 @@
+"""Maps validated robot commands to ROS bridge actions for execution.
+"""
+
 from ros2_bridge.ros_nodes import RosPugBridge
 
 
 def execute_command(command: dict, bridge=None):
+    """Map a validated command into a ROS bridge action invocation."""
     if bridge is None:
         bridge = RosPugBridge()
 

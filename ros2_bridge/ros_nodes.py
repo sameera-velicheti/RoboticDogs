@@ -1,3 +1,6 @@
+"""ROS node wrapper for Pug robot control, including movement, camera capture, and sensor feedback.
+"""
+
 import math
 
 import roslibpy
@@ -56,6 +59,7 @@ class RosPugBridge:
         self.stop()
 
     def _publish(self, x=0.0, y=0.0, yaw_rate=0.0, stop=False):
+        """Publish a velocity command to the robot control topic."""
         self.publisher.publish(roslibpy.Message({
             "x": float(x),
             "y": float(y),
@@ -65,6 +69,7 @@ class RosPugBridge:
 
     def cautious_walk(self, speed=0.15, duration=2.0, safety_level="high",
                   capture_interval=None):
+        """Drive the robot forward in safe segments while optionally capturing images."""
         SEGMENT = 2.0
         logger.info(f"cautious_walk: speed={speed}, total_duration={duration}, segment={SEGMENT}")
 
@@ -101,6 +106,7 @@ class RosPugBridge:
         return captured_images  # return all captured images for compliance check at end
 
     def turn_left(self, speed=0.10, duration=1.0):
+        """Rotate the robot left for the requested duration."""
         logger.info(f"turn_left: speed={speed}, duration={duration}")
         self._start_watchdog(WATCHDOG_TIMEOUT)
         self._publish(yaw_rate=speed)
@@ -109,6 +115,7 @@ class RosPugBridge:
         self.stop()
 
     def turn_right(self, speed=0.10, duration=1.0):
+        """Rotate the robot right for the requested duration."""
         logger.info(f"turn_right: speed={speed}, duration={duration}")
         self._start_watchdog(WATCHDOG_TIMEOUT)
         self._publish(yaw_rate=-speed)
@@ -117,6 +124,7 @@ class RosPugBridge:
         self.stop()
 
     def set_pose(self, height=-0.13, pitch=0.0, roll=0.0, yaw=0.0, run_time=0.5):
+        """Publish a target pose to move the robot body to a specified height and orientation."""
         logger.info(f"set_pose: height={height}")
         pose_publisher = roslibpy.Topic(
             self.client,
@@ -136,6 +144,7 @@ class RosPugBridge:
         time.sleep(run_time + 0.2)
 
     def sit(self, height=-0.15):
+        """Move the robot into a seated posture using a pose command."""
         logger.info(f"sit: height={height}")
         self._cancel_watchdog()
         self.stop()
@@ -143,6 +152,7 @@ class RosPugBridge:
         self.set_pose(height=height)
 
     def stop(self):
+        """Stop the robot by publishing repeated zero-velocity stop messages."""
         logger.info("stop")
         self._cancel_watchdog()
         for _ in range(3):
@@ -150,6 +160,7 @@ class RosPugBridge:
             time.sleep(0.1)
 
     def take_picture(self, save_dir="captures"):
+        """Capture a compressed camera image and save it locally."""
         os.makedirs(save_dir, exist_ok=True)
 
         captured = {"data": None}
@@ -187,6 +198,7 @@ class RosPugBridge:
         return filepath
 
     def get_lidar_distance(self, forward_cone_degrees=10):
+        """Compute the closest forward LiDAR distance within a narrow cone."""
         import math
 
         if self._latest_scan is None:
@@ -219,6 +231,7 @@ class RosPugBridge:
 
         return min(valid)
     def close(self):
+        """Shut down ROS communication and stop the robot safely."""
         try:
             self.stop()
             self.publisher.unadvertise()

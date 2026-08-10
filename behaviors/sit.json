@@ -3,5 +3,6 @@
   "speed": 0.0,
   "duration": 0.0,
   "safety_level": "high",
-  "height": 0.05
+  "height": 0.05,
+  "description": "Command the robot to transition into a seated posture at a safe height."
 }

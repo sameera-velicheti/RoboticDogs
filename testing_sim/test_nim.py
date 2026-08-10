@@ -1,3 +1,6 @@
+"""Smoke test that sends a test prompt to the local NIM endpoint.
+"""
+
 import requests
 
 NIM_URL = "http://localhost:8000/v1/chat/completions"

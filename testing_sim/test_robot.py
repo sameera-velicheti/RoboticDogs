@@ -1,3 +1,6 @@
+"""Minimal HTTP test payload for robot command endpoint connectivity.
+"""
+
 import requests
 
 ROBOT_IP = "http://10.21.129.17:5000"

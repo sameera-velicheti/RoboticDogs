@@ -2,5 +2,7 @@
   "speed": 0.0,
   "duration": 5.0,
   "emergency_stop": true,
-  "safety_level": "high"
+  "safety_level": "high",
+  "description": "Emergency stop behavior that halts motion and applies the highest safety stop settings.",
+  "action": "stop"
 }

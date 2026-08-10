@@ -1,3 +1,6 @@
+"""Integration test script for vision-based safety inspections.
+"""
+
 
 import sys
 import os
@@ -11,6 +14,7 @@ from vision.report_generator import generate_report, print_report_summary
 
 
 def run_inspection(label=None):
+    """Perform a full vision inspection workflow for one image capture."""
     print("\n=== NEMOCLAW SAFETY INSPECTION ===\n")
 
     # Step 1 — Capture

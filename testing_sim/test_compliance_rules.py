@@ -1,3 +1,6 @@
+"""Unit test for the compliance checker rule matching behavior.
+"""
+
 import sys
 
 sys.path.insert(0, '/home/demo_user/RoboticDogs')

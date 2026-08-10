@@ -1,3 +1,6 @@
+"""Simple walk test that exercises the ROS bridge caution walk behavior.
+"""
+
 from ros2_bridge.ros_nodes import RosPugBridge
 
 def main():

@@ -1,3 +1,6 @@
+"""Generates JSON and text inspection reports from compliance findings.
+"""
+
 # vision/report_generator.py
 
 import json
@@ -10,6 +13,7 @@ REPORTS_DIR = '/home/demo_user/RoboticDogs/reports'
 
 
 def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
+    """Generate JSON and plain-text inspection reports from collected findings."""
     """
     Takes a list of findings from multiple images and generates a full report.
     all_findings: list of finding lists (one per image captured)
@@ -108,6 +112,7 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
 
 
 def print_report_summary(report):
+    """Print a compact summary of the generated report to stdout."""
     status_icon = "✓" if report["overall_status"] == "PASS" else "✗"
     print(f"\n{status_icon} INSPECTION {report['overall_status']}")
     print(f"  Images:   {report['summary']['total_images']}")

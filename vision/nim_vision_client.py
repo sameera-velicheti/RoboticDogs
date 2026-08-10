@@ -1,3 +1,6 @@
+"""Sends image and text prompts to the NIM model for safety-related image description.
+"""
+
 import base64
 from email import message
 import json
@@ -10,11 +13,13 @@ NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 
 
 def image_to_base64(filepath):
+    """Encode a local image file as a base64 data URI payload."""
     with open(filepath, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
 
 def describe_image(filepath, context=None):
+    """Send the image to NIM and receive a safety-focused text description."""
     """
     Send an image to Nemotron and get a description back.
     context: optional string to focus the model (e.g. 'safety inspection')

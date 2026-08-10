@@ -1,3 +1,6 @@
+"""Command-line control loop for robot actions using NIM and ROS behavior execution.
+"""
+
 import requests
 import json
 import logging
@@ -18,6 +21,7 @@ NIM_URL = "http://localhost:8000/v1/chat/completions"
 
 
 def send_prompt(prompt):
+    """Send the assembled prompt to NIM and return the model output text."""
     payload = {
         "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
         "messages": [{"role": "user", "content": prompt}],
@@ -38,6 +42,7 @@ def send_prompt(prompt):
 
 
 def get_prompt(user_instruction):
+    """Construct the instruction prompt expected by the NIM model."""
     return f"""
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
 
@@ -61,6 +66,7 @@ User instruction: {user_instruction}
 
 
 def run_agent(user_instruction, bridge):
+    """Translate a user instruction into validated ROS behavior commands and execute them."""
     logger.info(f"User instruction: {user_instruction}")
 
     # Always allow emergency stop without hitting the model

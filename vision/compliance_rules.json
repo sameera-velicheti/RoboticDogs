@@ -5,52 +5,135 @@
     {
       "id": "CABLE_001",
       "name": "Loose Cables",
-      "keywords": ["cable lying on surface", "wire on surface", "cord on surface", "loose cable", "cable not secured", "wire not secured", "cable creating trip hazard", "tangled wire on ground", "cable draped across floor or surface"],
+      "keywords": [
+        "cable lying on surface",
+        "wire on surface",
+        "cord on surface",
+        "loose cable",
+        "cable not secured",
+        "wire not secured",
+        "cable creating trip hazard",
+        "tangled wire on ground",
+        "cable draped across floor or surface"
+      ],
       "severity": "LOW",
-      "remediation": "Route cables through cable management or secure to walls/desk"
+      "remediation": "Route cables through cable management or secure to walls/desk",
+      "description": "Check for loose cables using keywords and flag according to severity."
     },
     {
       "id": "DOOR_001",
       "name": "Open Door",
-      "keywords": ["door is open", "open door", "door left open", "door ajar", "door wide open", "door not closed", "door standing open", "fire door open", "exit door open", "door swung open", "door propped open"],
+      "keywords": [
+        "door is open",
+        "open door",
+        "door left open",
+        "door ajar",
+        "door wide open",
+        "door not closed",
+        "door standing open",
+        "fire door open",
+        "exit door open",
+        "door swung open",
+        "door propped open"
+      ],
       "severity": "MEDIUM",
-      "remediation": "Close and latch door"
+      "remediation": "Close and latch door",
+      "description": "Check for open door using keywords and flag according to severity."
     },
     {
       "id": "SPILL_001",
       "name": "Water or Liquid Spill",
-      "keywords": ["spill on floor", "liquid on floor", "puddle on floor", "wet floor", "water on ground", "liquid spill", "spilled liquid", "wet spot", "floor is wet"],
+      "keywords": [
+        "spill on floor",
+        "liquid on floor",
+        "puddle on floor",
+        "wet floor",
+        "water on ground",
+        "liquid spill",
+        "spilled liquid",
+        "wet spot",
+        "floor is wet"
+      ],
       "severity": "HIGH",
-      "remediation": "Clean up spill immediately and place wet floor sign"
+      "remediation": "Clean up spill immediately and place wet floor sign",
+      "description": "Check for water or liquid spill using keywords and flag according to severity."
     },
     {
       "id": "CABLE_002",
       "name": "Unsecured Power Cables",
-      "keywords": ["power cable on surface", "power cord on surface", "power cable not secured", "unsecured power cable", "power cable loose", "power cord loose", "electrical cable on floor", "power cable draped"],
+      "keywords": [
+        "power cable on surface",
+        "power cord on surface",
+        "power cable not secured",
+        "unsecured power cable",
+        "power cable loose",
+        "power cord loose",
+        "electrical cable on floor",
+        "power cable draped"
+      ],
       "severity": "MEDIUM",
-      "remediation": "Secure cables with cable ties or management system"
+      "remediation": "Secure cables with cable ties or management system",
+      "description": "Check for unsecured power cables using keywords and flag according to severity."
     },
     {
-  "id": "OBST_001",
-  "name": "Blocked Walkway",
-  "keywords": ["table leg", "chair leg", "furniture blocking", "wall blocking path", "object in path", "robot will collide", "blocking the walkway", "blocking the exit", "obstructing the path", "blocks the corridor", "walkway is blocked"],
-  "severity": "HIGH",
-  "remediation": "Remove obstruction from walkway immediately"
-  }
-    ,
+      "id": "OBST_001",
+      "name": "Blocked Walkway",
+      "keywords": [
+        "table leg",
+        "chair leg",
+        "furniture blocking",
+        "wall blocking path",
+        "object in path",
+        "robot will collide",
+        "blocking the walkway",
+        "blocking the exit",
+        "obstructing the path",
+        "blocks the corridor",
+        "walkway is blocked"
+      ],
+      "severity": "HIGH",
+      "remediation": "Remove obstruction from walkway immediately",
+      "description": "Check for blocked walkway using keywords and flag according to severity."
+    },
     {
       "id": "PHONE_001",
       "name": "Lost Cellphone",
-      "keywords": ["cell phone", "cellphone", "mobile phone", "phone on table", "lost phone", "smartphone", "mobile device", "phone left on", "phone lying", "phone on floor", "phone on table or surface"],
+      "keywords": [
+        "cell phone",
+        "cellphone",
+        "mobile phone",
+        "phone on table",
+        "lost phone",
+        "smartphone",
+        "mobile device",
+        "phone left on",
+        "phone lying",
+        "phone on floor",
+        "phone on table or surface"
+      ],
       "severity": "ALERT",
-      "remediation": "Secure the phone and return it to the owner; report to lost-and-found if appropriate"
+      "remediation": "Secure the phone and return it to the owner; report to lost-and-found if appropriate",
+      "description": "Check for lost cellphone using keywords and flag according to severity."
     },
     {
       "id": "KEYS_001",
       "name": "Lost Keys",
-      "keywords": ["keys on the floor", "keys on floor", "key on the floor", "key on floor", "keys on the table", "keys on table", "key on the table", "key on table", "set of keys", "keys left out"],
+      "keywords": [
+        "keys on the floor",
+        "keys on floor",
+        "key on the floor",
+        "key on floor",
+        "keys on the table",
+        "keys on table",
+        "key on the table",
+        "key on table",
+        "set of keys",
+        "keys left out"
+      ],
       "severity": "ALERT",
-      "remediation": "Secure the keys and return it to the owner; report to lost-and-found if appropriate"
+      "remediation": "Secure the keys and return it to the owner; report to lost-and-found if appropriate",
+      "description": "Check for lost keys using keywords and flag according to severity."
     }
-  ]
+  ],
+  "description": "Compliance rules for safety inspections, including keyword triggers, severity, and remediation instructions."
 }

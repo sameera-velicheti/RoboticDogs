@@ -1,3 +1,6 @@
+"""Loads robot behavior definitions from JSON files and attaches action metadata.
+"""
+
 import json
 import os
 
@@ -5,6 +8,7 @@ BEHAVIOR_DIR = os.path.dirname(__file__)
 
 
 def load_behavior(action: str) -> dict:
+    """Load a named robot behavior from a JSON file and tag it with its action."""
     """
     Loads a behavior JSON file from /behaviors based on action name.
     Example: cautious_walk → cautious_walk.json

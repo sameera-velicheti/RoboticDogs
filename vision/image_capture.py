@@ -1,3 +1,6 @@
+"""Captures and saves robot camera images, along with metadata and optional labels.
+"""
+
 import os
 import base64
 import json
@@ -11,6 +14,7 @@ CAPTURE_DIR = '/home/demo_user/RoboticDogs/captures'
 
 
 def _normalize_label(label):
+    """Normalize robot label input into a consistent name for file tagging."""
     if label is None:
         return None
 
@@ -23,6 +27,7 @@ def _normalize_label(label):
 
 
 def capture_image(bridge, label=None, save_dir=CAPTURE_DIR):
+    """Capture an image from the robot camera and store metadata alongside it."""
     """
     Capture a single image from the robot camera.
     Returns the filepath and metadata dict.
