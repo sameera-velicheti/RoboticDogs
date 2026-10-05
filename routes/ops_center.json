@@ -1,0 +1,13 @@
+{
+    "_note": "Placeholder coordinates. Replace on Thursday with tools/record_waypoints.py.",
+
+    "route_name": "Operations Center Patrol",
+
+    "waypoints": [
+        {"name": "Start",     "x": 0.0, "y": 0.0, "yaw": 0.0,   "action": "none",          "required": true},
+        {"name": "Waypoint1", "x": 2.0, "y": 0.0, "yaw": 0.0,   "action": "capture_image", "required": true},
+        {"name": "Waypoint2", "x": 2.0, "y": 2.0, "yaw": 1.571, "action": "capture_image", "required": false},
+        {"name": "Waypoint3", "x": 0.0, "y": 2.0, "yaw": 3.142, "action": "capture_image", "required": true},
+        {"name": "Home",      "x": 0.0, "y": 0.0, "yaw": 0.0,   "action": "none",          "required": true}
+    ]
+}
