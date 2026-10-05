@@ -1,0 +1,23 @@
+{
+    "_note": "Placeholder coordinates until mapping is completed.",
+    
+    "route_name": "Data Center Patrol",
+
+    "waypoints": [
+        {
+            "name": "Checkpoint1",
+            "x": 0,
+            "y": 0,
+            "yaw": 0,
+            "action": "capture_image"
+        },
+
+        {
+            "name": "Checkpoint2",
+            "x": 0,
+            "y": 0,
+            "yaw": 0,
+            "action": "capture_image"
+        }
+    ]
+}
