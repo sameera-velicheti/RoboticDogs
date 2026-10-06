@@ -932,6 +932,7 @@ function addCapturedImage(src, label, capturedAt='', dogId='dog1', waypointName=
   wrap.className = 'captured-image-card';
   wrap.dataset.filepath = fullPath;
   wrap.dataset.waypointName = waypointName || '';
+  wrap.dataset.routeName = '';
   wrap.style.cssText = 'border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-shrink:0;';
   wrap.innerHTML = `
     <div style="max-height:220px; overflow:hidden;">
@@ -1099,9 +1100,11 @@ async function analyzeInspection(dogId) {
     const panel = document.getElementById(`right-panel-content-${normalizedDogId}`);
     const button = document.getElementById('analyze-inspection-btn');
     if (!panel || !button) return;
-    const images = [...panel.querySelectorAll('.captured-image-card')].map(card => ({
+    const imageCards = [...panel.querySelectorAll('.captured-image-card')];
+    const images = imageCards.map(card => ({
         filepath: card.dataset.filepath,
-        waypoint_name: card.dataset.waypointName || null
+        waypoint_name: card.dataset.waypointName || null,
+        route_name: card.dataset.routeName || null
     }));
     if (!images.length) return;
     button.disabled = true;
@@ -1111,7 +1114,11 @@ async function analyzeInspection(dogId) {
         const resp = await fetch('/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ images, dog_id: normalizedDogId })
+            body: JSON.stringify({
+                images,
+                dog_id: normalizedDogId,
+                route_name: imageCards.find(card => card.dataset.routeName)?.dataset.routeName || null
+            })
         });
         if (!resp.ok) {
             const error = await resp.json();
@@ -1240,6 +1247,8 @@ function handleEvent(evt, dogId) {
       break;
     case 'image':
       addCapturedImage(evt.src, evt.label, evt.captured_at, evt.dog_id || dogId, evt.waypoint_name || '');
+      const imageCard = document.getElementById(`img-${evt.label}`);
+      if (imageCard) imageCard.dataset.routeName = evt.route_name || '';
       break;
     case 'captured':
       if (evt.image) {

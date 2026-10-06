@@ -39,7 +39,7 @@ Through a web interface, users type plain-English commands (e.g. "walk forward f
 - **Natural language robot control** — plain-English commands are parsed into structured robot actions by a locally-run NVIDIA Nemotron model
 - **Real-time obstacle avoidance** — onboard LiDAR detects obstacles during movement; the robot attempts to turn and reroute, or stops and requests new instructions if fully blocked
 - **Automatic image capture** — images are captured at regular intervals during movement and saved for review
-- **Inspection-wide compliance analysis** — analyze all captured images together for one report, with findings linked to their source image and named waypoint when available
+- **Inspection-wide compliance analysis** — analyze all captured images together for one report, with findings linked to their source image and named waypoint when available; the text report includes inspection date, route, image count, findings, and overall assessment
 - **Multi-robot control** — multiple ROSPug units can be commanded independently or simultaneously from a single interface
 - **Fully local / no cloud dependency** — the entire pipeline (language model, vision analysis, robot control) runs on local hardware; no facility data leaves the network
 

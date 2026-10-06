@@ -31,6 +31,7 @@ def test_analyze_combines_images_and_keeps_waypoint_sources(tmp_path, monkeypatc
     monkeypatch.setattr(compliance_checker, "check_compliance_with_nim", fake_check)
     response = flask_app.app.test_client().post("/analyze", json={
         "dog_id": "dog1",
+        "route_name": "Data Center Patrol",
         "images": [
             {"filepath": str(image_paths[0]), "waypoint_name": "Corner 1"},
             {"filepath": str(image_paths[1]), "waypoint_name": "Corner 2"},
@@ -55,11 +56,16 @@ def test_analyze_combines_images_and_keeps_waypoint_sources(tmp_path, monkeypatc
     assert len(report_files) == 1
     report = json.loads(report_files[0].read_text())
     assert report["summary"]["total_images"] == 2
+    assert report["route_name"] == "Data Center Patrol"
     assert report["findings"][1]["waypoint_name"] == "Corner 2"
     assert report["findings"][1]["image_path"] == str(image_paths[1])
     text_report = report_files[0].with_suffix(".txt").read_text()
-    assert "Corner 2: [HIGH] Loose cable" in text_report
-    assert str(image_paths[1]) in text_report
+    assert text_report.startswith("# Data Center Patrol Report\n\n")
+    assert f"- {report['inspection_date']}" in text_report
+    assert "- Data Center Patrol" in text_report
+    assert "- 2" in text_report
+    assert "- Corner 2: Loose cable detected" in text_report
+    assert "- 1 issue found requiring review" in text_report
 
 
 def test_analyze_rejects_image_paths_outside_capture_directory(tmp_path, monkeypatch):
@@ -99,3 +105,7 @@ def test_analyze_keeps_legacy_single_filepath_requests(tmp_path, monkeypatch):
     assert response.status_code == 200
     assert summary["overall"] == "PASS"
     assert summary["total_images"] == 1
+    report_path = next(Path(report_generator.REPORTS_DIR).glob("*.json"))
+    report = json.loads(report_path.read_text())
+    assert report["route_name"] == "Data Center Patrol"
+    assert report_path.with_suffix(".txt").read_text().startswith("# Data Center Patrol Report")

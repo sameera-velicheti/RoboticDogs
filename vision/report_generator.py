@@ -12,7 +12,7 @@ sys.path.insert(0, '/home/demo_user/RoboticDogs')
 REPORTS_DIR = '/home/demo_user/RoboticDogs/reports'
 
 
-def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
+def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw", route_name="Data Center Patrol"):
     """Generate JSON and plain-text inspection reports from collected findings."""
     """
     Takes a list of findings from multiple images and generates a full report.
@@ -20,7 +20,9 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
     """
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    generated_at = datetime.now()
+    timestamp = generated_at.strftime("%Y%m%d_%H%M%S")
+    inspection_date = f"{generated_at:%B} {generated_at.day}, {generated_at:%Y}"
 
     # Flatten all findings
     flat_findings = [f for findings in all_findings for f in findings]
@@ -50,6 +52,8 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
     report = {
         "report_id": f"INSPECTION_{timestamp}",
         "timestamp": timestamp,
+        "inspection_date": inspection_date,
+        "route_name": route_name,
         "location": location,
         "inspector": inspector,
         "overall_status": overall,
@@ -73,41 +77,32 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
     # Save human-readable text report
     txt_path = os.path.join(REPORTS_DIR, f"report_{timestamp}.txt")
     with open(txt_path, "w") as f:
-        f.write(f"NEMOCLAW SAFETY INSPECTION REPORT\n")
-        f.write(f"{'='*40}\n")
-        f.write(f"Report ID:    {report['report_id']}\n")
-        f.write(f"Timestamp:    {timestamp}\n")
-        f.write(f"Location:     {location}\n")
-        f.write(f"Inspector:    {inspector}\n")
-        f.write(f"Overall:      {overall}\n")
-        f.write(f"{'='*40}\n\n")
-
-        f.write(f"SUMMARY\n")
-        f.write(f"-------\n")
-        f.write(f"Images captured:  {report['summary']['total_images']}\n")
-        f.write(f"Issues found:     {len(fails)}\n")
-        f.write(f"  HIGH severity:  {len(high)}\n")
-        f.write(f"  ALERT severity: {len(alert)}\n")
-        f.write(f"  MEDIUM severity:{len(medium)}\n")
-        f.write(f"\n")
-
+        f.write(f"# {route_name} Report\n\n")
+        f.write("**Inspection Date**\n\n")
+        f.write(f"- {inspection_date}\n\n")
+        f.write("**Route**\n\n")
+        f.write(f"- {route_name}\n\n")
+        f.write("**Images Collected**\n\n")
+        f.write(f"- {report['summary']['total_images']}\n\n")
+        f.write("**Findings**\n\n")
         if fails:
-            f.write(f"ISSUES REQUIRING ACTION\n")
-            f.write(f"-----------------------\n")
             for finding in fails:
                 waypoint_name = finding.get("waypoint_name")
-                if waypoint_name:
-                    f.write(f"{waypoint_name}: ")
-                f.write(f"[{finding['severity']}] {finding['rule_name']}\n")
-                f.write(f"  Rule ID:    {finding['rule_id']}\n")
-                if waypoint_name:
-                    f.write(f"  Waypoint:   {waypoint_name}\n")
-                f.write(f"  Image:      {finding.get('image_path', 'N/A')}\n")
-                f.write(f"  Timestamp:  {finding.get('timestamp', 'N/A')}\n")
-                f.write(f"  Keywords:   {', '.join(finding['matched_keywords'])}\n")
-                f.write(f"  Action:     {finding['remediation']}\n\n")
+                description = finding["rule_name"]
+                if not description.lower().endswith("detected"):
+                    description = f"{description} detected"
+                prefix = f"{waypoint_name}: " if waypoint_name else ""
+                f.write(f"- {prefix}{description}\n")
         else:
-            f.write(f"No issues found. Area is compliant.\n")
+            f.write("- No issues detected\n")
+
+        f.write("\n**Overall Assessment**\n\n")
+        issue_label = "issue" if len(fails) == 1 else "issues"
+        assessment = (
+            f"{len(fails)} {issue_label} found requiring review"
+            if fails else "No issues found; inspection passed"
+        )
+        f.write(f"- {assessment}\n")
 
     print(f"Report saved:")
     print(f"  JSON: {json_path}")

@@ -332,7 +332,7 @@ def stream_command(user_input, dog_id="dog1"):
                             last_capture_at = elapsed_total
                             filename = os.path.basename(filepath)
                             captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
+                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name"), "route_name": action.get("route_name")})
                             yield event("log", {"msg": f"✓ Image saved: {filename}"})
                             yield event("log", {"msg": "✓ Path clear — continuing..."})
                         except Exception as e:
@@ -349,7 +349,7 @@ def stream_command(user_input, dog_id="dog1"):
                     all_captured_images.append(filepath)
                     filename = os.path.basename(filepath)
                     captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
+                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name"), "route_name": action.get("route_name")})
                     yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
                 except Exception as e:
@@ -385,7 +385,7 @@ def stream_command(user_input, dog_id="dog1"):
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
                         captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name"), "route_name": action.get("route_name")})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -434,7 +434,7 @@ def stream_command(user_input, dog_id="dog1"):
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
                         captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name"), "route_name": action.get("route_name")})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -495,7 +495,19 @@ def analyze():
         waypoint_name = image.get("waypoint_name")
         if waypoint_name is not None:
             waypoint_name = str(waypoint_name).strip() or None
-        images.append({"filepath": resolved_path, "waypoint_name": waypoint_name})
+        route_name = image.get("route_name")
+        if route_name is not None:
+            route_name = str(route_name).strip() or None
+        images.append({
+            "filepath": resolved_path,
+            "waypoint_name": waypoint_name,
+            "route_name": route_name,
+        })
+
+    route_name = str(data.get("route_name") or next(
+        (image["route_name"] for image in images if image["route_name"]),
+        "Data Center Patrol",
+    )).strip() or "Data Center Patrol"
 
     def generate():
         from vision.compliance_checker import check_compliance_with_nim
@@ -543,7 +555,8 @@ def analyze():
             report, json_path, txt_path = generate_report(
                 all_findings=all_findings,
                 location="SHI Lab",
-                inspector="NemoClaw"
+                inspector="NemoClaw",
+                route_name=route_name,
             )
             total_fails = sum(
                 finding["status"] == "FAIL"
