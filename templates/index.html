@@ -666,6 +666,11 @@ header .sub {
     <button class="panel-tab-btn active" id="tab-btn-dog1" onclick="switchPanelTab('dog1', this)">Pumbaa</button>
     <button class="panel-tab-btn" id="tab-btn-dog2" onclick="switchPanelTab('dog2', this)">Timon</button>
   </div>
+  <div style="padding:8px 12px; border-bottom:1px solid var(--border);">
+   <button id="analyze-inspection-btn" class="right-panel-btn analyze" onclick="analyzeInspection(getActivePanelDog())" disabled>
+     ANALYZE INSPECTION
+   </button>
+  </div>
   <div class="right-panel-content" id="right-panel-content-dog1">
     <div class="right-panel-placeholder" data-placeholder>
       Pumbaa's images and compliance reports will appear here.
@@ -708,6 +713,25 @@ function switchPanelTab(dogId, btn) {
 
   document.getElementById('right-panel-content-dog1').style.display = dogId === 'dog1' ? 'flex' : 'none';
   document.getElementById('right-panel-content-dog2').style.display = dogId === 'dog2' ? 'flex' : 'none';
+  updateInspectionAnalyzeButton();
+}
+
+function getActivePanelDog() {
+  const activeTab = document.querySelector('.panel-tab-btn.active');
+  return activeTab ? activeTab.id.replace('tab-btn-', '') : 'dog1';
+}
+
+function updateInspectionAnalyzeButton() {
+  const button = document.getElementById('analyze-inspection-btn');
+  if (!button) return;
+  const dogId = getActivePanelDog();
+  const panel = document.getElementById(`right-panel-content-${dogId}`);
+  const count = panel ? panel.querySelectorAll('.captured-image-card').length : 0;
+  button.disabled = count === 0 || button.dataset.running === 'true' ||
+    (panel && panel.dataset.reportGenerated === 'true');
+  button.textContent = panel && panel.dataset.reportGenerated === 'true'
+    ? `REPORT GENERATED (${count})`
+    : `ANALYZE INSPECTION (${count})`;
 }
 
 function useCommand(btn, e) {
@@ -866,6 +890,7 @@ async function clearCapturedImage(label) {
         </div>
       `;
     }
+    updateInspectionAnalyzeButton();
   } catch (e) {
     console.error('Clear image error:', e);
   }
@@ -889,7 +914,7 @@ function removeDuplicateCapturedImage(label) {
   document.querySelectorAll(`[id="img-${label}"]`).forEach(card => card.remove());
 }
 
-function addCapturedImage(src, label, capturedAt='', dogId='dog1') {
+function addCapturedImage(src, label, capturedAt='', dogId='dog1', waypointName='') {
   const targetDogId = normalizeDogId(dogId);
   const panel = document.getElementById(`right-panel-content-${targetDogId}`);
   if (!panel) return;
@@ -899,10 +924,14 @@ function addCapturedImage(src, label, capturedAt='', dogId='dog1') {
   if (panel.querySelector('[data-placeholder]')) {
     panel.innerHTML = '';
   }
+  panel.querySelectorAll('.inspection-report-summary').forEach(summary => summary.remove());
   const fullPath = `/home/demo_user/RoboticDogs/captures/${label}`;
 
   const wrap = document.createElement('div');
   wrap.id = `img-${label}`;
+  wrap.className = 'captured-image-card';
+  wrap.dataset.filepath = fullPath;
+  wrap.dataset.waypointName = waypointName || '';
   wrap.style.cssText = 'border:1px solid var(--border); border-radius:8px; overflow:hidden; flex-shrink:0;';
   wrap.innerHTML = `
     <div style="max-height:220px; overflow:hidden;">
@@ -911,20 +940,24 @@ function addCapturedImage(src, label, capturedAt='', dogId='dog1') {
     <div style="padding:8px 10px; font-family:var(--mono); font-size:12px; color:var(--muted); display:flex; align-items:center; justify-content:space-between; gap:8px;">
       <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
         <span>${label}</span>
+        ${waypointName ? `<span class="image-waypoint" style="color:var(--text); font-size:11px;"></span>` : ''}
         ${capturedAt ? `<span style="color:var(--accent); font-size:11px;">${capturedAt}</span>` : ''}
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-        <button id="analyze-btn-${label}" onclick="analyzeImage('${fullPath}', '${label}')" class="right-panel-btn analyze">ANALYZE</button>
         <button id="clear-btn-${label}" onclick="clearCapturedImage('${label}')" class="right-panel-btn clear">CLEAR</button>
       </div>
     </div>
     <div id="findings-${label}" class="right-panel-findings" style="padding:0 10px 8px 10px; display:none;"></div>
   `;
+  const waypointElement = wrap.querySelector('.image-waypoint');
+  if (waypointElement) waypointElement.textContent = waypointName;
   panel.appendChild(wrap);
+  panel.dataset.reportGenerated = 'false';
+  updateInspectionAnalyzeButton();
   panel.scrollTop = panel.scrollHeight;
 }
 
-function attachFindingsToImage(filename, status, findings) {
+function attachFindingsToImage(filename, status, findings, waypointName='') {
     const container = document.getElementById(`findings-${filename}`);
     if (!container) return;
 
@@ -963,6 +996,7 @@ function attachFindingsToImage(filename, status, findings) {
             <span style="color:${statusColor}; font-weight:700; font-size:12px;">
                 ${statusIcon} ${statusText} — ${fails.length} issue(s)
             </span>
+            ${waypointName ? '<div class="finding-waypoint" style="color:var(--accent); font-size:11px; margin-top:3px;"></div>' : ''}
         </div>
         ${failRows || '<div style="color:var(--success); padding:4px 0; font-size:12px;">✓ No issues found</div>'}
         ${passes.length > 0 ? `
@@ -971,6 +1005,8 @@ function attachFindingsToImage(filename, status, findings) {
             </div>` : ''}
     `;
     container.style.display = 'block';
+    const waypointElement = container.querySelector('.finding-waypoint');
+    if (waypointElement) waypointElement.textContent = waypointName;
     scrollBottom();
 }
 
@@ -1009,9 +1045,10 @@ function addReportSummary(data) {
     }
 
     // Also add summary to right panel
-    const panel = document.getElementById('right-panel-content');
+    const panel = document.getElementById(`right-panel-content-${normalizeDogId(data.dog_id)}`);
     if (panel) {
         const div = document.createElement('div');
+        div.className = 'inspection-report-summary';
         div.style.cssText = 'padding:10px; border:1px solid var(--border); border-radius:6px;';
         div.innerHTML = `
             <div style="display:flex; align-items:center; gap:8px; font-family:var(--mono);">
@@ -1025,6 +1062,8 @@ function addReportSummary(data) {
         `;
         panel.appendChild(div);
         panel.scrollTop = panel.scrollHeight;
+        panel.dataset.reportGenerated = 'true';
+        updateInspectionAnalyzeButton();
     }
 }
 
@@ -1055,20 +1094,29 @@ async function sendSingle(dogId) {
   }
 }
 
-async function analyzeImage(filepath, label) {
-    const btn = document.getElementById(`analyze-btn-${label}`);
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'ANALYZING...';
-        btn.style.opacity = '0.5';
-    }
-
+async function analyzeInspection(dogId) {
+    const normalizedDogId = normalizeDogId(dogId);
+    const panel = document.getElementById(`right-panel-content-${normalizedDogId}`);
+    const button = document.getElementById('analyze-inspection-btn');
+    if (!panel || !button) return;
+    const images = [...panel.querySelectorAll('.captured-image-card')].map(card => ({
+        filepath: card.dataset.filepath,
+        waypoint_name: card.dataset.waypointName || null
+    }));
+    if (!images.length) return;
+    button.disabled = true;
+    button.dataset.running = 'true';
+    button.textContent = 'ANALYZING INSPECTION...';
     try {
         const resp = await fetch('/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filepath: filepath })
+            body: JSON.stringify({ images, dog_id: normalizedDogId })
         });
+        if (!resp.ok) {
+            const error = await resp.json();
+            throw new Error(error.error || 'Unable to analyze inspection');
+        }
 
         const reader = resp.body.getReader();
         const decoder = new TextDecoder();
@@ -1083,16 +1131,15 @@ async function analyzeImage(filepath, label) {
             for (const line of lines) {
                 if (!line.startsWith('data: ')) continue;
                 const evt = JSON.parse(line.slice(6));
-                handleEvent(evt);
+                handleEvent(evt, normalizedDogId);
             }
         }
     } catch (e) {
         console.error('Analyze error:', e);
+        addLog(`Inspection analysis failed: ${e.message}`, 'error', normalizedDogId);
     } finally {
-        if (btn) {
-            btn.textContent = 'DONE ✓';
-            btn.style.background = 'var(--success)';
-        }
+        button.dataset.running = 'false';
+        updateInspectionAnalyzeButton();
     }
 }
 
@@ -1192,7 +1239,13 @@ function handleEvent(evt, dogId) {
       completeStep(evt.index, dogId);
       break;
     case 'image':
-      addCapturedImage(evt.src, evt.label, evt.captured_at, evt.dog_id);
+      addCapturedImage(evt.src, evt.label, evt.captured_at, evt.dog_id || dogId, evt.waypoint_name || '');
+      break;
+    case 'captured':
+      if (evt.image) {
+        const label = evt.image.split(/[\\/]/).pop();
+        addCapturedImage(`/captures/${encodeURIComponent(label)}`, label, '', dogId, evt.waypoint_name || '');
+      }
       break;
     case 'report':
       addReport(evt);
@@ -1206,7 +1259,7 @@ function handleEvent(evt, dogId) {
       setStatus('Error', true, dogId);
       break;
     case 'image_findings':
-      attachFindingsToImage(evt.filename, evt.status, evt.findings);
+      attachFindingsToImage(evt.filename, evt.status, evt.findings, evt.waypoint_name || '');
       break;
     case 'report_summary':
       addReportSummary(evt);

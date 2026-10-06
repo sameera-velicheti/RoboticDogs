@@ -8,7 +8,7 @@ An AI-powered autonomous safety inspection system built on NVIDIA technology. Ne
 
 Agentic Paw Patrol is a system that uses AI and small robot dogs to inspect a space for safety issues. 
 
-Through a web interface, users type plain-English commands (e.g. "walk forward for 10 seconds") to control one or more robots at once. As a robot moves, it avoids obstacles on its own using LiDAR and takes pictures along the way. Any captured image can be analyzed on demand, the AI checks it for safety problems like blocked walkways, loose cables, or open doors, rates the severity, and suggests remediation. The result is a timestamped, photo-documented inspection record with no manual walkthrough required.
+Through a web interface, users type plain-English commands (e.g. "walk forward for 10 seconds") to control one or more robots at once. As a robot moves, it avoids obstacles on its own using LiDAR and takes pictures along the way. After an inspection, all captured images can be analyzed together to create one report for the full inspection. Images remain visible in the interface, and each finding is tied to its source image and, when available, its named waypoint (for example, “Corner 1: loose cable”). The AI checks for safety problems like blocked walkways, loose cables, or open doors, rates the severity, and suggests remediation.
 
 ---
 
@@ -39,7 +39,7 @@ Through a web interface, users type plain-English commands (e.g. "walk forward f
 - **Natural language robot control** — plain-English commands are parsed into structured robot actions by a locally-run NVIDIA Nemotron model
 - **Real-time obstacle avoidance** — onboard LiDAR detects obstacles during movement; the robot attempts to turn and reroute, or stops and requests new instructions if fully blocked
 - **Automatic image capture** — images are captured at regular intervals during movement and saved for review
-- **On-demand compliance analysis** — any captured image can be analyzed by the AI for safety hazards, with findings rated by severity (Pass / Warning / Fail) and paired with remediation guidance
+- **Inspection-wide compliance analysis** — analyze all captured images together for one report, with findings linked to their source image and named waypoint when available
 - **Multi-robot control** — multiple ROSPug units can be commanded independently or simultaneously from a single interface
 - **Fully local / no cloud dependency** — the entire pipeline (language model, vision analysis, robot control) runs on local hardware; no facility data leaves the network
 
@@ -53,7 +53,7 @@ Through a web interface, users type plain-English commands (e.g. "walk forward f
 | `ros_nodes.py` | `RosPugBridge` class — manages the direct ROS connection to each robot, including movement commands, LiDAR readings, and camera capture |
 | `vision/compliance_checker.py` | Sends captured images to the NIM for safety compliance analysis and returns findings |
 | `vision/compliance_rules.json` | Configurable list of safety hazards the system checks for (e.g. loose cables, open doors, spills, blocked walkways) — edit this file to add or adjust compliance rules |
-| `vision/report_generator.py` | Builds timestamped compliance reports (JSON and text) from analysis findings, including severity ratings and remediation guidance |
+| `vision/report_generator.py` | Builds timestamped inspection-wide compliance reports (JSON and text) from analysis findings, including source images, waypoint names, severity ratings, and remediation guidance |
 | `templates/index.html` | Web-based user interface — command inputs, live execution status, and image/report viewing panel |
 
 ---

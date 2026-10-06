@@ -95,8 +95,13 @@ def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw"):
             f.write(f"ISSUES REQUIRING ACTION\n")
             f.write(f"-----------------------\n")
             for finding in fails:
+                waypoint_name = finding.get("waypoint_name")
+                if waypoint_name:
+                    f.write(f"{waypoint_name}: ")
                 f.write(f"[{finding['severity']}] {finding['rule_name']}\n")
                 f.write(f"  Rule ID:    {finding['rule_id']}\n")
+                if waypoint_name:
+                    f.write(f"  Waypoint:   {waypoint_name}\n")
                 f.write(f"  Image:      {finding.get('image_path', 'N/A')}\n")
                 f.write(f"  Timestamp:  {finding.get('timestamp', 'N/A')}\n")
                 f.write(f"  Keywords:   {', '.join(finding['matched_keywords'])}\n")

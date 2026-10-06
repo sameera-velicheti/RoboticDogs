@@ -332,7 +332,7 @@ def stream_command(user_input, dog_id="dog1"):
                             last_capture_at = elapsed_total
                             filename = os.path.basename(filepath)
                             captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
+                            yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
                             yield event("log", {"msg": f"✓ Image saved: {filename}"})
                             yield event("log", {"msg": "✓ Path clear — continuing..."})
                         except Exception as e:
@@ -349,7 +349,7 @@ def stream_command(user_input, dog_id="dog1"):
                     all_captured_images.append(filepath)
                     filename = os.path.basename(filepath)
                     captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
+                    yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
                     yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     yield event("progress", {"index": i, "pct": 100, "elapsed": 0})
                 except Exception as e:
@@ -385,7 +385,7 @@ def stream_command(user_input, dog_id="dog1"):
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
                         captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -434,7 +434,7 @@ def stream_command(user_input, dog_id="dog1"):
                         all_captured_images.append(filepath)
                         filename = os.path.basename(filepath)
                         captured_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id})
+                        yield event("image", {"src": f"/captures/{filename}", "label": filename, "captured_at": captured_at, "dog_id": dog_id, "waypoint_name": action.get("waypoint_name")})
                         yield event("log", {"msg": f"✓ Image saved: {filename}"})
                     except Exception as e:
                         yield event("log", {"msg": f"Capture failed: {e}"})
@@ -465,58 +465,92 @@ def stream_command(user_input, dog_id="dog1"):
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.get_json()
-    filepath = data.get("filepath", "").strip()
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return {"error": "Invalid request body"}, 400
+    requested_images = data.get("images")
+    if requested_images is None and data.get("filepath"):
+        requested_images = [{"filepath": data["filepath"]}]
 
-    if not filepath:
-        return {"error": "No filepath provided"}, 400
+    if not isinstance(requested_images, list) or not requested_images:
+        return {"error": "No images provided"}, 400
 
-    if not filepath.startswith('/home/demo_user/RoboticDogs/captures/'):
-        return {"error": "Invalid filepath"}, 400
+    capture_root = os.path.realpath(CAPTURE_DIR)
+    images = []
+    for image in requested_images:
+        if not isinstance(image, dict):
+            return {"error": "Each image must be an object"}, 400
+        filepath = image.get("filepath", "")
+        if not isinstance(filepath, str) or not filepath.strip():
+            return {"error": "Each image must include a filepath"}, 400
+
+        resolved_path = os.path.realpath(filepath.strip())
+        try:
+            is_capture = os.path.commonpath((capture_root, resolved_path)) == capture_root
+        except ValueError:
+            is_capture = False
+        if not is_capture or resolved_path == capture_root:
+            return {"error": "Invalid filepath"}, 400
+
+        waypoint_name = image.get("waypoint_name")
+        if waypoint_name is not None:
+            waypoint_name = str(waypoint_name).strip() or None
+        images.append({"filepath": resolved_path, "waypoint_name": waypoint_name})
 
     def generate():
         from vision.compliance_checker import check_compliance_with_nim
         from vision.report_generator import generate_report
         from datetime import datetime
 
-        filename = os.path.basename(filepath)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-        yield f"data: {json.dumps({'type': 'log', 'msg': f'Analyzing {filename}...'})}\n\n"
-
         try:
-            findings = check_compliance_with_nim(
-                filepath=filepath,
-                timestamp=timestamp
-            )
+            all_findings = []
+            for image in images:
+                filepath = image["filepath"]
+                filename = os.path.basename(filepath)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                waypoint_name = image["waypoint_name"]
+                location = f"{waypoint_name}: " if waypoint_name else ""
+                yield f"data: {json.dumps({'type': 'log', 'msg': f'Analyzing {location}{filename}...'})}\n\n"
 
-            high_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] in ("HIGH", "ALERT")]
-            medium_low_fails = [f for f in findings if f["status"] == "FAIL" and f["severity"] in ("MEDIUM", "LOW")]
+                findings = check_compliance_with_nim(filepath=filepath, timestamp=timestamp)
+                for finding in findings:
+                    finding["waypoint_name"] = waypoint_name
+                all_findings.append(findings)
 
-            if high_fails:
-                image_status = "FAIL"
-            elif medium_low_fails:
-                image_status = "WARNING"
-            else:
-                image_status = "PASS"
+                high_fails = [
+                    f for f in findings
+                    if f["status"] == "FAIL" and f["severity"] in ("HIGH", "ALERT")
+                ]
+                other_fails = [
+                    f for f in findings
+                    if f["status"] == "FAIL" and f["severity"] in ("MEDIUM", "LOW")
+                ]
+                image_status = "FAIL" if high_fails else "WARNING" if other_fails else "PASS"
+                if any(f.get("rule_id") == "PHONE_001" and f["status"] == "FAIL" for f in findings):
+                    yield f"data: {json.dumps({'type': 'log', 'msg': f'Lost cellphone detected in {filename}'})}\n\n"
 
-            # If a lost cellphone is detected, emit a prominent alert message
-            phone_flags = [f for f in findings if f.get('rule_id') == 'PHONE_001' and f.get('status') == 'FAIL']
-            if phone_flags:
-                yield f"data: {json.dumps({'type': 'log', 'msg': 'Lost cellphone detected'})}\n\n"
-
-            yield f"data: {json.dumps({'type': 'image_findings', 'filename': filename, 'status': image_status, 'findings': [{'rule_name': f['rule_name'], 'severity': f['severity'], 'status': f['status'], 'remediation': f['remediation']} for f in findings]})}\n\n"
+                visible_findings = [
+                    {
+                        "rule_name": f["rule_name"],
+                        "severity": f["severity"],
+                        "status": f["status"],
+                        "remediation": f["remediation"],
+                    }
+                    for f in findings
+                ]
+                yield f"data: {json.dumps({'type': 'image_findings', 'filename': filename, 'waypoint_name': waypoint_name, 'status': image_status, 'findings': visible_findings})}\n\n"
 
             report, json_path, txt_path = generate_report(
-                all_findings=[findings],
+                all_findings=all_findings,
                 location="SHI Lab",
                 inspector="NemoClaw"
             )
-
-            total_fails = len(high_fails) + len(medium_low_fails)
-            overall = "FAIL" if high_fails else "WARNING" if medium_low_fails else "PASS"
-
-            yield f"data: {json.dumps({'type': 'report_summary', 'overall': overall, 'total_images': 1, 'total_fails': total_fails, 'report_file': os.path.basename(txt_path)})}\n\n"
+            total_fails = sum(
+                finding["status"] == "FAIL"
+                for findings in all_findings
+                for finding in findings
+            )
+            yield f"data: {json.dumps({'type': 'report_summary', 'overall': report['overall_status'], 'total_images': len(images), 'total_fails': total_fails, 'report_file': os.path.basename(txt_path), 'dog_id': data.get('dog_id', 'dog1')})}\n\n"
             yield f"data: {json.dumps({'type': 'done', 'msg': 'Analysis complete.'})}\n\n"
 
         except Exception as e:
@@ -598,4 +632,3 @@ def command():
 if __name__ == "__main__":
     print("NemoClaw UI running at http://localhost:5000")
     app.run(debug=False, threaded=True, port=5000)
-
