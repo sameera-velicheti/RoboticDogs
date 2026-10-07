@@ -18,10 +18,12 @@ Ready
 
 from enum import Enum
 
-from nim_manager import NIMManager
-from ssh_manager import SSHManager
-from discovery_manager import DiscoveryManager
-from readiness_checks import ReadinessChecks
+from startup.nim_manager import NIMManager
+from startup.ssh_manager import SSHManager
+from startup.discovery_manager import DiscoveryManager
+from startup.readiness_checks import ReadinessChecks
+from status.system_status import status
+
 
 
 class StartupState(Enum):
@@ -50,15 +52,21 @@ class StartupManager:
 
         self.state = state
 
-        print(f"\n[STATE] {state.value}")
+        status.set_startup_state(
+            state.value
+        )
 
+        print(f"\n[STATE] {state.value}")
+    
     def run(self):
 
         try:
 
             self.set_state(StartupState.STARTING_NIM)
 
-            nim_status = self.nim_manager.check_nim()
+            self.nim_manager.start_nim()
+
+            nim_status = self.nim_manager.check_status()
 
             print(f"NIM Status: {nim_status}")
 
@@ -94,6 +102,12 @@ class StartupManager:
             self.set_state(StartupState.READY)
 
             print("\nSystem Ready")
+
+            from status.system_status import status
+
+            print("\nFinal Status Object:")
+
+            print(status.get_status())
 
         except Exception as e:
 

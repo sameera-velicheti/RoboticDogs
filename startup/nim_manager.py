@@ -14,66 +14,54 @@ Future Version:
 
 import time
 
+from status.system_status import status
+
 
 class NIMManager:
 
     def __init__(self):
-
-        self.status = "offline"
 
         self.model_name = (
             "nemotron-3-nano-omni-30b-a3b-reasoning"
         )
 
     def check_status(self):
-        """
-        Return current NIM status.
 
-        Future:
-        Check Docker container
-        Check NIM health endpoint
-        """
-
-        return {
-            "status": self.status,
-            "model": self.model_name if self.status == "ready" else None
-        }
+        return status.nim
 
     def start_nim(self):
-        """
-        Start NIM.
-
-        Future:
-        docker compose up -d
-        """
 
         print("[NIM] Starting...")
 
-        self.status = "starting"
+        status.update_nim_status(
+            "starting"
+        )
 
         time.sleep(2)
 
-        self.status = "ready"
+        status.update_nim_status(
+            "ready",
+            model=self.model_name
+        )
 
         print("[NIM] Ready")
 
         return True
 
     def stop_nim(self):
-        """
-        Stop NIM.
-
-        Future:
-        docker compose down
-        """
 
         print("[NIM] Stopping...")
 
-        self.status = "stopping"
+        status.update_nim_status(
+            "stopping"
+        )
 
         time.sleep(1)
 
-        self.status = "offline"
+        status.update_nim_status(
+            "offline",
+            model=None
+        )
 
         print("[NIM] Offline")
 
@@ -84,15 +72,14 @@ if __name__ == "__main__":
 
     nim = NIMManager()
 
-    print("\nCheck:")
-    print(nim.check_status())
+    print("\nStarting NIM")
 
-    print("\nStarting:")
     nim.start_nim()
 
-    print(nim.check_status())
+    print(status.get_status())
 
-    print("\nStopping:")
+    print("\nStopping NIM")
+
     nim.stop_nim()
 
-    print(nim.check_status())
+    print(status.get_status())

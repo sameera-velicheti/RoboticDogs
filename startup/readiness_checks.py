@@ -1,29 +1,35 @@
 """
-Preflight readiness validation.
+Robot readiness checks.
 
-All values mocked for now.
+Current version:
+- Mock implementation
 
-Later these will get:
-- Battery
-- Camera
-- LiDAR
-- Map
+Future version:
+- Battery check
+- LiDAR check
+- Camera check
+- Map check
 """
 
-import time
+from status.system_status import status
 
 
 class ReadinessChecks:
 
     def check_robot(self, dog_name):
 
-        print(f"[CHECKS] Running checks for {dog_name}...")
-        time.sleep(1)
-
-        return {
-            "battery": True,
+        results = {
+            "battery": 87,
             "camera": True,
             "lidar": True,
-            "map": True,
+            "map_loaded": True,
+            "emergency_stop_available": True,
             "ready": True
         }
+
+        status.update_dog(
+            dog_name,
+            **results
+        )
+
+        return results

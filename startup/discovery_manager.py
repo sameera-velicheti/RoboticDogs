@@ -1,23 +1,25 @@
 """
-Robot discovery module.
+Dog discovery module.
 
-Later:
-- Ping scan
-- ARP scan
-- Verify ROS services
+Current version:
+- Mock implementation
+
+Future version:
+- Network scan
+- Device discovery
+- Automatic robot registration
 """
 
-import time
+from status.system_status import status
 
 
 class DiscoveryManager:
 
     def discover_dogs(self):
 
-        print("[DISCOVERY] Searching for robots...")
-        time.sleep(2)
+        print("[DISCOVERY] Looking for dogs...")
 
-        return [
+        discovered_dogs = [
             {
                 "name": "Pumbaa",
                 "ip": "192.168.0.60"
@@ -27,3 +29,12 @@ class DiscoveryManager:
                 "ip": "192.168.0.85"
             }
         ]
+
+        for dog in discovered_dogs:
+
+            status.update_dog(
+                dog["name"],
+                discovered=True
+            )
+
+        return discovered_dogs

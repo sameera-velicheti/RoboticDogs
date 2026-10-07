@@ -1,0 +1,3 @@
+"""
+Global system status package.
+"""
