@@ -1,30 +1,233 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agentic Paw Patrol</title>
-<style>
-:root{--bg:#071421;--panel:#0b1b2b;--line:#274059;--text:#f2f7ff;--muted:#91a7c1;--blue:#1684f8;--green:#31df79;--red:#ff6574}*{box-sizing:border-box}body{margin:0;background:#04101c;color:var(--text);font:14px Segoe UI,Arial}.app{height:100vh;display:grid;grid-template-columns:205px 1fr}.side{padding:24px 14px;background:#091927;border-right:1px solid var(--line)}.brand{font-size:19px;font-weight:700;margin:0 10px 30px}.brand small{display:block;color:#9db7d2;font-size:12px}.nav button{display:block;width:100%;padding:12px;border:0;border-radius:7px;background:transparent;color:#b9cae0;text-align:left;margin:5px 0}.nav button.active{background:#114b8c;color:white}.main{min-width:0}.pair{height:100vh;overflow:auto;padding:24px}.pairHead{display:flex;gap:24px;justify-content:space-between;align-items:stretch}.pair h1{margin:0;font-size:30px}.muted{color:var(--muted)}.card{background:linear-gradient(145deg,#0c1b2a,#0a1826);border:1px solid var(--line);border-radius:9px}.nim{min-width:500px;padding:15px 20px;display:flex;align-items:center;gap:16px}.nim strong{flex:1}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:7px}.nim button,.disconnect{border:1px solid var(--red);background:transparent;color:#ff8791;border-radius:7px;padding:10px 18px}.dogGrid{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:15px;margin-top:18px}.dogCard{padding:14px;min-height:250px;position:relative;cursor:pointer}.dogCard.selected{border:2px solid #339cff}.dogCard.offline{opacity:.55;cursor:not-allowed}.check{position:absolute;width:23px;height:23px;border:2px solid #7189a3;border-radius:5px;display:grid;place-items:center}.selected .check{background:#1684f8;border-color:#57b0ff}.robot{height:130px;margin:5px 20px;background:linear-gradient(135deg,transparent 28%,#bac3c9 29% 52%,#354653 53% 65%,transparent 66%);filter:drop-shadow(0 15px 12px #0008)}.pairFoot{margin-top:16px;padding:14px;display:flex;justify-content:space-between;align-items:center}.primary{border:1px solid #62b6ff;background:linear-gradient(#1684f8,#0862ce);color:white;border-radius:7px;padding:12px 25px}.primary:disabled{opacity:.4}.dogView{display:none;height:100vh}.top{height:88px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:15px 25px}.avatar{width:55px;height:55px;border-radius:50%;background:radial-gradient(circle,#bec8cf 25%,#263a4b 27% 50%,#aeb8bf 52%);margin-right:14px}.identity h2{margin:0}.health{display:flex;gap:22px;margin-left:28px}.disconnect{margin-left:auto}.workspace{height:calc(100vh - 88px);padding:13px;display:grid;grid-template-columns:1.15fr .85fr;gap:13px}.routeCard{padding:14px;display:flex;flex-direction:column}.routeHead{display:flex;justify-content:space-between}.map{position:relative;flex:1;min-height:350px;margin:12px 0;border:1px solid #34516e;border-radius:7px;background:linear-gradient(90deg,#11283a 1px,transparent 1px),linear-gradient(#11283a 1px,transparent 1px);background-size:28px 28px}.racks{position:absolute;inset:88px 115px;display:flex;justify-content:space-between;gap:45px;padding:16px}.rack{width:55px;background:repeating-linear-gradient(#283849 0 2px,#111f2e 2px 6px);border:1px solid #617185}.routeSvg{position:absolute;inset:0;width:100%;height:100%}.base,.done{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}.base{stroke:#8295aa}.done{stroke:#1791ff}.marker{fill:var(--green);stroke:white;stroke-width:5}.legend{display:flex;gap:22px;color:#c5d3e2}.routeActions{margin-top:auto;display:grid;grid-template-columns:1fr 220px;gap:10px}.routeBtn{width:100%}.emergencyStopBtn{border:1px solid #ff6675;background:linear-gradient(#a92335,#751725);color:white;border-radius:7px;padding:12px 18px;font-weight:700;cursor:pointer}.emergencyStopBtn.active{background:#39131a;color:#ff9da6}.emergencyStopBtn:disabled{cursor:not-allowed;opacity:.8}.right{padding:12px;display:grid;grid-template-rows:auto 1fr}.tabs{display:grid;grid-template-columns:1fr 1fr;margin:-12px -12px 12px}.tabs button{padding:14px;border:0;border-bottom:2px solid transparent;background:#081725;color:#9db1c9}.tabs button.active{background:#153d6c;color:white;border-color:#2fa0ff}.panel{min-height:0}.images{height:100%;display:grid;grid-template-rows:auto 1fr 100px;gap:10px}.photo,.thumb{border:1px solid #36506b;border-radius:7px;background:linear-gradient(90deg,#172530,#bec8c9 19%,#27343d 24% 43%,#c1c9c9 48%,#182630 53% 72%,#bdc6c7 77%,#192631)}.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.commands{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:12px}.history{overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:9px}.empty{margin:auto;color:#7d93ad}.message{align-self:flex-end;max-width:85%;background:#125baa;border:1px solid #3ea2ff;border-radius:11px 11px 3px 11px;padding:10px}.message small{display:block;color:#c2ddfb;text-align:right;margin-top:5px}.chat{display:grid;grid-template-columns:1fr 48px;gap:8px}.chat input{border:1px solid #496b8c;border-radius:8px;background:#091827;color:white;padding:13px}.chat button{border:0;border-radius:8px;background:#147bed;color:white;font-size:20px}.hidden{display:none}@media(max-width:1000px){.dogGrid{grid-template-columns:repeat(2,1fr)}.pairHead{display:block}.nim{min-width:0;margin-top:15px}.workspace{grid-template-columns:1fr}.right{display:none}}
-</style></head><body><div class="app"><aside class="side"><div class="brand">Robotic Dogs<small>Agentic Paw Patrol</small></div><nav class="nav"><button id="pairNav" class="active">▣ &nbsp; Pair & Connect</button><div id="dogNav"></div></nav></aside><main class="main"><section id="pair" class="pair"><div class="pairHead"><div><h1>Pair & Connect</h1><p class="muted">Select any available robotic dogs to connect with.</p></div><div class="nim card"><span style="font-size:28px">◉</span><strong>Network Interface Module (NIM)<small class="muted" style="display:block">NIM is active and ready.</small></strong><span id="nimStatus"><i id="nimDot" class="dot"></i><b id="nimText">ON</b></span><button id="nimBtn">Turn NIM Off</button></div></div><h3>Available Robotic Dogs</h3><div id="dogGrid" class="dogGrid"></div><div class="pairFoot card"><span id="summary">0 dogs selected</span><button id="pairBtn" class="primary" disabled>Pair & Connect</button></div></section><section id="dogView" class="dogView"><header class="top"><div class="avatar"></div><div class="identity"><h2 id="dogName"></h2><small id="unit"></small></div><div class="health"><span><i class="dot"></i>Online</span><span>▣ <b id="battery"></b></span><span>⌁ Connected</span></div><button id="disconnect" class="disconnect">Disconnect</button></header><div class="workspace"><section class="routeCard card"><div class="routeHead"><b>Route Progress</b><span id="percent"></span></div><div class="map"><div class="racks"><div class="rack"></div><div class="rack"></div><div class="rack"></div><div class="rack"></div></div><svg class="routeSvg" viewBox="0 0 600 340" preserveAspectRatio="none"><polyline id="base" class="base" points="85,285 85,55 515,55 515,285 85,285"/><polyline id="done" class="done" points="85,285 85,55 515,55 515,285 85,285"/><circle id="marker" class="marker" r="10"/></svg></div><div class="legend">🔵 Completed &nbsp; 🟢 Current Position &nbsp; ⚪ Remaining</div><p><b>Current Task</b><br><span id="task" style="color:#8ec5ff"></span></p><div class="routeActions"><button id="routeBtn" class="primary routeBtn">▶ Go on your inspection route</button><button id="emergencyStopBtn" class="emergencyStopBtn">■ Emergency Stop</button></div></section><aside class="right card"><div class="tabs"><button id="imagesTab" class="active">Images</button><button id="commandsTab">Emergency Commands</button></div><div id="imagesPanel" class="panel images"><b>Live Images</b><div class="photo"></div><div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div></div><div id="commandsPanel" class="panel commands hidden"><div><b>Emergency Commands</b><p class="muted">Send a direct instruction to the selected dog.</p></div><div id="history" class="history"></div><div class="chat"><input id="commandInput" placeholder="Type an exact movement command..."><button id="send">➤</button></div></div></aside></div></section></main></div>
-<script>
-const dogs={Pumbaa:{unit:'Unit 01',battery:87,progress:24,task:'Moving to Section B',online:true},Timone:{unit:'Unit 02',battery:92,progress:76,task:'Inspecting Section D',online:true},Simba:{unit:'Unit 03',battery:null,progress:0,task:'Offline',online:false},Nala:{unit:'Unit 04',battery:78,progress:42,task:'Moving to Section C',online:true}};
-let selected=new Set(),current='',nimOn=true;const dogStates=Object.fromEntries(Object.keys(dogs).map(n=>[n,{stopped:false,running:false}]));const histories=Object.fromEntries(Object.keys(dogs).map(n=>[n,[]]));const $=id=>document.getElementById(id);
-function renderCards(){$('dogGrid').innerHTML=Object.entries(dogs).map(([n,d])=>`<article class="dogCard card ${selected.has(n)?'selected':''} ${d.online?'':'offline'}" data-dog="${n}"><div class="check">${selected.has(n)?'✓':''}</div><div class="robot"></div><h3>${n}</h3><span class="muted">${d.unit}</span><p style="color:${d.online?'#40e582':'#ff7a87'}">● ${d.online?'Online':'Offline'} &nbsp; ▣ ${d.battery??'--'}%</p></article>`).join('');document.querySelectorAll('.dogCard').forEach(c=>c.onclick=()=>toggle(c.dataset.dog));summary()}
-function toggle(n){if(!dogs[n].online)return;selected.has(n)?selected.delete(n):selected.add(n);renderCards()}
-function summary(){$('summary').textContent=selected.size?`${selected.size} dog${selected.size>1?'s':''} selected: ${[...selected].join(', ')}`:'0 dogs selected';$('pairBtn').disabled=!selected.size||!nimOn}
-function renderNav(){$('dogNav').innerHTML=[...selected].map(n=>`<button data-dog="${n}" class="${n===current?'active':''}">♙ &nbsp; ${n}</button>`).join('');document.querySelectorAll('#dogNav button').forEach(b=>b.onclick=()=>openDog(b.dataset.dog))}
-function showPair(){$('pair').style.display='block';$('dogView').style.display='none';$('pairNav').classList.add('active');renderCards()}
-function openDog(n){current=n;renderNav();$('pairNav').classList.remove('active');$('pair').style.display='none';$('dogView').style.display='block';const d=dogs[n];$('dogName').textContent=n;$('unit').textContent=d.unit;$('battery').textContent=d.battery+'%';setProgress(d.progress);renderDogState();showImages();renderHistory()}
-
-function renderDogState(){
- const state=dogStates[current],d=dogs[current];
- $('task').textContent=state.stopped?'Emergency stop activated':state.running?'Inspection route running':d.task;
- $('routeBtn').textContent=state.stopped?'▶ Send back on inspection route':state.running?'■ Route running':'▶ Go on your inspection route';
- $('emergencyStopBtn').classList.toggle('active',state.stopped);
- $('emergencyStopBtn').textContent=state.stopped?'■ Stopped':'■ Emergency Stop';
- $('emergencyStopBtn').disabled=state.stopped;
-}
-function setProgress(p){$('percent').textContent=p+'% Complete';const base=$('base'),done=$('done'),mark=$('marker'),len=base.getTotalLength();done.style.strokeDasharray=`${len} ${len}`;done.style.strokeDashoffset=len*(1-p/100);const pt=base.getPointAtLength(len*p/100);mark.setAttribute('cx',pt.x);mark.setAttribute('cy',pt.y)}
-function renderHistory(){const h=$('history'),items=histories[current];h.innerHTML=items.length?items.map(x=>`<div class="message"><span>${escapeHtml(x)}</span><small>Sent to ${current}</small></div>`).join(''):`<div class="empty">No emergency commands sent to ${current}.</div>`;h.scrollTop=h.scrollHeight}
-function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function send(){const v=$('commandInput').value.trim();if(!v||!current)return;histories[current].push(v);$('commandInput').value='';renderHistory()}
-function showImages(){$('imagesPanel').classList.remove('hidden');$('commandsPanel').classList.add('hidden');$('imagesTab').classList.add('active');$('commandsTab').classList.remove('active')}
-$('commandsTab').onclick=()=>{$('commandsPanel').classList.remove('hidden');$('imagesPanel').classList.add('hidden');$('commandsTab').classList.add('active');$('imagesTab').classList.remove('active');renderHistory()};$('imagesTab').onclick=showImages;$('send').onclick=send;$('commandInput').onkeydown=e=>{if(e.key==='Enter')send()};$('pairNav').onclick=showPair;$('pairBtn').onclick=()=>{renderNav();openDog([...selected][0])};$('disconnect').onclick=()=>{selected.delete(current);const next=[...selected][0];current='';renderNav();next?openDog(next):showPair()};$('nimBtn').onclick=()=>{nimOn=!nimOn;$('nimBtn').textContent=nimOn?'Turn NIM Off':'Turn NIM On';$('nimText').textContent=nimOn?'ON':'OFF';$('nimDot').style.background=nimOn?'var(--green)':'var(--red)';$('nimDot').style.boxShadow=nimOn?'0 0 10px #31df7966':'0 0 10px #ff657466';summary()};$('routeBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=false;dogStates[current].running=true;renderDogState()};$('emergencyStopBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=true;dogStates[current].running=false;renderDogState()};
-selected.clear();current='';renderNav();showPair();
-</script></body></html>
+    <style>
+    :root{--bg:#071421;--panel:#0b1b2b;--line:#274059;--text:#f2f7ff;--muted:#91a7c1;--blue:#1684f8;--green:#31df79;--red:#ff6574}*{box-sizing:border-box}body{margin:0;background:#04101c;color:var(--text);font:14px Segoe UI,Arial}.app{height:100vh;display:grid;grid-template-columns:205px 1fr}.side{padding:24px 14px;background:#091927;border-right:1px solid var(--line)}.brand{font-size:19px;font-weight:700;margin:0 10px 30px}.brand small{display:block;color:#9db7d2;font-size:12px}.nav button{display:block;width:100%;padding:12px;border:0;border-radius:7px;background:transparent;color:#b9cae0;text-align:left;margin:5px 0}.nav button.active{background:#114b8c;color:white}.main{min-width:0}.pair{height:100vh;overflow:auto;padding:24px}.pairHead{display:flex;gap:24px;justify-content:space-between;align-items:stretch}.pair h1{margin:0;font-size:30px}.muted{color:var(--muted)}.card{background:linear-gradient(145deg,#0c1b2a,#0a1826);border:1px solid var(--line);border-radius:9px}.nim{min-width:500px;padding:15px 20px;display:flex;align-items:center;gap:16px}.nim strong{flex:1}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:7px}.nim button,.disconnect{border:1px solid var(--red);background:transparent;color:#ff8791;border-radius:7px;padding:10px 18px}.dogGrid{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:15px;margin-top:18px}.dogCard{padding:14px;min-height:250px;position:relative;cursor:pointer}.dogCard.selected{border:2px solid #339cff}.dogCard.offline{opacity:.55;cursor:not-allowed}.check{position:absolute;width:23px;height:23px;border:2px solid #7189a3;border-radius:5px;display:grid;place-items:center}.selected .check{background:#1684f8;border-color:#57b0ff}.robot{height:130px;margin:5px 20px;background:linear-gradient(135deg,transparent 28%,#bac3c9 29% 52%,#354653 53% 65%,transparent 66%);filter:drop-shadow(0 15px 12px #0008)}.pairFoot{margin-top:16px;padding:14px;display:flex;justify-content:space-between;align-items:center}.primary{border:1px solid #62b6ff;background:linear-gradient(#1684f8,#0862ce);color:white;border-radius:7px;padding:12px 25px}.primary:disabled{opacity:.4}.dogView{display:none;height:100vh}.top{height:88px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:15px 25px}.avatar{width:55px;height:55px;border-radius:50%;background:radial-gradient(circle,#bec8cf 25%,#263a4b 27% 50%,#aeb8bf 52%);margin-right:14px}.identity h2{margin:0}.health{display:flex;gap:22px;margin-left:28px}.disconnect{margin-left:auto}.workspace{height:calc(100vh - 88px);padding:13px;display:grid;grid-template-columns:1.15fr .85fr;gap:13px}.routeCard{padding:14px;display:flex;flex-direction:column}.routeHead{display:flex;justify-content:space-between}.map{position:relative;flex:1;min-height:350px;margin:12px 0;border:1px solid #34516e;border-radius:7px;background:linear-gradient(90deg,#11283a 1px,transparent 1px),linear-gradient(#11283a 1px,transparent 1px);background-size:28px 28px}.racks{position:absolute;inset:88px 115px;display:flex;justify-content:space-between;gap:45px;padding:16px}.rack{width:55px;background:repeating-linear-gradient(#283849 0 2px,#111f2e 2px 6px);border:1px solid #617185}.routeSvg{position:absolute;inset:0;width:100%;height:100%}.base,.done{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}.base{stroke:#8295aa}.done{stroke:#1791ff}.marker{fill:var(--green);stroke:white;stroke-width:5}.legend{display:flex;gap:22px;color:#c5d3e2}.routeActions{margin-top:auto;display:grid;grid-template-columns:1fr 220px;gap:10px}.routeBtn{width:100%}.emergencyStopBtn{border:1px solid #ff6675;background:linear-gradient(#a92335,#751725);color:white;border-radius:7px;padding:12px 18px;font-weight:700;cursor:pointer}.emergencyStopBtn.active{background:#39131a;color:#ff9da6}.emergencyStopBtn:disabled{cursor:not-allowed;opacity:.8}.right{padding:12px;display:grid;grid-template-rows:auto 1fr}.tabs{display:grid;grid-template-columns:1fr 1fr;margin:-12px -12px 12px}.tabs button{padding:14px;border:0;border-bottom:2px solid transparent;background:#081725;color:#9db1c9}.tabs button.active{background:#153d6c;color:white;border-color:#2fa0ff}.panel{min-height:0}.images{height:100%;display:grid;grid-template-rows:auto 1fr 100px;gap:10px}.photo,.thumb{border:1px solid #36506b;border-radius:7px;background:linear-gradient(90deg,#172530,#bec8c9 19%,#27343d 24% 43%,#c1c9c9 48%,#182630 53% 72%,#bdc6c7 77%,#192631)}.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.commands{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:12px}.history{overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:9px}.empty{margin:auto;color:#7d93ad}.message{align-self:flex-end;max-width:85%;background:#125baa;border:1px solid #3ea2ff;border-radius:11px 11px 3px 11px;padding:10px}.message small{display:block;color:#c2ddfb;text-align:right;margin-top:5px}.chat{display:grid;grid-template-columns:1fr 48px;gap:8px}.chat input{border:1px solid #496b8c;border-radius:8px;background:#091827;color:white;padding:13px}.chat button{border:0;border-radius:8px;background:#147bed;color:white;font-size:20px}.hidden{display:none}
+    /* ---------- Route Setup ---------- */
+    .navLabel{margin:22px 12px 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5f7790}
+    .setup{display:none;height:100vh;overflow:auto;padding:28px}
+    .rsWrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+    .rsHead{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
+    .rsHead h1{margin:0;font-size:30px}
+    .rsTitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .rsBadge{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:600;background:#0f2a1d;border:1px solid #1d4a33;color:#6ff0a8}
+    .rsBadge i{width:7px;height:7px;border-radius:50%;background:#35e08a}
+    .rsBadge.bad{background:#2a1218;border-color:#5a2430;color:#ff8a95}.rsBadge.bad i{background:var(--red)}
+    .rsControls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+    .rsField{display:flex;flex-direction:column;gap:6px}
+    .rsLabel{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b829b}
+    .rsSeg{display:flex;padding:3px;background:#071421;border:1px solid #1d3248;border-radius:10px}
+    .rsSeg button{border:0;border-radius:7px;padding:8px 18px;min-height:38px;background:transparent;color:#8aa1ba;font:500 14px Segoe UI,Arial;cursor:pointer}
+    .rsSeg button[aria-pressed="true"]{background:#12324f;color:#fff;font-weight:600}
+    .rsInput,.rsSelect{height:44px;background:#071421;color:var(--text);border:1px solid #1d3248;border-radius:10px;padding:0 12px;font:500 14px Segoe UI,Arial}
+    .rsInput:focus,.rsSelect:focus{outline:none;border-color:#2f8cff;box-shadow:0 0 0 3px rgba(47,140,255,.18)}
+    .rsGhost{height:44px;border:1px solid #1d3248;background:transparent;color:#cfe0f5;border-radius:10px;padding:0 16px;cursor:pointer;font:500 14px Segoe UI,Arial}
+    .rsGhost:hover{border-color:#3f6286}
+    .rsNew{display:flex;gap:8px}.rsNew.hidden{display:none}
+    .rsRow{display:flex;flex-wrap:wrap;gap:20px}
+    .rsCard{background:#0a1826;border:1px solid #1b2f44;border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0}
+    .rsCard h2{margin:0;font-size:15px;font-weight:600;color:#dbe7f4}
+    .rsCardHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .rsPose{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .rsPose div{background:#071421;border:1px solid #1b2f44;border-radius:10px;padding:12px 14px}
+    .rsPose b{display:block;font:600 24px Consolas,monospace;margin-top:2px}
+    .rsPose b span{font-size:13px;color:#6b829b;margin-left:4px}
+    .rsMap{background:#071421;border:1px solid #1b2f44;border-radius:10px;overflow:hidden}
+    .rsMap svg{display:block;width:100%;height:auto}
+    .rsLegend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#8aa1ba}
+    .rsLegend span{display:inline-flex;align-items:center;gap:7px}
+    .rsLegend i{width:10px;height:10px;border-radius:50%}
+    .rsOption{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#071421;border:1px solid #1b2f44;border-radius:10px;padding:11px 14px;min-height:48px;cursor:pointer}
+    .rsOption span span{display:block}
+    .rsOption small{color:#8aa1ba;font-size:12px}
+    .rsOption input{width:18px;height:18px;accent-color:#2f8cff}
+    .rsRecord{height:50px;border:0;border-radius:10px;background:#1f7ae6;color:#fff;font:600 15px Segoe UI,Arial;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+    .rsRecord:hover{background:#2a86f0}
+    .rsRecord:disabled{background:#13283b;color:#5f7790;cursor:not-allowed}
+    .rsRecord kbd{font:500 11px Consolas,monospace;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.2)}
+    .rsMsg{min-height:20px;font-size:13px;color:#6ff0a8}.rsMsg.err{color:#ff8a95}
+    .rsHelp{margin-top:auto;border-top:1px solid #1b2f44;padding-top:14px;display:flex;flex-direction:column;gap:8px;color:#8aa1ba;font-size:13px}
+    .rsHelp b{color:#cfe0f5}
+    .rsTableWrap{overflow-x:auto}
+    .rsTable{width:100%;border-collapse:collapse;min-width:760px;font-variant-numeric:tabular-nums}
+    .rsTable th{text-align:left;color:#6b829b;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:8px 10px}
+    .rsTable td{padding:10px;border-top:1px solid #142739}
+    .rsTable tr.sel td{background:#0d2034}
+    .rsNum{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#2f8cff;font:600 12px Consolas,monospace}
+    .rsNum.plain{background:#3a5470}
+    .rsMono{font-family:Consolas,monospace;color:#a9bdd2}
+    .rsName{width:100%;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--text);padding:5px 8px;margin-left:-8px;font:600 14px Segoe UI,Arial}
+    .rsName:hover{border-color:#1d3248}.rsName:focus{outline:none;border-color:#2f8cff;background:#071421}
+    .rsTag{border:0;cursor:pointer;font:600 12px Segoe UI,Arial;padding:4px 10px;border-radius:999px}
+    .rsTag.photo{background:#0f2440;color:#8cc2ff}.rsTag.nophoto{background:#13202d;color:#6b829b}
+    .rsTag.req{background:#13283b;color:#cfe0f5}.rsTag.opt{background:#2b2410;color:#f5c46b}
+    .rsActs{text-align:right;white-space:nowrap}
+    .rsIcon{width:34px;height:34px;border:1px solid #1d3248;background:transparent;color:#8aa1ba;border-radius:8px;cursor:pointer}
+    .rsIcon:disabled{color:#3a4f66;cursor:default}
+    .rsDel{height:34px;border:1px solid #4a1f28;background:transparent;color:#ff8a95;border-radius:8px;padding:0 12px;cursor:pointer;font:500 13px Segoe UI,Arial}
+    .rsEmpty{padding:28px 10px;text-align:center;color:#7d93ad}
+    
+    @media(max-width:1000px){.setup{padding:18px}.rsPose b{font-size:20px}.dogGrid{grid-template-columns:repeat(2,1fr)}.pairHead{display:block}.nim{min-width:0;margin-top:15px}.workspace{grid-template-columns:1fr}.right{display:none}}
+    </style></head><body><div class="app"><aside class="side"><div class="brand">Robotic Dogs<small>Agentic Paw Patrol</small></div><nav class="nav"><button id="pairNav" class="active">▣ &nbsp; Pair & Connect</button><div id="dogNav"></div><div class="navLabel">Setup</div><button id="setupNav">⌖ &nbsp; Route Setup</button></nav></aside><main class="main"><section id="pair" class="pair"><div class="pairHead"><div><h1>Pair & Connect</h1><p class="muted">Select any available robotic dogs to connect with.</p></div><div class="nim card"><span style="font-size:28px">◉</span><strong>Network Interface Module (NIM)<small class="muted" style="display:block">NIM is active and ready.</small></strong><span id="nimStatus"><i id="nimDot" class="dot"></i><b id="nimText">ON</b></span><button id="nimBtn">Turn NIM Off</button></div></div><h3>Available Robotic Dogs</h3><div id="dogGrid" class="dogGrid"></div><div class="pairFoot card"><span id="summary">0 dogs selected</span><button id="pairBtn" class="primary" disabled>Pair & Connect</button></div></section><section id="dogView" class="dogView"><header class="top"><div class="avatar"></div><div class="identity"><h2 id="dogName"></h2><small id="unit"></small></div><div class="health"><span><i class="dot"></i>Online</span><span>▣ <b id="battery"></b></span><span>⌁ Connected</span></div><button id="disconnect" class="disconnect">Disconnect</button></header><div class="workspace"><section class="routeCard card"><div class="routeHead"><b>Route Progress</b><span id="percent"></span></div><div class="map"><div class="racks"><div class="rack"></div><div class="rack"></div><div class="rack"></div><div class="rack"></div></div><svg class="routeSvg" viewBox="0 0 600 340" preserveAspectRatio="none"><polyline id="base" class="base" points="85,285 85,55 515,55 515,285 85,285"/><polyline id="done" class="done" points="85,285 85,55 515,55 515,285 85,285"/><circle id="marker" class="marker" r="10"/></svg></div><div class="legend">🔵 Completed &nbsp; 🟢 Current Position &nbsp; ⚪ Remaining</div><p><b>Current Task</b><br><span id="task" style="color:#8ec5ff"></span></p><div class="routeActions"><button id="routeBtn" class="primary routeBtn">▶ Go on your inspection route</button><button id="emergencyStopBtn" class="emergencyStopBtn">■ Emergency Stop</button></div></section><aside class="right card"><div class="tabs"><button id="imagesTab" class="active">Images</button><button id="commandsTab">Emergency Commands</button></div><div id="imagesPanel" class="panel images"><b>Live Images</b><div class="photo"></div><div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div></div><div id="commandsPanel" class="panel commands hidden"><div><b>Emergency Commands</b><p class="muted">Send a direct instruction to the selected dog.</p></div><div id="history" class="history"></div><div class="chat"><input id="commandInput" placeholder="Type an exact movement command..."><button id="send">➤</button></div></div></aside></div></section><section id="setup" class="setup" aria-labelledby="rsH1">
+    <div class="rsWrap">
+    <header class="rsHead">
+    <div>
+    <div class="rsTitle"><h1 id="rsH1">Route Setup</h1><span id="rsBadge" class="rsBadge"><i></i><span id="rsBadgeText">Pumbaa localized</span></span></div>
+    <p class="muted" style="margin:6px 0 0">Walk the dog to each inspection spot and press Record. </p>
+    </div>
+    <div class="rsControls">
+    <div class="rsField"><span class="rsLabel" id="rsDogLabel">Dog</span><div id="rsDogs" class="rsSeg" role="group" aria-labelledby="rsDogLabel"></div></div>
+    <div class="rsField" style="min-width:220px"><label class="rsLabel" for="rsRoute">Route</label><select id="rsRoute" class="rsSelect"></select></div>
+    <button id="rsNewToggle" class="rsGhost" type="button" aria-expanded="false">+ New route</button>
+    </div>
+    </header>
+    <form id="rsNewForm" class="rsNew hidden" style="justify-content:flex-end">
+    <input id="rsNewName" class="rsInput" placeholder="Route name, e.g. Ops Center Patrol" aria-label="New route name" style="width:300px">
+    <button class="rsGhost" type="submit">Create</button>
+    </form>
+    
+    <div class="rsRow">
+    <section class="rsCard" style="flex:999 1 560px">
+    <div class="rsCardHead"><h2>Dog position</h2><button id="rsRecenter" class="rsGhost" type="button" style="height:32px;font-size:12.5px;padding:0 12px">Recenter map</button></div>
+    <div class="rsPose" aria-live="polite">
+    <div><span class="rsLabel">X</span><b id="rsX">–</b></div>
+    <div><span class="rsLabel">Y</span><b id="rsY">–</b></div>
+    <div><span class="rsLabel">Facing</span><b id="rsYaw">–</b></div>
+    </div>
+    <div class="rsMap"><svg id="rsMap" viewBox="0 0 640 340" role="img" aria-label="Map of recorded stops and the dog's position"></svg></div>
+    <div class="rsLegend"><span><i style="background:#2f8cff"></i>Photo stop</span><span><i style="background:#3a5470"></i>No photo</span><span><i style="background:#35e08a"></i>Dog</span></div>
+    </section>
+    
+    <section class="rsCard" style="flex:1 1 360px">
+    <h2>Record a waypoint here</h2>
+    <div class="rsField"><label class="rsLabel" for="rsWpName">Name</label><input id="rsWpName" class="rsInput" placeholder="e.g. Corner 1" style="height:46px;font-size:15px"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+    <label class="rsOption"><span><span style="font-weight:600">Take a photo here</span><small>Sent for compliance analysis</small></span><input id="rsPhoto" type="checkbox" checked></label>
+    <label class="rsOption"><span><span style="font-weight:600">Required stop</span><small>Route ends if the dog can't reach it</small></span><input id="rsRequired" type="checkbox" checked></label>
+    </div>
+    <button id="rsRecord" class="rsRecord" type="button">Record at dog's position <kbd>Enter</kbd></button>
+    <div id="rsMsg" class="rsMsg" role="status"></div>
+    <div class="rsHelp"><b>How to use</b><span>1. Start the dog on the taped start spot.</span><span>2. Drive it to a spot and point it at what to photograph.</span><span>3. Name it and press Record. End with "Home".</span></div>
+    </section>
+    </div>
+    
+    <section class="rsCard">
+    <div class="rsCardHead"><h2 id="rsListTitle">Waypoints</h2><span id="rsCount" class="rsMono" style="font-size:12px;color:#6b829b"></span></div>
+    <div class="rsTableWrap"><table class="rsTable">
+    <thead><tr><th style="width:44px">#</th><th>Name</th><th>Position</th><th>Facing</th><th>Photo</th><th>Stop</th><th style="text-align:right">Actions</th></tr></thead>
+    <tbody id="rsBody"></tbody>
+    </table></div>
+    </section>
+    </div>
+    </section>
+    </main></div>
+    <script>
+    const dogs={Pumbaa:{unit:'Unit 01',battery:87,progress:24,task:'Moving to Section B',online:true},Timone:{unit:'Unit 02',battery:92,progress:76,task:'Inspecting Section D',online:true},Simba:{unit:'Unit 03',battery:null,progress:0,task:'Offline',online:false},Nala:{unit:'Unit 04',battery:78,progress:42,task:'Moving to Section C',online:true}};
+    let selected=new Set(),current='',nimOn=true;const dogStates=Object.fromEntries(Object.keys(dogs).map(n=>[n,{stopped:false,running:false}]));const histories=Object.fromEntries(Object.keys(dogs).map(n=>[n,[]]));const $=id=>document.getElementById(id);
+    function renderCards(){$('dogGrid').innerHTML=Object.entries(dogs).map(([n,d])=>`<article class="dogCard card ${selected.has(n)?'selected':''} ${d.online?'':'offline'}" data-dog="${n}"><div class="check">${selected.has(n)?'✓':''}</div><div class="robot"></div><h3>${n}</h3><span class="muted">${d.unit}</span><p style="color:${d.online?'#40e582':'#ff7a87'}">● ${d.online?'Online':'Offline'} &nbsp; ▣ ${d.battery??'--'}%</p></article>`).join('');document.querySelectorAll('.dogCard').forEach(c=>c.onclick=()=>toggle(c.dataset.dog));summary()}
+    function toggle(n){if(!dogs[n].online)return;selected.has(n)?selected.delete(n):selected.add(n);renderCards()}
+    function summary(){$('summary').textContent=selected.size?`${selected.size} dog${selected.size>1?'s':''} selected: ${[...selected].join(', ')}`:'0 dogs selected';$('pairBtn').disabled=!selected.size||!nimOn}
+    function renderNav(){$('dogNav').innerHTML=[...selected].map(n=>`<button data-dog="${n}" class="${n===current?'active':''}">♙ &nbsp; ${n}</button>`).join('');document.querySelectorAll('#dogNav button').forEach(b=>b.onclick=()=>openDog(b.dataset.dog))}
+    function showPair(){$('setup').style.display='none';$('setupNav').classList.remove('active');$('pair').style.display='block';$('dogView').style.display='none';$('pairNav').classList.add('active');renderCards()}
+    function openDog(n){current=n;renderNav();$('pairNav').classList.remove('active');$('setupNav').classList.remove('active');$('setup').style.display='none';$('pair').style.display='none';$('dogView').style.display='block';const d=dogs[n];$('dogName').textContent=n;$('unit').textContent=d.unit;$('battery').textContent=d.battery+'%';setProgress(d.progress);renderDogState();showImages();renderHistory()}
+    
+    function renderDogState(){
+     const state=dogStates[current],d=dogs[current];
+     $('task').textContent=state.stopped?'Emergency stop activated':state.running?'Inspection route running':d.task;
+     $('routeBtn').textContent=state.stopped?'▶ Send back on inspection route':state.running?'■ Route running':'▶ Go on your inspection route';
+     $('emergencyStopBtn').classList.toggle('active',state.stopped);
+     $('emergencyStopBtn').textContent=state.stopped?'■ Stopped':'■ Emergency Stop';
+     $('emergencyStopBtn').disabled=state.stopped;
+    }
+    function setProgress(p){$('percent').textContent=p+'% Complete';const base=$('base'),done=$('done'),mark=$('marker'),len=base.getTotalLength();done.style.strokeDasharray=`${len} ${len}`;done.style.strokeDashoffset=len*(1-p/100);const pt=base.getPointAtLength(len*p/100);mark.setAttribute('cx',pt.x);mark.setAttribute('cy',pt.y)}
+    function renderHistory(){const h=$('history'),items=histories[current];h.innerHTML=items.length?items.map(x=>`<div class="message"><span>${escapeHtml(x)}</span><small>Sent to ${current}</small></div>`).join(''):`<div class="empty">No emergency commands sent to ${current}.</div>`;h.scrollTop=h.scrollHeight}
+    function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+    function send(){const v=$('commandInput').value.trim();if(!v||!current)return;histories[current].push(v);$('commandInput').value='';renderHistory()}
+    function showImages(){$('imagesPanel').classList.remove('hidden');$('commandsPanel').classList.add('hidden');$('imagesTab').classList.add('active');$('commandsTab').classList.remove('active')}
+    $('commandsTab').onclick=()=>{$('commandsPanel').classList.remove('hidden');$('imagesPanel').classList.add('hidden');$('commandsTab').classList.add('active');$('imagesTab').classList.remove('active');renderHistory()};$('imagesTab').onclick=showImages;$('send').onclick=send;$('commandInput').onkeydown=e=>{if(e.key==='Enter')send()};$('pairNav').onclick=showPair;$('pairBtn').onclick=()=>{renderNav();openDog([...selected][0])};$('disconnect').onclick=()=>{selected.delete(current);const next=[...selected][0];current='';renderNav();next?openDog(next):showPair()};$('nimBtn').onclick=()=>{nimOn=!nimOn;$('nimBtn').textContent=nimOn?'Turn NIM Off':'Turn NIM On';$('nimText').textContent=nimOn?'ON':'OFF';$('nimDot').style.background=nimOn?'var(--green)':'var(--red)';$('nimDot').style.boxShadow=nimOn?'0 0 10px #31df7966':'0 0 10px #ff657466';summary()};$('routeBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=false;dogStates[current].running=true;renderDogState()};$('emergencyStopBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=true;dogStates[current].running=false;renderDogState()};
+    
+    /* ---------- Route Setup (placeholder data; swap for /api/routes calls later) ---------- */
+    const rsRoutes={'Ops Center Patrol':[
+     {name:'Start',x:1.25,y:0.75,yaw:0.56,photo:true,required:true},
+     {name:'Corner 1',x:1.95,y:1.30,yaw:0.44,photo:true,required:true},
+     {name:'Server row B',x:3.12,y:1.48,yaw:-0.19,photo:true,required:false},
+     {name:'Home',x:4.02,y:2.10,yaw:0.51,photo:false,required:true}],
+     'Data Center Patrol':[]};
+    const rsDogNames=Object.keys(dogs).filter(n=>dogs[n].online);
+    const rsPoses=Object.fromEntries(rsDogNames.map((n,i)=>[n,{x:3.64-i*.8,y:1.72+i*.4,yaw:0.5}]));
+    let rsDog=rsDogNames[0],rsRoute='Ops Center Patrol',rsSel=-1,rsView=null;
+    const rsDeg=r=>Math.round(r*180/Math.PI)+'°';
+    function rsEsc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+    function rsSay(t,err){$('rsMsg').textContent=t;$('rsMsg').className='rsMsg'+(err?' err':'')}
+    
+    function showSetup(){current='';renderNav();$('pair').style.display='none';$('dogView').style.display='none';$('setup').style.display='block';$('pairNav').classList.remove('active');$('setupNav').classList.add('active');rsRender()}
+    function rsRender(){
+     $('rsDogs').innerHTML=rsDogNames.map(n=>`<button type="button" data-dog="${n}" aria-pressed="${n===rsDog}">${n}</button>`).join('');
+     document.querySelectorAll('#rsDogs button').forEach(b=>b.onclick=()=>{rsDog=b.dataset.dog;rsView=null;rsRender()});
+     $('rsRoute').innerHTML=Object.keys(rsRoutes).map(r=>`<option${r===rsRoute?' selected':''}>${rsEsc(r)}</option>`).join('');
+     $('rsBadgeText').textContent=`${rsDog} localized`;
+     rsTable();rsPose();rsDraw();
+    }
+    function rsTable(){
+     const w=rsRoutes[rsRoute];
+     $('rsListTitle').textContent=`Waypoints · ${rsRoute}`;
+     $('rsCount').textContent=`${w.length} stop${w.length===1?'':'s'} · saved automatically`;
+     $('rsBody').innerHTML=w.length?w.map((p,i)=>`<tr class="${i===rsSel?'sel':''}" data-i="${i}">
+    <td><span class="rsNum ${p.photo?'':'plain'}">${i+1}</span></td>
+    <td><input class="rsName" value="${rsEsc(p.name)}" data-i="${i}" aria-label="Name of stop ${i+1}"></td>
+    <td class="rsMono">${p.x.toFixed(2)}, ${p.y.toFixed(2)}</td>
+    <td class="rsMono">${rsDeg(p.yaw)}</td>
+    <td><button type="button" class="rsTag ${p.photo?'photo':'nophoto'}" data-act="photo" data-i="${i}" aria-pressed="${p.photo}">${p.photo?'Photo':'No photo'}</button></td>
+    <td><button type="button" class="rsTag ${p.required?'req':'opt'}" data-act="req" data-i="${i}" aria-pressed="${p.required}">${p.required?'Required':'Optional'}</button></td>
+    <td class="rsActs"><button type="button" class="rsIcon" data-act="up" data-i="${i}" aria-label="Move ${rsEsc(p.name)} up"${i===0?' disabled':''}>↑</button> <button type="button" class="rsIcon" data-act="down" data-i="${i}" aria-label="Move ${rsEsc(p.name)} down"${i===w.length-1?' disabled':''}>↓</button> <button type="button" class="rsDel" data-act="del" data-i="${i}" aria-label="Delete ${rsEsc(p.name)}">Delete</button></td>
+    </tr>`).join(''):`<tr><td colspan="7" class="rsEmpty">No stops yet. Drive the dog to its start spot, name it "Start", and press Record.</td></tr>`;
+    }
+    function rsPose(){const p=rsPoses[rsDog];$('rsX').innerHTML=`${p.x.toFixed(2)}<span>m</span>`;$('rsY').innerHTML=`${p.y.toFixed(2)}<span>m</span>`;$('rsYaw').textContent=rsDeg(p.yaw)}
+    function rsDraw(){
+     const w=rsRoutes[rsRoute],p=rsPoses[rsDog],W=640,H=340,m=46;
+     const pts=w.map(q=>[q.x,q.y]).concat([[p.x,p.y]]);
+     const fits=v=>pts.every(([x,y])=>x>v.x0+.3&&x<v.x1-.3&&y>v.y0+.3&&y<v.y1-.3);
+     if(!rsView||!fits(rsView)){const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);rsView={x0:Math.min(...xs)-1,x1:Math.max(...xs)+1,y0:Math.min(...ys)-1,y1:Math.max(...ys)+1}}
+     const v=rsView,s=Math.min((W-2*m)/(v.x1-v.x0),(H-2*m)/(v.y1-v.y0)),ox=(W-s*(v.x1-v.x0))/2,oy=(H-s*(v.y1-v.y0))/2;
+     const X=x=>ox+(x-v.x0)*s,Y=y=>H-(oy+(y-v.y0)*s);
+     let g='';
+     for(let x=Math.ceil(v.x0);x<=v.x1;x++)g+=`<line x1="${X(x)}" y1="0" x2="${X(x)}" y2="${H}" stroke="#122438"/><text x="${X(x)+4}" y="${H-8}" fill="#4c6580" font-family="Consolas,monospace" font-size="11">${x}m</text>`;
+     for(let y=Math.ceil(v.y0);y<=v.y1;y++)g+=`<line x1="0" y1="${Y(y)}" x2="${W}" y2="${Y(y)}" stroke="#122438"/>`;
+     if(w.length>1)g+=`<polyline points="${w.map(q=>X(q.x)+','+Y(q.y)).join(' ')}" fill="none" stroke="#2f8cff" stroke-opacity=".6" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>`;
+     w.forEach((q,i)=>{const x=X(q.x),y=Y(q.y),c=q.photo?'#2f8cff':'#3a5470';
+      g+=`<line x1="${x}" y1="${y}" x2="${x+Math.cos(q.yaw)*22}" y2="${y-Math.sin(q.yaw)*22}" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`;
+      if(i===rsSel)g+=`<circle cx="${x}" cy="${y}" r="20" fill="#2f8cff" fill-opacity=".18"/>`;
+      g+=`<circle cx="${x}" cy="${y}" r="13" fill="${c}" stroke="#071421" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-family="Consolas,monospace" font-size="12" font-weight="600">${i+1}</text><text x="${x+18}" y="${y+22}" fill="#dbe7f4" font-size="12.5" font-weight="600">${rsEsc(q.name)}</text>`});
+     const dx=X(p.x),dy=Y(p.y);
+     g+=`<circle cx="${dx}" cy="${dy}" r="24" fill="none" stroke="#35e08a" stroke-opacity=".25" stroke-width="2"/><g transform="translate(${dx} ${dy}) rotate(${-p.yaw*180/Math.PI})"><path d="M17 0 L-9 10 L-4 0 L-9 -10 Z" fill="#35e08a"/></g>`;
+     $('rsMap').innerHTML=g;
+    }
+    function rsRecord(){
+     const w=rsRoutes[rsRoute],p=rsPoses[rsDog];
+     const name=$('rsWpName').value.trim()||`Checkpoint${w.length+1}`;
+     if(w.some(q=>q.name===name)){rsSay(`There's already a stop called "${name}"`,true);return}
+     w.push({name,x:+p.x.toFixed(2),y:+p.y.toFixed(2),yaw:+p.yaw.toFixed(2),photo:$('rsPhoto').checked,required:$('rsRequired').checked});
+     rsSel=w.length-1;$('rsWpName').value='';rsSay(`Saved ${name} at ${p.x.toFixed(2)}, ${p.y.toFixed(2)}`);rsTable();rsDraw();
+    }
+    
+    $('setupNav').onclick=showSetup;
+    $('rsRecord').onclick=rsRecord;
+    $('rsWpName').onkeydown=e=>{if(e.key==='Enter')rsRecord()};
+    $('rsRoute').onchange=e=>{rsRoute=e.target.value;rsSel=-1;rsView=null;rsTable();rsDraw()};
+    $('rsRecenter').onclick=()=>{rsView=null;rsDraw()};
+    $('rsNewToggle').onclick=()=>{const f=$('rsNewForm');f.classList.toggle('hidden');$('rsNewToggle').setAttribute('aria-expanded',!f.classList.contains('hidden'));if(!f.classList.contains('hidden'))$('rsNewName').focus()};
+    $('rsNewForm').onsubmit=e=>{e.preventDefault();const n=$('rsNewName').value.trim();if(!n){rsSay('Type a name for the new route first',true);return}if(rsRoutes[n]){rsSay(`A route called "${n}" already exists`,true);return}rsRoutes[n]=[];rsRoute=n;rsSel=-1;rsView=null;$('rsNewName').value='';$('rsNewForm').classList.add('hidden');$('rsNewToggle').setAttribute('aria-expanded','false');rsSay(`Created ${n}. Record its first stop.`);rsRender();$('rsWpName').focus()};
+    $('rsBody').onclick=e=>{const b=e.target.closest('button'),tr=e.target.closest('tr[data-i]');if(!tr)return;const w=rsRoutes[rsRoute],i=+tr.dataset.i;
+     if(!b){rsSel=i;document.querySelectorAll('#rsBody tr').forEach(r=>r.classList.toggle('sel',+r.dataset.i===i));rsDraw();return}
+     const a=b.dataset.act;
+     if(a==='photo')w[i].photo=!w[i].photo;
+     if(a==='req')w[i].required=!w[i].required;
+     if(a==='up'&&i>0){[w[i-1],w[i]]=[w[i],w[i-1]];rsSel=i-1}
+     if(a==='down'&&i<w.length-1){[w[i+1],w[i]]=[w[i],w[i+1]];rsSel=i+1}
+     if(a==='del'){const n=w[i].name;w.splice(i,1);rsSel=-1;rsSay(`Deleted ${n}`)}
+     rsTable();rsDraw()};
+    $('rsBody').onchange=e=>{if(!e.target.classList.contains('rsName'))return;const w=rsRoutes[rsRoute],i=+e.target.dataset.i,n=e.target.value.trim();
+     if(!n||w.some((q,j)=>j!==i&&q.name===n)){rsSay(n?`There's already a stop called "${n}"`:"Name can't be empty",true);rsTable();return}
+     w[i].name=n;rsSay('Renamed');rsDraw()};
+    $('rsBody').onkeydown=e=>{if(e.key==='Enter'&&e.target.classList.contains('rsName'))e.target.blur()};
+    
+    selected.clear();current='';renderNav();showPair();
+    </script></body></html>
