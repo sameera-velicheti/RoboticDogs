@@ -13,6 +13,7 @@ import json
 import time
 import threading
 import requests as http_requests
+from status.system_status import status
 
 app = Flask(__name__)
 
@@ -574,6 +575,19 @@ def analyze():
         mimetype="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
     )
+
+@app.route("/api/status", methods=["GET"])
+def api_status():
+    """
+    Returns the current system status.
+
+    Used by:
+    - Pair & Connect Screen
+    - Startup Monitoring
+    - Future Route Status Tracking
+    """
+
+    return status.get_status()
 
 @app.route("/")
 def index():
