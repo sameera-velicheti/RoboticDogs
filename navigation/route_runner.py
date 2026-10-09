@@ -21,6 +21,7 @@ import time
 
 from navigation.route_loader import load_route
 from navigation.navigator import MockNavigator
+from status.system_status import status
 
 
 class RouteRunner:
@@ -42,6 +43,7 @@ class RouteRunner:
         """Emergency stop: cancel the current goal and end the route."""
         self._stop_requested = True
         self.navigator.cancel()
+        status.stop_route(self.dog_name)
 
     def _emit(self, status, index, total, wp=None, message="", image=None):
         self.on_event({
@@ -62,9 +64,13 @@ class RouteRunner:
         summary = {"route": route["route_name"], "dog": self.dog_name,
                    "reached": [], "skipped": [], "images": [], "completed": False}
 
+        status.start_route(self.dog_name)
+
         self._emit("route_started", 0, total, message=route["route_name"])
 
         for i, wp in enumerate(waypoints, start=1):
+            status.update_waypoint(self.dog_name, wp["name"])
+
             if self._stop_requested:
                 self._emit("route_stopped", i, total, wp, "Stopped by user")
                 return summary
@@ -78,11 +84,13 @@ class RouteRunner:
                 self._emit("retrying", i, total, wp, result.message)
 
             if self._stop_requested:
+                status.stop_route(self.dog_name)
                 self._emit("route_stopped", i, total, wp, "Stopped by user")
                 return summary
 
             if not result.success:
                 if wp["required"]:
+                    status.stop_route(self.dog_name)
                     self._emit("route_failed", i, total, wp,
                                f"Required waypoint unreachable: {result.message}")
                     return summary
@@ -102,6 +110,7 @@ class RouteRunner:
                     self._emit("capture_failed", i, total, wp, str(e))
 
         summary["completed"] = True
+        status.complete_route(self.dog_name)
         self._emit("route_completed", total, total, message=route["route_name"])
         return summary
 
