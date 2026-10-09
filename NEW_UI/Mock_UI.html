@@ -66,7 +66,32 @@
     .rsEmpty{padding:28px 10px;text-align:center;color:#7d93ad}
     
     @media(max-width:1000px){.setup{padding:18px}.rsPose b{font-size:20px}.dogGrid{grid-template-columns:repeat(2,1fr)}.pairHead{display:block}.nim{min-width:0;margin-top:15px}.workspace{grid-template-columns:1fr}.right{display:none}}
-    </style></head><body><div class="app"><aside class="side"><div class="brand">Robotic Dogs<small>Agentic Paw Patrol</small></div><nav class="nav"><button id="pairNav" class="active">▣ &nbsp; Pair & Connect</button><div id="dogNav"></div><div class="navLabel">Setup</div><button id="setupNav">⌖ &nbsp; Route Setup</button></nav></aside><main class="main"><section id="pair" class="pair"><div class="pairHead"><div><h1>Pair & Connect</h1><p class="muted">Select any available robotic dogs to connect with.</p></div><div class="nim card"><span style="font-size:28px">◉</span><strong>Network Interface Module (NIM)<small class="muted" style="display:block">NIM is active and ready.</small></strong><span id="nimStatus"><i id="nimDot" class="dot"></i><b id="nimText">ON</b></span><button id="nimBtn">Turn NIM Off</button></div></div><h3>Available Robotic Dogs</h3><div id="dogGrid" class="dogGrid"></div><div class="pairFoot card"><span id="summary">0 dogs selected</span><button id="pairBtn" class="primary" disabled>Pair & Connect</button></div></section><section id="dogView" class="dogView"><header class="top"><div class="avatar"></div><div class="identity"><h2 id="dogName"></h2><small id="unit"></small></div><div class="health"><span><i class="dot"></i>Online</span><span>▣ <b id="battery"></b></span><span>⌁ Connected</span></div><button id="disconnect" class="disconnect">Disconnect</button></header><div class="workspace"><section class="routeCard card"><div class="routeHead"><b>Route Progress</b><span id="percent"></span></div><div class="map"><div class="racks"><div class="rack"></div><div class="rack"></div><div class="rack"></div><div class="rack"></div></div><svg class="routeSvg" viewBox="0 0 600 340" preserveAspectRatio="none"><polyline id="base" class="base" points="85,285 85,55 515,55 515,285 85,285"/><polyline id="done" class="done" points="85,285 85,55 515,55 515,285 85,285"/><circle id="marker" class="marker" r="10"/></svg></div><div class="legend">🔵 Completed &nbsp; 🟢 Current Position &nbsp; ⚪ Remaining</div><p><b>Current Task</b><br><span id="task" style="color:#8ec5ff"></span></p><div class="routeActions"><button id="routeBtn" class="primary routeBtn">▶ Go on your inspection route</button><button id="emergencyStopBtn" class="emergencyStopBtn">■ Emergency Stop</button></div></section><aside class="right card"><div class="tabs"><button id="imagesTab" class="active">Images</button><button id="commandsTab">Emergency Commands</button></div><div id="imagesPanel" class="panel images"><b>Live Images</b><div class="photo"></div><div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div></div><div id="commandsPanel" class="panel commands hidden"><div><b>Emergency Commands</b><p class="muted">Send a direct instruction to the selected dog.</p></div><div id="history" class="history"></div><div class="chat"><input id="commandInput" placeholder="Type an exact movement command..."><button id="send">➤</button></div></div></aside></div></section><section id="setup" class="setup" aria-labelledby="rsH1">
+    
+    /* ---------- Dog Management Popup ---------- */
+    .dogListHead{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
+    .dogListHead h3{margin:0}
+    .manageDogsBtn{border:1px solid #42698e;background:#0b1b2b;color:#dcecff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;position:relative;z-index:1}
+    .manageDogsBtn:hover{border-color:#62b6ff;background:#10243a}
+    .dogModalBackdrop{display:none;position:fixed;inset:0;z-index:10000;background:rgba(1,8,14,.82);align-items:center;justify-content:center;padding:20px;pointer-events:auto}
+    .dogModalBackdrop.open{display:flex}
+    .dogModal{width:min(820px,100%);max-height:90vh;overflow:auto;padding:22px;position:relative;pointer-events:auto}
+    .dogModalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .dogModalHead h2{margin:0}
+    .dogModalClose{width:40px;height:40px;border:1px solid #36536f;background:#071421;color:#dcecff;border-radius:8px;font-size:21px;cursor:pointer}
+    .dogForm{display:grid;grid-template-columns:1fr 1.2fr 1fr .8fr;gap:12px;margin-top:20px}
+    .dogForm label{display:flex;flex-direction:column;gap:6px;color:#7890a9;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+    .dogForm input{height:44px;border:1px solid #29445f;border-radius:8px;background:#071421;color:#f2f7ff;padding:0 11px;outline:none}
+    .dogForm input:focus{border-color:#2f8cff;box-shadow:0 0 0 3px rgba(47,140,255,.17)}
+    .dogFormActions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;margin-top:2px}
+    .addDogBtn{min-width:150px;cursor:pointer;pointer-events:auto;position:relative;z-index:2}
+    .dogFormError{grid-column:1/-1;min-height:18px;color:#ff8a95;font-size:13px}
+    .managedDogs{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+    .managedDog{display:grid;grid-template-columns:1.1fr 1.25fr 1fr .8fr auto;gap:12px;align-items:center;padding:11px 12px;border:1px solid #1e374e;border-radius:9px;background:#071421}
+    .managedDog small{display:block;color:#7289a1;margin-top:3px}
+    .removeDogBtn{border:1px solid #59242e;background:transparent;color:#ff8a95;border-radius:7px;padding:8px 12px;cursor:pointer}
+    @media(max-width:850px){.dogForm{grid-template-columns:1fr 1fr}.managedDog{grid-template-columns:1fr 1fr}.removeDogBtn{grid-column:1/-1}.dogModal{max-height:94vh}}
+
+    </style></head><body><div class="app"><aside class="side"><div class="brand">Robotic Dogs<small>Agentic Paw Patrol</small></div><nav class="nav"><button id="pairNav" class="active">▣ &nbsp; Pair & Connect</button><div id="dogNav"></div><div class="navLabel">Setup</div><button id="setupNav">⌖ &nbsp; Route Setup</button></nav></aside><main class="main"><section id="pair" class="pair"><div class="pairHead"><div><h1>Pair & Connect</h1><p class="muted">Select any available robotic dogs to connect with.</p></div><div class="nim card"><span style="font-size:28px">◉</span><strong>Network Interface Module (NIM)<small class="muted" style="display:block">NIM is active and ready.</small></strong><span id="nimStatus"><i id="nimDot" class="dot"></i><b id="nimText">ON</b></span><button id="nimBtn">Turn NIM Off</button></div></div><div class="dogListHead"><h3>Available Robotic Dogs</h3><button id="manageDogsBtn" class="manageDogsBtn" type="button">+ Add / Remove Dogs</button></div><div id="dogGrid" class="dogGrid"></div><div class="pairFoot card"><span id="summary">0 dogs selected</span><button id="pairBtn" class="primary" disabled>Pair & Connect</button></div></section><section id="dogView" class="dogView"><header class="top"><div class="avatar"></div><div class="identity"><h2 id="dogName"></h2><small id="unit"></small></div><div class="health"><span><i class="dot"></i>Online</span><span>▣ <b id="battery"></b></span><span>⌁ Connected</span></div><button id="disconnect" class="disconnect">Disconnect</button></header><div class="workspace"><section class="routeCard card"><div class="routeHead"><b>Route Progress</b><span id="percent"></span></div><div class="map"><div class="racks"><div class="rack"></div><div class="rack"></div><div class="rack"></div><div class="rack"></div></div><svg class="routeSvg" viewBox="0 0 600 340" preserveAspectRatio="none"><polyline id="base" class="base" points="85,285 85,55 515,55 515,285 85,285"/><polyline id="done" class="done" points="85,285 85,55 515,55 515,285 85,285"/><circle id="marker" class="marker" r="10"/></svg></div><div class="legend">🔵 Completed &nbsp; 🟢 Current Position &nbsp; ⚪ Remaining</div><p><b>Current Task</b><br><span id="task" style="color:#8ec5ff"></span></p><div class="routeActions"><button id="routeBtn" class="primary routeBtn">▶ Go on your inspection route</button><button id="emergencyStopBtn" class="emergencyStopBtn">■ Emergency Stop</button></div></section><aside class="right card"><div class="tabs"><button id="imagesTab" class="active">Images</button><button id="commandsTab">Emergency Commands</button></div><div id="imagesPanel" class="panel images"><b>Live Images</b><div class="photo"></div><div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div></div><div id="commandsPanel" class="panel commands hidden"><div><b>Emergency Commands</b><p class="muted">Send a direct instruction to the selected dog.</p></div><div id="history" class="history"></div><div class="chat"><input id="commandInput" placeholder="Type an exact movement command..."><button id="send">➤</button></div></div></aside></div></section><section id="setup" class="setup" aria-labelledby="rsH1">
     <div class="rsWrap">
     <header class="rsHead">
     <div>
@@ -119,15 +144,39 @@
     </div>
     </section>
     </main></div>
+    
+    <div id="dogModalBackdrop" class="dogModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="dogModalTitle">
+      <section class="dogModal card">
+        <div class="dogModalHead">
+          <div><h2 id="dogModalTitle">Add or Remove Dogs</h2><p class="muted">Configure the connection details used for each robotic dog.</p></div>
+          <button id="closeDogModal" class="dogModalClose" type="button" aria-label="Close">×</button>
+        </div>
+        <form id="addDogForm" class="dogForm" novalidate>
+          <label>Dog name<input id="newDogName" type="text" autocomplete="off" placeholder="e.g. Pumbaa"></label>
+          <label>IP address<input id="newDogIp" type="text" autocomplete="off" placeholder="e.g. 192.168.0.60"></label>
+          <label>SSH username<input id="newDogUser" type="text" autocomplete="off" placeholder="e.g. ubuntu"></label>
+          <label>ROS port<input id="newDogPort" type="number" min="1" max="65535" value="9090"></label>
+          <div id="dogFormError" class="dogFormError" role="alert"></div>
+          <div class="dogFormActions">
+            <button id="cancelAddDog" class="rsGhost" type="button">Cancel</button>
+            <button id="addDogBtn" class="primary addDogBtn" type="button">Add Dog</button>
+          </div>
+        </form>
+        <h3>Configured Dogs</h3>
+        <div id="managedDogs" class="managedDogs"></div>
+      </section>
+    </div>
+
     <script>
-    const dogs={Pumbaa:{unit:'Unit 01',battery:87,progress:24,task:'Moving to Section B',online:true},Timone:{unit:'Unit 02',battery:92,progress:76,task:'Inspecting Section D',online:true},Simba:{unit:'Unit 03',battery:null,progress:0,task:'Offline',online:false},Nala:{unit:'Unit 04',battery:78,progress:42,task:'Moving to Section C',online:true}};
+    const dogs={Pumbaa:{unit:'Unit 01',ip:'192.168.0.60',sshUser:'ubuntu',rosPort:9090,battery:87,progress:24,task:'Moving to Section B',online:true},Timone:{unit:'Unit 02',ip:'192.168.0.85',sshUser:'ubuntu',rosPort:9090,battery:92,progress:76,task:'Inspecting Section D',online:true},Simba:{unit:'Unit 03',ip:'192.168.0.90',sshUser:'ubuntu',rosPort:9090,battery:null,progress:0,task:'Offline',online:false},Nala:{unit:'Unit 04',ip:'192.168.0.95',sshUser:'ubuntu',rosPort:9090,battery:78,progress:42,task:'Moving to Section C',online:true}};
     let selected=new Set(),current='',nimOn=true;const dogStates=Object.fromEntries(Object.keys(dogs).map(n=>[n,{stopped:false,running:false}]));const histories=Object.fromEntries(Object.keys(dogs).map(n=>[n,[]]));const $=id=>document.getElementById(id);
-    function renderCards(){$('dogGrid').innerHTML=Object.entries(dogs).map(([n,d])=>`<article class="dogCard card ${selected.has(n)?'selected':''} ${d.online?'':'offline'}" data-dog="${n}"><div class="check">${selected.has(n)?'✓':''}</div><div class="robot"></div><h3>${n}</h3><span class="muted">${d.unit}</span><p style="color:${d.online?'#40e582':'#ff7a87'}">● ${d.online?'Online':'Offline'} &nbsp; ▣ ${d.battery??'--'}%</p></article>`).join('');document.querySelectorAll('.dogCard').forEach(c=>c.onclick=()=>toggle(c.dataset.dog));summary()}
+    function renderCards(){$('dogGrid').innerHTML=Object.entries(dogs).map(([n,d])=>`<article class="dogCard card ${selected.has(n)?'selected':''} ${d.online?'':'offline'}" data-dog="${n}"><div class="check">${selected.has(n)?'✓':''}</div><div class="robot"></div><h3>${n}</h3><span class="muted">${d.unit} · ${d.ip||'No IP'}</span><p style="color:${d.online?'#40e582':'#ff7a87'}">● ${d.online?'Online':'Offline'} &nbsp; ▣ ${d.battery??'--'}%</p></article>`).join('');document.querySelectorAll('.dogCard').forEach(c=>c.onclick=()=>toggle(c.dataset.dog));summary()}
     function toggle(n){if(!dogs[n].online)return;selected.has(n)?selected.delete(n):selected.add(n);renderCards()}
     function summary(){$('summary').textContent=selected.size?`${selected.size} dog${selected.size>1?'s':''} selected: ${[...selected].join(', ')}`:'0 dogs selected';$('pairBtn').disabled=!selected.size||!nimOn}
     function renderNav(){$('dogNav').innerHTML=[...selected].map(n=>`<button data-dog="${n}" class="${n===current?'active':''}">♙ &nbsp; ${n}</button>`).join('');document.querySelectorAll('#dogNav button').forEach(b=>b.onclick=()=>openDog(b.dataset.dog))}
     function showPair(){$('setup').style.display='none';$('setupNav').classList.remove('active');$('pair').style.display='block';$('dogView').style.display='none';$('pairNav').classList.add('active');renderCards()}
-    function openDog(n){current=n;renderNav();$('pairNav').classList.remove('active');$('setupNav').classList.remove('active');$('setup').style.display='none';$('pair').style.display='none';$('dogView').style.display='block';const d=dogs[n];$('dogName').textContent=n;$('unit').textContent=d.unit;$('battery').textContent=d.battery+'%';setProgress(d.progress);renderDogState();showImages();renderHistory()}
+    function ensureDogState(n){if(!dogStates[n])dogStates[n]={stopped:false,running:false};if(!histories[n])histories[n]=[]}
+    function openDog(n){ensureDogState(n);current=n;renderNav();$('pairNav').classList.remove('active');$('setupNav').classList.remove('active');$('setup').style.display='none';$('pair').style.display='none';$('dogView').style.display='block';const d=dogs[n];$('dogName').textContent=n;$('unit').textContent=d.unit;$('battery').textContent=d.battery+'%';setProgress(d.progress);renderDogState();showImages();renderHistory()}
     
     function renderDogState(){
      const state=dogStates[current],d=dogs[current];
@@ -142,8 +191,84 @@
     function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
     function send(){const v=$('commandInput').value.trim();if(!v||!current)return;histories[current].push(v);$('commandInput').value='';renderHistory()}
     function showImages(){$('imagesPanel').classList.remove('hidden');$('commandsPanel').classList.add('hidden');$('imagesTab').classList.add('active');$('commandsTab').classList.remove('active')}
-    $('commandsTab').onclick=()=>{$('commandsPanel').classList.remove('hidden');$('imagesPanel').classList.add('hidden');$('commandsTab').classList.add('active');$('imagesTab').classList.remove('active');renderHistory()};$('imagesTab').onclick=showImages;$('send').onclick=send;$('commandInput').onkeydown=e=>{if(e.key==='Enter')send()};$('pairNav').onclick=showPair;$('pairBtn').onclick=()=>{renderNav();openDog([...selected][0])};$('disconnect').onclick=()=>{selected.delete(current);const next=[...selected][0];current='';renderNav();next?openDog(next):showPair()};$('nimBtn').onclick=()=>{nimOn=!nimOn;$('nimBtn').textContent=nimOn?'Turn NIM Off':'Turn NIM On';$('nimText').textContent=nimOn?'ON':'OFF';$('nimDot').style.background=nimOn?'var(--green)':'var(--red)';$('nimDot').style.boxShadow=nimOn?'0 0 10px #31df7966':'0 0 10px #ff657466';summary()};$('routeBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=false;dogStates[current].running=true;renderDogState()};$('emergencyStopBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=true;dogStates[current].running=false;renderDogState()};
+    $('commandsTab').onclick=()=>{$('commandsPanel').classList.remove('hidden');$('imagesPanel').classList.add('hidden');$('commandsTab').classList.add('active');$('imagesTab').classList.remove('active');renderHistory()};$('imagesTab').onclick=showImages;$('send').onclick=send;$('commandInput').onkeydown=e=>{if(e.key==='Enter')send()};$('pairNav').onclick=showPair;$('pairBtn').onclick=()=>{renderNav();openDog([...selected][0])};$('disconnect').onclick=()=>{selected.delete(current);const next=[...selected][0];current='';renderNav();next?openDog(next):showPair()};$('nimBtn').onclick=()=>{nimOn=!nimOn;$('nimBtn').textContent=nimOn?'Turn NIM Off':'Turn NIM On';$('nimText').textContent=nimOn?'ON':'OFF';$('nimDot').style.background=nimOn?'var(--green)':'var(--red)';$('nimDot').style.boxShadow=nimOn?'0 0 10px #31df7966':'0 0 10px #ff657466';if(!nimOn){selected.clear();current='';Object.values(dogStates).forEach(state=>{state.running=false;state.stopped=false});renderNav();showPair()}summary()};$('routeBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=false;dogStates[current].running=true;renderDogState()};$('emergencyStopBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=true;dogStates[current].running=false;renderDogState()};
     
+    
+    /* ---------- Dog Management ---------- */
+    function nextDogUnit(){
+      const used=Object.values(dogs).map(d=>Number(String(d.unit||'').replace(/\D/g,''))).filter(Number.isFinite);
+      const next=(used.length?Math.max(...used):0)+1;
+      return `Unit ${String(next).padStart(2,'0')}`;
+    }
+    function openDogModal(){
+      $('dogModalBackdrop').classList.add('open');
+      $('dogFormError').textContent='';
+      renderManagedDogs();
+      setTimeout(()=>$('newDogName').focus(),0);
+    }
+    function closeDogModal(){
+      $('dogModalBackdrop').classList.remove('open');
+      $('dogFormError').textContent='';
+    }
+    function renderManagedDogs(){
+      $('managedDogs').innerHTML=Object.entries(dogs).map(([name,d])=>`<div class="managedDog">
+        <div><b>${escapeHtml(name)}</b><small>${escapeHtml(d.unit||'')}</small></div>
+        <div><b>${escapeHtml(d.ip||'Not set')}</b><small>IP address</small></div>
+        <div><b>${escapeHtml(d.sshUser||'Not set')}</b><small>SSH username</small></div>
+        <div><b>${escapeHtml(String(d.rosPort||'--'))}</b><small>ROS port</small></div>
+        <button class="removeDogBtn" type="button" data-remove-dog="${escapeHtml(name)}">Remove</button>
+      </div>`).join('')||'<div class="empty">No dogs configured.</div>';
+      document.querySelectorAll('[data-remove-dog]').forEach(button=>button.onclick=()=>removeDog(button.dataset.removeDog));
+    }
+    function resetAddDogForm(){
+      $('newDogName').value='';
+      $('newDogIp').value='';
+      $('newDogUser').value='';
+      $('newDogPort').value='9090';
+      $('dogFormError').textContent='';
+    }
+    function addDog(){
+      const name=$('newDogName').value.trim();
+      const ip=$('newDogIp').value.trim();
+      const sshUser=$('newDogUser').value.trim();
+      const rosPort=Number($('newDogPort').value);
+      const ipv4=/^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
+      if(!name||!ip||!sshUser||!rosPort){$('dogFormError').textContent='Complete all four fields.';return}
+      if(dogs[name]){$('dogFormError').textContent='A dog with that name already exists.';return}
+      if(Object.values(dogs).some(d=>d.ip===ip)){$('dogFormError').textContent='That IP address is already assigned to another dog.';return}
+      if(!ipv4.test(ip)){$('dogFormError').textContent='Enter a valid IPv4 address.';return}
+      if(rosPort<1||rosPort>65535){$('dogFormError').textContent='ROS port must be between 1 and 65535.';return}
+      dogs[name]={unit:nextDogUnit(),ip,sshUser,rosPort,battery:null,progress:0,task:'Awaiting connection',online:true};
+      ensureDogState(name);
+      resetAddDogForm();
+      renderCards();
+      renderManagedDogs();
+    }
+    function removeDog(name){
+      if(!dogs[name])return;
+      selected.delete(name);
+      delete dogs[name];
+      delete dogStates[name];
+      delete histories[name];
+      if(current===name){
+        current='';
+        const next=[...selected][0];
+        renderNav();
+        next?openDog(next):showPair();
+      }else{
+        renderNav();
+        renderCards();
+      }
+      renderManagedDogs();
+    }
+    $('manageDogsBtn').onclick=openDogModal;
+    $('closeDogModal').onclick=closeDogModal;
+    $('cancelAddDog').onclick=()=>{resetAddDogForm();closeDogModal()};
+    $('addDogBtn').onclick=addDog;
+    $('addDogForm').onsubmit=e=>{e.preventDefault();addDog()};
+    $('dogModalBackdrop').onclick=e=>{if(e.target===$('dogModalBackdrop'))closeDogModal()};
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('dogModalBackdrop').classList.contains('open'))closeDogModal()});
+
     /* ---------- Route Setup (placeholder data; swap for /api/routes calls later) ---------- */
     const rsRoutes={'Ops Center Patrol':[
      {name:'Start',x:1.25,y:0.75,yaw:0.56,photo:true,required:true},
@@ -151,14 +276,14 @@
      {name:'Server row B',x:3.12,y:1.48,yaw:-0.19,photo:true,required:false},
      {name:'Home',x:4.02,y:2.10,yaw:0.51,photo:false,required:true}],
      'Data Center Patrol':[]};
-    const rsDogNames=Object.keys(dogs).filter(n=>dogs[n].online);
+    let rsDogNames=Object.keys(dogs).filter(n=>dogs[n].online);
     const rsPoses=Object.fromEntries(rsDogNames.map((n,i)=>[n,{x:3.64-i*.8,y:1.72+i*.4,yaw:0.5}]));
     let rsDog=rsDogNames[0],rsRoute='Ops Center Patrol',rsSel=-1,rsView=null;
     const rsDeg=r=>Math.round(r*180/Math.PI)+'°';
     function rsEsc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
     function rsSay(t,err){$('rsMsg').textContent=t;$('rsMsg').className='rsMsg'+(err?' err':'')}
     
-    function showSetup(){current='';renderNav();$('pair').style.display='none';$('dogView').style.display='none';$('setup').style.display='block';$('pairNav').classList.remove('active');$('setupNav').classList.add('active');rsRender()}
+    function showSetup(){rsDogNames=Object.keys(dogs).filter(n=>dogs[n].online);rsDog=rsDogNames.includes(rsDog)?rsDog:rsDogNames[0];rsDogNames.forEach((n,i)=>{if(!rsPoses[n])rsPoses[n]={x:3.64-i*.8,y:1.72+i*.4,yaw:0.5}});current='';renderNav();$('pair').style.display='none';$('dogView').style.display='none';$('setup').style.display='block';$('pairNav').classList.remove('active');$('setupNav').classList.add('active');rsRender()}
     function rsRender(){
      $('rsDogs').innerHTML=rsDogNames.map(n=>`<button type="button" data-dog="${n}" aria-pressed="${n===rsDog}">${n}</button>`).join('');
      document.querySelectorAll('#rsDogs button').forEach(b=>b.onclick=()=>{rsDog=b.dataset.dog;rsView=null;rsRender()});
