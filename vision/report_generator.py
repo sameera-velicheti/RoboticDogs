@@ -7,9 +7,10 @@ import json
 import os
 import sys
 from datetime import datetime
-sys.path.insert(0, '/home/demo_user/RoboticDogs')
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo folder
+sys.path.insert(0, _ROOT)
 
-REPORTS_DIR = '/home/demo_user/RoboticDogs/reports'
+REPORTS_DIR = os.path.join(_ROOT, 'reports')
 
 
 def generate_report(all_findings, location="SHI Lab", inspector="NemoClaw", route_name="Data Center Patrol"):

@@ -30,7 +30,8 @@ class RouteRunner:
         """
         navigator: MockNavigator or RosNavigator
         capture:   function that takes a picture and returns its file path
-                   (for a real dog: bridge.take_picture)
+                   (for a real dog: bridge.take_picture). If it accepts one
+                   argument, it is given the waypoint name.
         on_event:  function that receives each status event dict
         """
         self.navigator = navigator
@@ -38,6 +39,12 @@ class RouteRunner:
         self.capture = capture or (lambda: None)
         self.on_event = on_event or (lambda e: print(json.dumps(e)))
         self._stop_requested = False
+
+    def _take_picture(self, waypoint_name):
+        try:
+            return self.capture(waypoint_name)
+        except TypeError:
+            return self.capture()
 
     def stop(self):
         """Emergency stop: cancel the current goal and end the route."""
@@ -67,6 +74,14 @@ class RouteRunner:
         status.start_route(self.dog_name)
 
         self._emit("route_started", 0, total, message=route["route_name"])
+
+        # Localize the dog automatically (replaces "2D Pose Estimate" in RViz)
+        start = route.get("start_pose")
+        if start and hasattr(self.navigator, "set_initial_pose"):
+            self.navigator.set_initial_pose(start["x"], start["y"], start["yaw"])
+            self._emit("localizing", 0, total,
+                       message=f"Start pose set to ({start['x']}, {start['y']})")
+            time.sleep(2.0)  # give amcl a moment to settle
 
         for i, wp in enumerate(waypoints, start=1):
             status.update_waypoint(self.dog_name, wp["name"])
@@ -103,7 +118,7 @@ class RouteRunner:
 
             if wp["action"] == "capture_image":
                 try:
-                    image = self.capture()
+                    image = self._take_picture(wp["name"])
                     summary["images"].append(image)
                     self._emit("captured", i, total, wp, image=image)
                 except Exception as e:  # a bad photo should not end the route

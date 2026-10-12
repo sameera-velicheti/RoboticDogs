@@ -26,6 +26,15 @@ def validate_route(route):
         raise RouteError("Route has no waypoints")
 
     route.setdefault("route_name", "Unnamed route")
+
+    # Optional: where the dog starts (the taped spot), used to localize it
+    # automatically instead of clicking "2D Pose Estimate" in RViz.
+    start = route.get("start_pose")
+    if start is not None:
+        for field in ("x", "y", "yaw"):
+            if not isinstance(start.get(field), (int, float)):
+                raise RouteError(f"start_pose: '{field}' must be a number")
+
     seen = set()
 
     for i, wp in enumerate(route["waypoints"]):

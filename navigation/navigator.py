@@ -133,6 +133,33 @@ class RosNavigator(Navigator):
             return NavResult(True, "Arrived")
         return NavResult(False, f"move_base {_STATUS_TEXT.get(self._result, self._result)}")
 
+    def set_initial_pose(self, x, y, yaw):
+        """Tell amcl where the dog is (same as "2D Pose Estimate" in RViz).
+
+        Put the dog on the taped start spot first; the route file's
+        start_pose must be that spot's map coordinates.
+        """
+        cov = [0.0] * 36
+        cov[0] = cov[7] = 0.25 ** 2      # +/- 25 cm in x and y
+        cov[35] = 0.2 ** 2               # +/- ~11 degrees in heading
+        pub = self._roslibpy.Topic(
+            self.client, "/initialpose", "geometry_msgs/PoseWithCovarianceStamped")
+        msg = self._roslibpy.Message({
+            "header": {"frame_id": self.frame_id, "stamp": {"secs": 0, "nsecs": 0}},
+            "pose": {
+                "pose": {
+                    "position": {"x": float(x), "y": float(y), "z": 0.0},
+                    "orientation": yaw_to_quaternion(float(yaw)),
+                },
+                "covariance": cov,
+            },
+        })
+        # publish a few times: the first message can be lost while the topic connects
+        for _ in range(3):
+            pub.publish(msg)
+            time.sleep(0.3)
+        pub.unadvertise()
+
     def cancel(self):
         if self._goal_id:
             self._cancel_pub.publish(self._roslibpy.Message(

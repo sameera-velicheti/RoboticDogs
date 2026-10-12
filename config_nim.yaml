@@ -1,4 +1,11 @@
+# Model server settings. Read by nim_config.py.
+# To switch models, change "model" to the name the server was started with
+# (vLLM: the value of --served-model-name). Restart app.py afterwards.
+#
+# Do NOT put API keys in this file - the repo is public.
+# If a key is needed, set it in the terminal instead:  export NIM_API_KEY=...
 nim:
   base_url: "http://localhost:8000/v1/chat/completions"
-  model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
-  api_key: "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"
+  model: "qwen"
+  # Skip the model's long "thinking" step for faster, more reliable short answers
+  disable_thinking: true

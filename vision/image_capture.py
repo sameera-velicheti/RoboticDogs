@@ -6,11 +6,12 @@ import base64
 import json
 from datetime import datetime
 import sys
-sys.path.insert(0, '/home/demo_user/RoboticDogs')
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo folder
+sys.path.insert(0, _ROOT)
 
 from ros2_bridge.ros_nodes import RosPugBridge
 
-CAPTURE_DIR = '/home/demo_user/RoboticDogs/captures'
+CAPTURE_DIR = os.path.join(_ROOT, 'captures')
 
 
 def _normalize_label(label):

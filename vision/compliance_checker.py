@@ -8,9 +8,12 @@ import os
 import sys
 import requests
 import base64
-sys.path.insert(0, '/home/demo_user/RoboticDogs')
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo folder
+sys.path.insert(0, _ROOT)
 
-RULES_PATH = '/home/demo_user/RoboticDogs/vision/compliance_rules.json'
+from nim_config import NIM_URL, NIM_MODEL, headers as nim_headers, extract_answer, extra_params
+
+RULES_PATH = os.path.join(_ROOT, 'vision', 'compliance_rules.json')
 
 
 def load_rules():
@@ -82,19 +85,20 @@ YES if the issue is clearly visible.
 NO if the issue is not visible or you are not sure."""
 
         payload = {
-            "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+            "model": NIM_MODEL,
             "messages": [{"role": "user", "content": [
                 {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
                 {"type": "text", "text": prompt}
             ]}],
             "temperature": 0.1,
-            "max_tokens": 500
+            "max_tokens": 1024,
+            **extra_params(),
         }
 
-        r = requests.post("http://localhost:8000/v1/chat/completions", json=payload, timeout=60)
+        r = requests.post(NIM_URL, json=payload, headers=nim_headers(), timeout=120)
         data = r.json()
         message = data["choices"][0]["message"]
-        answer = (message.get("reasoning") or message.get("content") or "").strip()
+        answer = extract_answer(message)
 
         print(f"  Checking [{rule['id']}] {rule['name']}... ", end="", flush=True)
 
@@ -149,7 +153,7 @@ if __name__ == "__main__":
     from datetime import datetime
 
     # Find the most recent capture
-    capture_dir = '/home/demo_user/RoboticDogs/captures'
+    capture_dir = os.path.join(_ROOT, 'captures')
     jpgs = sorted([f for f in os.listdir(capture_dir) if f.endswith('.jpg')])
 
     if not jpgs:

@@ -652,6 +652,13 @@ header .sub {
     </div>
     
   </div>
+  <div class="input-row" style="margin-bottom:10px;">
+    <select id="routeSelect" class="input-field" style="flex:1;" title="Saved route to patrol">
+      <option value="data_center.json">Data Center Left Aisle</option>
+    </select>
+    <button class="send-btn" id="patrolBtn-dog1" onclick="startPatrol('dog1')">PATROL PUMBAA</button>
+    <button class="send-btn" id="patrolBtn-dog2" onclick="startPatrol('dog2')">PATROL TIMON</button>
+  </div>
   <div class="input-row">
     <button class="send-btn" id="sendAllBtn" onclick="sendAllCommands()" style="flex:1;">SEND ALL</button>
     <button class="stop-btn" onclick="stopAllDogs()">■ STOP ALL</button>
@@ -1211,6 +1218,70 @@ async function runCommandForDog(text, dogId) {
     }
   }
 }
+
+// ---- Waypoint patrol -------------------------------------------------------
+async function loadRoutes() {
+  try {
+    const resp = await fetch('/routes');
+    const data = await resp.json();
+    const sel = document.getElementById('routeSelect');
+    if (!sel || !data.routes) return;
+    sel.innerHTML = '';
+    for (const r of data.routes) {
+      const opt = document.createElement('option');
+      opt.value = r.file;
+      opt.textContent = r.error ? `${r.file} (invalid)` : `${r.name} (${r.stops} stops)`;
+      opt.disabled = !!r.error;
+      if (r.file === 'data_center.json') opt.selected = true;
+      sel.appendChild(opt);
+    }
+  } catch (e) { /* keep the default option */ }
+}
+
+async function startPatrol(dogId) {
+  const btn = document.getElementById(`patrolBtn-${dogId}`);
+  const route = document.getElementById('routeSelect').value;
+  if (btn) btn.disabled = true;
+  addUserMsg(`${getDogDisplayName(dogId)}: start patrol (${route})`);
+  const controller = new AbortController();
+  dogControllers[dogId] = controller;
+  createExecPanel(dogId);
+  try {
+    const resp = await fetch('/patrol/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dog_id: dogId, route: route }),
+      signal: controller.signal
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      addLog(err.error || 'Could not start patrol', 'error', dogId);
+      setStatus('Error', true, dogId);
+      return;
+    }
+    const reader = resp.body.getReader();
+    dogReaders[dogId] = reader;
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        handleEvent(JSON.parse(line.slice(6)), dogId);
+      }
+    }
+  } catch (e) {
+    if (e.name !== 'AbortError') addLog(`${e}`, 'error', dogId);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+loadRoutes();
 
 async function stopAllDogs() {
   for (const dogId of ['dog1', 'dog2', 'dog3']) {

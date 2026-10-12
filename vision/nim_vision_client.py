@@ -5,11 +5,12 @@ import base64
 from email import message
 import json
 import requests
+import os
 import sys
-sys.path.insert(0, '/home/demo_user/RoboticDogs')
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo folder
+sys.path.insert(0, _ROOT)
 
-NIM_URL = "http://localhost:8000/v1/chat/completions"
-NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
+from nim_config import NIM_URL, NIM_MODEL, headers as nim_headers, extract_answer, extra_params
 
 
 def image_to_base64(filepath):
@@ -51,11 +52,12 @@ def describe_image(filepath, context=None):
             }
         ],
         "temperature": 0.2,
-        "max_tokens": 2000
+        "max_tokens": 2000,
+        **extra_params(),
     }
 
     print("Sending image to NIM...")
-    r = requests.post(NIM_URL, json=payload, timeout=60)
+    r = requests.post(NIM_URL, json=payload, headers=nim_headers(), timeout=120)
     print(f"Status: {r.status_code}")
 
     if r.status_code != 200:
@@ -65,15 +67,14 @@ def describe_image(filepath, context=None):
     data = r.json()
     message = data["choices"][0]["message"]
 
-# This model returns analysis in 'reasoning', not 'content'
-    description = message.get("reasoning") or message.get("content")
+    description = extract_answer(message)
     return description
 
 
 if __name__ == "__main__":
     import os
     # Find the most recent capture to test with
-    capture_dir = '/home/demo_user/RoboticDogs/captures'
+    capture_dir = os.path.join(_ROOT, 'captures')
     jpgs = [f for f in os.listdir(capture_dir) if f.endswith('.jpg')]
     
     if not jpgs:

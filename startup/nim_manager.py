@@ -21,9 +21,8 @@ class NIMManager:
 
     def __init__(self):
 
-        self.model_name = (
-            "nemotron-3-nano-omni-30b-a3b-reasoning"
-        )
+        from nim_config import NIM_MODEL
+        self.model_name = NIM_MODEL
 
     def check_status(self):
 

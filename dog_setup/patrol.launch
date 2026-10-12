@@ -1,0 +1,24 @@
+<!--
+  Patrol mode for a ROSPug: navigation on a saved map + rosbridge for the app.
+
+  Install on each dog (from the laptop, in the repo folder):
+      scp dog_setup/patrol.launch hiwonder@<DOG_IP>:~/pug/src/pug_navigation/launch/
+
+  Run on the dog (with pug_bringup.service stopped):
+      roslaunch pug_navigation patrol.launch map:=datacenter_01
+
+  navigation.launch already starts the LiDAR, camera, motion controller,
+  map_server, amcl and move_base. This file only adds rosbridge on port 9090,
+  which the Flask app needs to send waypoints and take photos.
+-->
+<launch>
+  <arg name="map" default="datacenter_01"/>
+
+  <include file="$(find pug_navigation)/launch/navigation.launch">
+    <arg name="map" value="$(arg map)"/>
+  </include>
+
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+    <arg name="port" value="9090"/>
+  </include>
+</launch>

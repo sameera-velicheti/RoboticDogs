@@ -17,10 +17,14 @@ from status.system_status import status
 
 app = Flask(__name__)
 
-CAPTURE_DIR = "/home/demo_user/RoboticDogs/captures"
-REPORT_DIR = "/home/demo_user/RoboticDogs/reports"
-NIM_URL = "http://localhost:8000/v1/chat/completions"
-NIM_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CAPTURE_DIR = os.path.join(BASE_DIR, "captures")
+REPORT_DIR = os.path.join(BASE_DIR, "reports")
+os.makedirs(CAPTURE_DIR, exist_ok=True)
+os.makedirs(REPORT_DIR, exist_ok=True)
+
+# Model server settings live in config_nim.yaml (see nim_config.py)
+from nim_config import NIM_URL, NIM_MODEL, headers as nim_headers, extract_answer, extra_params
 
 ALLOWED_ACTIONS = {"cautious_walk", "walk_backward", "sit", "stop", "turn_left", "turn_right", "take_picture"}# Build a set of user-facing keywords to match common input variants
 ALLOWED_KEYWORDS = set()
@@ -99,11 +103,12 @@ def send_to_nim(prompt):
     payload = {
         "model": NIM_MODEL,
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.2
+        "temperature": 0.2,
+        **extra_params(),
     }
-    r = http_requests.post(NIM_URL, json=payload, timeout=30)
+    r = http_requests.post(NIM_URL, json=payload, headers=nim_headers(), timeout=60)
     data = r.json()
-    return data["choices"][0]["message"]["content"]
+    return extract_answer(data["choices"][0]["message"])
 
 
 def validate_and_clamp(action):
@@ -625,10 +630,181 @@ def serve_capture(filename):
 def serve_report(filename):
     return send_from_directory(REPORT_DIR, filename)
 
+# ---------------------------------------------------------------------------
+# Waypoint patrol: runs a saved route (routes/*.json) on the dog's map.
+# The dog must be in navigation mode with rosbridge running
+# (roslaunch pug_navigation patrol.launch map:=datacenter_01 on the dog).
+# ---------------------------------------------------------------------------
+
+ROUTES_DIR = os.path.join(BASE_DIR, "routes")
+_patrols = {}              # dog_id -> RouteRunner while a patrol is running
+_patrol_lock = threading.Lock()
+
+# Runner statuses that end a patrol, and how the UI should show them
+_PATROL_END = {
+    "route_completed": "done",
+    "route_stopped": "done",
+    "route_failed": "error",
+}
+
+
+def _safe_name(text):
+    """'Stop 9 (return)' -> 'Stop-9-return' for use in a filename."""
+    keep = "".join(c if c.isalnum() else "-" for c in text)
+    return "-".join(part for part in keep.split("-") if part)
+
+
+@app.route("/routes", methods=["GET"])
+def list_routes():
+    """Route files the UI can offer in the patrol dropdown."""
+    from navigation.route_loader import load_route
+    routes = []
+    for fname in sorted(os.listdir(ROUTES_DIR)):
+        if not fname.endswith(".json"):
+            continue
+        try:
+            r = load_route(os.path.join(ROUTES_DIR, fname))
+            routes.append({"file": fname, "name": r["route_name"],
+                           "stops": len(r["waypoints"])})
+        except Exception as e:
+            routes.append({"file": fname, "name": fname, "error": str(e)})
+    return {"routes": routes}
+
+
+@app.route("/patrol/start", methods=["POST"])
+def patrol_start():
+    import queue
+    from navigation.route_loader import load_route
+    from navigation.route_runner import RouteRunner
+    from navigation.navigator import RosNavigator
+
+    data = request.get_json(silent=True) or {}
+    dog_id = data.get("dog_id", "dog1")
+    route_file = os.path.basename(data.get("route", "data_center.json"))
+    dog_name = DOG_NAMES.get(dog_id, dog_id)
+
+    with _patrol_lock:
+        if dog_id in _patrols:
+            return {"error": f"{dog_name} is already on patrol"}, 409
+
+    try:
+        route = load_route(os.path.join(ROUTES_DIR, route_file))
+    except Exception as e:
+        return {"error": f"Could not load route {route_file}: {e}"}, 400
+
+    events = queue.Queue()
+
+    def generate():
+        def sse(kind, payload):
+            return f"data: {json.dumps({'type': kind, **payload})}\n\n"
+
+        yield sse("log", {"msg": f"Connecting to {dog_name}..."})
+        try:
+            bridge = get_bridge(dog_id)
+            navigator = RosNavigator(bridge.client)
+        except Exception as e:
+            yield sse("error", {"msg": f"{e}. Is patrol.launch running on the dog?"})
+            return
+
+        def capture(waypoint_name):
+            path = bridge.take_picture(save_dir=CAPTURE_DIR)
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            new_path = os.path.join(
+                CAPTURE_DIR, f"{dog_name}_{_safe_name(waypoint_name)}_{stamp}.jpg")
+            os.replace(path, new_path)
+            return new_path
+
+        runner = RouteRunner(navigator, dog_name, capture=capture, on_event=events.put)
+        with _patrol_lock:
+            _patrols[dog_id] = runner
+
+        def run():
+            try:
+                runner.run(route)
+            except Exception as e:
+                events.put({"status": "route_failed", "message": str(e),
+                            "waypoint": 0, "total": 0, "waypoint_name": None})
+            finally:
+                try:
+                    navigator.close()
+                except Exception:
+                    pass
+                with _patrol_lock:
+                    _patrols.pop(dog_id, None)
+                events.put(None)  # end of stream
+
+        threading.Thread(target=run, daemon=True).start()
+
+        steps = [wp["name"] for wp in route["waypoints"]]
+        yield sse("plan", {"actions": steps, "total": len(steps)})
+
+        while True:
+            try:
+                e = events.get(timeout=15)
+            except queue.Empty:
+                yield ": keep-alive\n\n"
+                continue
+            if e is None:
+                break
+
+            st = e.get("status")
+            where = f"[{e.get('waypoint')}/{e.get('total')}] {e.get('waypoint_name') or ''}".strip()
+            msg = f"{where} {st.replace('_', ' ')}"
+            if e.get("message"):
+                msg += f": {e['message']}"
+            yield sse("log", {"msg": msg})
+
+            idx = (e.get("waypoint") or 1) - 1
+            if st == "navigating":
+                yield sse("action_start", {"index": idx, "action": e["waypoint_name"],
+                                           "total": e.get("total")})
+            elif st in ("arrived", "skipped"):
+                yield sse("action_done", {"index": idx, "action": e["waypoint_name"]})
+            elif st == "captured" and e.get("image"):
+                label = os.path.basename(e["image"])
+                yield sse("image", {
+                    "src": f"/captures/{label}", "label": label,
+                    "captured_at": e.get("time", ""), "dog_id": dog_id,
+                    "waypoint_name": e.get("waypoint_name"),
+                    "route_name": route["route_name"],
+                })
+            elif st in _PATROL_END:
+                yield sse(_PATROL_END[st], {"msg": f"{route['route_name']}: {st.replace('_', ' ')}"})
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+def _stop_patrol(dog_id):
+    """Cancel a running patrol for this dog, if any. Returns True if one was running."""
+    with _patrol_lock:
+        runner = _patrols.get(dog_id)
+    if runner:
+        runner.stop()
+        return True
+    return False
+
+
+@app.route("/patrol/stop", methods=["POST"])
+def patrol_stop():
+    data = request.get_json(silent=True) or {}
+    dog_id = data.get("dog_id", "dog1")
+    was_running = _stop_patrol(dog_id)
+    try:
+        emergency_stop_robot(get_bridge(dog_id))
+    except Exception:
+        pass
+    return {"status": "stopped" if was_running else "not_running"}
+
+
 @app.route("/cancel", methods=["POST"])
 def cancel():
     data = request.get_json(silent=True) or {}
     dog_id = data.get("dog_id", "dog1")
+    _stop_patrol(dog_id)  # cancel the navigation goal first, then halt the legs
     try:
         bridge = get_bridge(dog_id)
         emergency_stop_robot(bridge)
