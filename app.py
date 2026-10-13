@@ -37,25 +37,28 @@ for a in ALLOWED_ACTIONS:
 MAX_SPEED = 0.15
 SAFE_DISTANCE = 0.5  # meters — stop if anything within this distance ahead
 
-DOG_IPS = {
-    "dog1": "192.168.0.60",  # Pumbaa
-    "dog2": "192.168.0.85",  # Timon
-}
-
 _bridges = {}
 _bridge_lock = threading.Lock()
 cancel_event = threading.Event()
 
+# Dogs live in dogs.json (edited from the UI's "Add / Remove Dogs").
+# DOG_IPS / DOG_NAMES are kept as dicts because the rest of the app uses them.
+from startup import dog_prep
+DOG_IPS, DOG_NAMES = {}, {}
 
-DOG_IPS = {
-    "dog1": "192.168.0.60",
-    "dog2": "192.168.0.85",
-}
 
-DOG_NAMES = {
-    "dog1": "Pumbaa",
-    "dog2": "Timon",
-}
+def reload_dogs():
+    """Re-read dogs.json into DOG_IPS / DOG_NAMES (in place, so references stay valid)."""
+    dogs = dog_prep.load_dogs()
+    DOG_IPS.clear()
+    DOG_NAMES.clear()
+    for d in dogs:
+        DOG_IPS[d["id"]] = d["ip"]
+        DOG_NAMES[d["id"]] = d["name"]
+    return dogs
+
+
+reload_dogs()
 
 def get_bridge(dog_id):
     """Return a cached ROS bridge for a specific robot/dog ID."""
@@ -669,6 +672,144 @@ def list_routes():
         except Exception as e:
             routes.append({"file": fname, "name": fname, "error": str(e)})
     return {"routes": routes}
+
+
+@app.route("/api/routes", methods=["GET"])
+def api_routes():
+    """Every route with its waypoints, in the shape the new UI's Route Setup uses."""
+    from navigation.route_loader import load_route
+    routes = []
+    for fname in sorted(os.listdir(ROUTES_DIR)):
+        if not fname.endswith(".json"):
+            continue
+        try:
+            r = load_route(os.path.join(ROUTES_DIR, fname))
+        except Exception as e:
+            routes.append({"file": fname, "name": fname, "error": str(e), "waypoints": []})
+            continue
+        routes.append({
+            "file": fname,
+            "name": r["route_name"],
+            "waypoints": [{
+                "name": wp["name"],
+                "x": wp["x"], "y": wp["y"], "yaw": wp["yaw"],
+                "photo": wp["action"] == "capture_image",
+                "required": wp["required"],
+            } for wp in r["waypoints"]],
+        })
+    return {"routes": routes}
+
+
+def _dog_status(dog):
+    """Card info for one dog: offline / online / ready, plus whether it's patrolling."""
+    state, label = dog_prep.dog_status(dog)
+    with _patrol_lock:
+        on_patrol = dog["id"] in _patrols
+    if on_patrol:
+        label = "On patrol"
+    ids = list(DOG_IPS)
+    return {
+        "id": dog["id"], "name": dog["name"], "ip": dog["ip"],
+        "ssh_user": dog.get("ssh_user", "hiwonder"), "ros_port": dog.get("ros_port", 9090),
+        "unit": f"Unit {ids.index(dog['id']) + 1:02d}" if dog["id"] in ids else "Unit --",
+        "state": state, "label": label, "online": state != "offline",
+        "on_patrol": on_patrol, "battery": None,
+    }
+
+
+@app.route("/api/dogs", methods=["GET"])
+def api_dogs():
+    """Live status of every configured dog (checked in parallel, ~1 s worst case)."""
+    from concurrent.futures import ThreadPoolExecutor
+    dogs = reload_dogs()
+    if not dogs:
+        return {"dogs": []}
+    with ThreadPoolExecutor(max_workers=len(dogs)) as pool:
+        return {"dogs": list(pool.map(_dog_status, dogs))}
+
+
+@app.route("/api/dogs", methods=["POST"])
+def api_add_dog():
+    """Add a dog (from the Add / Remove Dogs dialog)."""
+    data = request.get_json(silent=True) or {}
+    dog, err = dog_prep.add_dog(data.get("name", ""), data.get("ip", ""),
+                                data.get("ssh_user") or "hiwonder", data.get("ros_port", 9090))
+    if err:
+        return {"error": err}, 400
+    reload_dogs()
+    return {"dog": dog}
+
+
+@app.route("/api/dogs/<dog_id>", methods=["DELETE"])
+def api_remove_dog(dog_id):
+    with _patrol_lock:
+        if dog_id in _patrols:
+            return {"error": "Stop this dog's patrol before removing it"}, 409
+    if not dog_prep.remove_dog(dog_id):
+        return {"error": "No such dog"}, 404
+    with _bridge_lock:
+        _bridges.pop(dog_id, None)
+    reload_dogs()
+    return {"status": "removed"}
+
+
+@app.route("/api/dogs/<dog_id>/prepare", methods=["POST"])
+def api_prepare_dog(dog_id):
+    """Pair & Connect: put the dog in patrol mode over SSH. Streams each step."""
+    dog = next((d for d in reload_dogs() if d["id"] == dog_id), None)
+    if not dog:
+        return {"error": "No such dog"}, 404
+
+    def generate():
+        for update in dog_prep.prepare_dog(dog):
+            if update.get("done") and update.get("ok"):
+                with _bridge_lock:          # drop any stale connection from before
+                    _bridges.pop(dog_id, None)
+            yield f"data: {json.dumps(update)}\n\n"
+
+    return Response(stream_with_context(generate()), mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.route("/api/nim", methods=["GET"])
+def api_nim():
+    """Is the AI model server (Qwen) answering? Used by the NIM card."""
+    models_url = NIM_URL.rsplit("/chat/completions", 1)[0] + "/models"
+    try:
+        r = http_requests.get(models_url, headers=nim_headers(), timeout=1.5)
+        r.raise_for_status()
+        ids = [m.get("id") for m in r.json().get("data", [])]
+        loaded = NIM_MODEL in ids
+        return {"up": True, "model": NIM_MODEL, "loaded": loaded, "available": ids,
+                "label": "AI model ready" if loaded else f"Server up, but '{NIM_MODEL}' not loaded"}
+    except Exception:
+        return {"up": False, "model": NIM_MODEL, "loaded": False, "available": [],
+                "label": "AI model offline (start Qwen to analyze photos)"}
+
+
+@app.route("/api/nim/<action>", methods=["POST"])
+def api_nim_control(action):
+    """Start or stop the Qwen server kit on this computer (config_nim.yaml: server_dir)."""
+    import subprocess
+    from nim_config import NIM_SERVER_DIR
+    if action not in ("start", "stop"):
+        return {"error": "Use start or stop"}, 400
+    if not NIM_SERVER_DIR or not os.path.isdir(NIM_SERVER_DIR):
+        return {"error": "Set server_dir in config_nim.yaml to the Qwen kit folder"}, 400
+    script = os.path.join(NIM_SERVER_DIR, "linux", f"{action}.sh")
+    if not os.path.exists(script):
+        return {"error": f"{script} not found"}, 400
+    args = ["bash", script] + (["--no-harness", "-b"] if action == "start" else [])
+    subprocess.Popen(args, cwd=NIM_SERVER_DIR, stdin=subprocess.DEVNULL,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+    return {"status": f"{action} requested"}
+
+
+@app.route("/new")
+def new_ui():
+    """The new UI (templates/new_ui.html). The old UI stays at /."""
+    return render_template("new_ui.html")
 
 
 @app.route("/patrol/start", methods=["POST"])

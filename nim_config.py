@@ -46,6 +46,10 @@ NIM_URL = os.environ.get("NIM_URL") or _file.get("base_url") or _DEFAULTS["base_
 NIM_MODEL = os.environ.get("NIM_MODEL") or _file.get("model") or _DEFAULTS["model"]
 NIM_API_KEY = os.environ.get("NIM_API_KEY") or None
 
+# Folder of the Qwen one-click kit (has linux/start.sh); lets the UI start/stop it.
+NIM_SERVER_DIR = os.path.expanduser(
+    os.environ.get("NIM_SERVER_DIR") or _file.get("server_dir") or "")
+
 # Qwen-style "thinking" models can spend hundreds of tokens reasoning before
 # they answer. For short YES/NO checks and JSON plans that is slow and can run
 # out of max_tokens before the answer appears, so it is switched off by default.
