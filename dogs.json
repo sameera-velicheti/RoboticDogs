@@ -1,0 +1,16 @@
+[
+    {
+        "id": "dog1",
+        "name": "Pumbaa",
+        "ip": "192.168.0.60",
+        "ssh_user": "hiwonder",
+        "ros_port": 9090
+    },
+    {
+        "id": "dog2",
+        "name": "Timon",
+        "ip": "192.168.0.85",
+        "ssh_user": "hiwonder",
+        "ros_port": 9090
+    }
+]
