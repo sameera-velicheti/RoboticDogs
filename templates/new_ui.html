@@ -1,445 +1,3204 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agentic Paw Patrol</title>
-    <style>
-    :root{--bg:#071421;--panel:#0b1b2b;--line:#274059;--text:#f2f7ff;--muted:#91a7c1;--blue:#1684f8;--green:#31df79;--red:#ff6574}*{box-sizing:border-box}body{margin:0;background:#04101c;color:var(--text);font:14px Segoe UI,Arial}.app{height:100vh;display:grid;grid-template-columns:205px 1fr}.side{padding:24px 14px;background:#091927;border-right:1px solid var(--line)}.brand{font-size:19px;font-weight:700;margin:0 10px 30px}.brand small{display:block;color:#9db7d2;font-size:12px}.nav button{display:block;width:100%;padding:12px;border:0;border-radius:7px;background:transparent;color:#b9cae0;text-align:left;margin:5px 0}.nav button.active{background:#114b8c;color:white}.main{min-width:0}.pair{height:100vh;overflow:auto;padding:24px}.pairHead{display:flex;gap:24px;justify-content:space-between;align-items:stretch}.pair h1{margin:0;font-size:30px}.muted{color:var(--muted)}.card{background:linear-gradient(145deg,#0c1b2a,#0a1826);border:1px solid var(--line);border-radius:9px}.nim{min-width:500px;padding:15px 20px;display:flex;align-items:center;gap:16px}.nim strong{flex:1}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:7px}.nim button,.disconnect{border:1px solid var(--red);background:transparent;color:#ff8791;border-radius:7px;padding:10px 18px}.dogGrid{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:15px;margin-top:18px}.dogCard{padding:14px;min-height:250px;position:relative;cursor:pointer}.dogCard.selected{border:2px solid #339cff}.dogCard.offline{opacity:.55;cursor:not-allowed}.check{position:absolute;width:23px;height:23px;border:2px solid #7189a3;border-radius:5px;display:grid;place-items:center}.selected .check{background:#1684f8;border-color:#57b0ff}.robot{height:130px;margin:5px 20px;background:linear-gradient(135deg,transparent 28%,#bac3c9 29% 52%,#354653 53% 65%,transparent 66%);filter:drop-shadow(0 15px 12px #0008)}.pairFoot{margin-top:16px;padding:14px;display:flex;justify-content:space-between;align-items:center}.primary{border:1px solid #62b6ff;background:linear-gradient(#1684f8,#0862ce);color:white;border-radius:7px;padding:12px 25px}.primary:disabled{opacity:.4}.dogView{display:none;height:100vh}.top{height:88px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:15px 25px}.avatar{width:55px;height:55px;border-radius:50%;background:radial-gradient(circle,#bec8cf 25%,#263a4b 27% 50%,#aeb8bf 52%);margin-right:14px}.identity h2{margin:0}.health{display:flex;gap:22px;margin-left:28px}.disconnect{margin-left:auto}.workspace{height:calc(100vh - 88px);padding:13px;display:grid;grid-template-columns:1.15fr .85fr;gap:13px}.routeCard{padding:14px;display:flex;flex-direction:column}.routeHead{display:flex;justify-content:space-between}.map{position:relative;flex:1;min-height:350px;margin:12px 0;border:1px solid #34516e;border-radius:7px;background:linear-gradient(90deg,#11283a 1px,transparent 1px),linear-gradient(#11283a 1px,transparent 1px);background-size:28px 28px}.racks{position:absolute;inset:88px 115px;display:flex;justify-content:space-between;gap:45px;padding:16px}.rack{width:55px;background:repeating-linear-gradient(#283849 0 2px,#111f2e 2px 6px);border:1px solid #617185}.routeSvg{position:absolute;inset:0;width:100%;height:100%}.base,.done{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}.base{stroke:#8295aa}.done{stroke:#1791ff}.marker{fill:var(--green);stroke:white;stroke-width:5}.legend{display:flex;gap:22px;color:#c5d3e2}.routeActions{margin-top:auto;display:grid;grid-template-columns:1fr 220px;gap:10px}.routeBtn{width:100%}.emergencyStopBtn{border:1px solid #ff6675;background:linear-gradient(#a92335,#751725);color:white;border-radius:7px;padding:12px 18px;font-weight:700;cursor:pointer}.emergencyStopBtn.active{background:#39131a;color:#ff9da6}.emergencyStopBtn:disabled{cursor:not-allowed;opacity:.8}.right{padding:12px;display:grid;grid-template-rows:auto 1fr}.tabs{display:grid;grid-template-columns:1fr 1fr;margin:-12px -12px 12px}.tabs button{padding:14px;border:0;border-bottom:2px solid transparent;background:#081725;color:#9db1c9}.tabs button.active{background:#153d6c;color:white;border-color:#2fa0ff}.panel{min-height:0}.images{height:100%;display:grid;grid-template-rows:auto 1fr 100px;gap:10px}.photo,.thumb{border:1px solid #36506b;border-radius:7px;background:linear-gradient(90deg,#172530,#bec8c9 19%,#27343d 24% 43%,#c1c9c9 48%,#182630 53% 72%,#bdc6c7 77%,#192631)}.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.commands{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:12px}.history{overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:9px}.empty{margin:auto;color:#7d93ad}.message{align-self:flex-end;max-width:85%;background:#125baa;border:1px solid #3ea2ff;border-radius:11px 11px 3px 11px;padding:10px}.message small{display:block;color:#c2ddfb;text-align:right;margin-top:5px}.chat{display:grid;grid-template-columns:1fr 48px;gap:8px}.chat input{border:1px solid #496b8c;border-radius:8px;background:#091827;color:white;padding:13px}.chat button{border:0;border-radius:8px;background:#147bed;color:white;font-size:20px}.hidden{display:none}
-    /* ---------- Route Setup ---------- */
-    .navLabel{margin:22px 12px 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5f7790}
-    .setup{display:none;height:100vh;overflow:auto;padding:28px}
-    .rsWrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
-    .rsHead{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
-    .rsHead h1{margin:0;font-size:30px}
-    .rsTitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-    .rsBadge{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:600;background:#0f2a1d;border:1px solid #1d4a33;color:#6ff0a8}
-    .rsBadge i{width:7px;height:7px;border-radius:50%;background:#35e08a}
-    .rsBadge.bad{background:#2a1218;border-color:#5a2430;color:#ff8a95}.rsBadge.bad i{background:var(--red)}
-    .rsControls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-    .rsField{display:flex;flex-direction:column;gap:6px}
-    .rsLabel{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b829b}
-    .rsSeg{display:flex;padding:3px;background:#071421;border:1px solid #1d3248;border-radius:10px}
-    .rsSeg button{border:0;border-radius:7px;padding:8px 18px;min-height:38px;background:transparent;color:#8aa1ba;font:500 14px Segoe UI,Arial;cursor:pointer}
-    .rsSeg button[aria-pressed="true"]{background:#12324f;color:#fff;font-weight:600}
-    .rsInput,.rsSelect{height:44px;background:#071421;color:var(--text);border:1px solid #1d3248;border-radius:10px;padding:0 12px;font:500 14px Segoe UI,Arial}
-    .rsInput:focus,.rsSelect:focus{outline:none;border-color:#2f8cff;box-shadow:0 0 0 3px rgba(47,140,255,.18)}
-    .rsGhost{height:44px;border:1px solid #1d3248;background:transparent;color:#cfe0f5;border-radius:10px;padding:0 16px;cursor:pointer;font:500 14px Segoe UI,Arial}
-    .rsGhost:hover{border-color:#3f6286}
-    .rsNew{display:flex;gap:8px}.rsNew.hidden{display:none}
-    .rsRow{display:flex;flex-wrap:wrap;gap:20px}
-    .rsCard{background:#0a1826;border:1px solid #1b2f44;border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0}
-    .rsCard h2{margin:0;font-size:15px;font-weight:600;color:#dbe7f4}
-    .rsCardHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-    .rsPose{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .rsPose div{background:#071421;border:1px solid #1b2f44;border-radius:10px;padding:12px 14px}
-    .rsPose b{display:block;font:600 24px Consolas,monospace;margin-top:2px}
-    .rsPose b span{font-size:13px;color:#6b829b;margin-left:4px}
-    .rsMap{background:#071421;border:1px solid #1b2f44;border-radius:10px;overflow:hidden}
-    .rsMap svg{display:block;width:100%;height:auto}
-    .rsLegend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#8aa1ba}
-    .rsLegend span{display:inline-flex;align-items:center;gap:7px}
-    .rsLegend i{width:10px;height:10px;border-radius:50%}
-    .rsOption{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#071421;border:1px solid #1b2f44;border-radius:10px;padding:11px 14px;min-height:48px;cursor:pointer}
-    .rsOption span span{display:block}
-    .rsOption small{color:#8aa1ba;font-size:12px}
-    .rsOption input{width:18px;height:18px;accent-color:#2f8cff}
-    .rsRecord{height:50px;border:0;border-radius:10px;background:#1f7ae6;color:#fff;font:600 15px Segoe UI,Arial;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
-    .rsRecord:hover{background:#2a86f0}
-    .rsRecord:disabled{background:#13283b;color:#5f7790;cursor:not-allowed}
-    .rsRecord kbd{font:500 11px Consolas,monospace;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.2)}
-    .rsMsg{min-height:20px;font-size:13px;color:#6ff0a8}.rsMsg.err{color:#ff8a95}
-    .rsHelp{margin-top:auto;border-top:1px solid #1b2f44;padding-top:14px;display:flex;flex-direction:column;gap:8px;color:#8aa1ba;font-size:13px}
-    .rsHelp b{color:#cfe0f5}
-    .rsTableWrap{overflow-x:auto}
-    .rsTable{width:100%;border-collapse:collapse;min-width:760px;font-variant-numeric:tabular-nums}
-    .rsTable th{text-align:left;color:#6b829b;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:8px 10px}
-    .rsTable td{padding:10px;border-top:1px solid #142739}
-    .rsTable tr.sel td{background:#0d2034}
-    .rsNum{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#2f8cff;font:600 12px Consolas,monospace}
-    .rsNum.plain{background:#3a5470}
-    .rsMono{font-family:Consolas,monospace;color:#a9bdd2}
-    .rsName{width:100%;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--text);padding:5px 8px;margin-left:-8px;font:600 14px Segoe UI,Arial}
-    .rsName:hover{border-color:#1d3248}.rsName:focus{outline:none;border-color:#2f8cff;background:#071421}
-    .rsTag{border:0;cursor:pointer;font:600 12px Segoe UI,Arial;padding:4px 10px;border-radius:999px}
-    .rsTag.photo{background:#0f2440;color:#8cc2ff}.rsTag.nophoto{background:#13202d;color:#6b829b}
-    .rsTag.req{background:#13283b;color:#cfe0f5}.rsTag.opt{background:#2b2410;color:#f5c46b}
-    .rsActs{text-align:right;white-space:nowrap}
-    .rsIcon{width:34px;height:34px;border:1px solid #1d3248;background:transparent;color:#8aa1ba;border-radius:8px;cursor:pointer}
-    .rsIcon:disabled{color:#3a4f66;cursor:default}
-    .rsDel{height:34px;border:1px solid #4a1f28;background:transparent;color:#ff8a95;border-radius:8px;padding:0 12px;cursor:pointer;font:500 13px Segoe UI,Arial}
-    .rsEmpty{padding:28px 10px;text-align:center;color:#7d93ad}
-    
-    @media(max-width:1000px){.setup{padding:18px}.rsPose b{font-size:20px}.dogGrid{grid-template-columns:repeat(2,1fr)}.pairHead{display:block}.nim{min-width:0;margin-top:15px}.workspace{grid-template-columns:1fr}.right{display:none}}
-    
-    /* ---------- Dog Management Popup ---------- */
-    .dogListHead{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
-    .dogListHead h3{margin:0}
-    .manageDogsBtn{border:1px solid #42698e;background:#0b1b2b;color:#dcecff;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer;position:relative;z-index:1}
-    .manageDogsBtn:hover{border-color:#62b6ff;background:#10243a}
-    .dogModalBackdrop{display:none;position:fixed;inset:0;z-index:10000;background:rgba(1,8,14,.82);align-items:center;justify-content:center;padding:20px;pointer-events:auto}
-    .dogModalBackdrop.open{display:flex}
-    .dogModal{width:min(820px,100%);max-height:90vh;overflow:auto;padding:22px;position:relative;pointer-events:auto}
-    .dogModalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-    .dogModalHead h2{margin:0}
-    .dogModalClose{width:40px;height:40px;border:1px solid #36536f;background:#071421;color:#dcecff;border-radius:8px;font-size:21px;cursor:pointer}
-    .dogForm{display:grid;grid-template-columns:1fr 1.2fr 1fr .8fr;gap:12px;margin-top:20px}
-    .dogForm label{display:flex;flex-direction:column;gap:6px;color:#7890a9;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-    .dogForm input{height:44px;border:1px solid #29445f;border-radius:8px;background:#071421;color:#f2f7ff;padding:0 11px;outline:none}
-    .dogForm input:focus{border-color:#2f8cff;box-shadow:0 0 0 3px rgba(47,140,255,.17)}
-    .dogFormActions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;margin-top:2px}
-    .addDogBtn{min-width:150px;cursor:pointer;pointer-events:auto;position:relative;z-index:2}
-    .dogFormError{grid-column:1/-1;min-height:18px;color:#ff8a95;font-size:13px}
-    .managedDogs{display:flex;flex-direction:column;gap:9px;margin-top:10px}
-    .managedDog{display:grid;grid-template-columns:1.1fr 1.25fr 1fr .8fr auto;gap:12px;align-items:center;padding:11px 12px;border:1px solid #1e374e;border-radius:9px;background:#071421}
-    .managedDog small{display:block;color:#7289a1;margin-top:3px}
-    .removeDogBtn{border:1px solid #59242e;background:transparent;color:#ff8a95;border-radius:7px;padding:8px 12px;cursor:pointer}
-    @media(max-width:850px){.dogForm{grid-template-columns:1fr 1fr}.managedDog{grid-template-columns:1fr 1fr}.removeDogBtn{grid-column:1/-1}.dogModal{max-height:94vh}}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Agentic Paw Patrol</title>
 
-    </style></head><body><div class="app"><aside class="side"><div class="brand">Robotic Dogs<small>Agentic Paw Patrol</small></div><nav class="nav"><button id="pairNav" class="active">▣ &nbsp; Pair & Connect</button><div id="dogNav"></div><div class="navLabel">Setup</div><button id="setupNav">⌖ &nbsp; Route Setup</button></nav></aside><main class="main"><section id="pair" class="pair"><div class="pairHead"><div><h1>Pair & Connect</h1><p class="muted">Select any available robotic dogs to connect with.</p></div><div class="nim card"><span style="font-size:28px">◉</span><strong>AI Model (Qwen)<small id="nimDetail" class="muted" style="display:block">Checking…</small></strong><span id="nimStatus"><i id="nimDot" class="dot"></i><b id="nimText">…</b></span><button id="nimBtn">Check again</button></div></div><div class="dogListHead"><h3>Available Robotic Dogs</h3><button id="manageDogsBtn" class="manageDogsBtn" type="button">+ Add / Remove Dogs</button></div><div id="dogGrid" class="dogGrid"></div><div class="pairFoot card"><span id="summary">0 dogs selected</span><button id="pairBtn" class="primary" disabled>Pair & Connect</button></div></section><section id="dogView" class="dogView"><header class="top"><div class="avatar"></div><div class="identity"><h2 id="dogName"></h2><small id="unit"></small></div><div class="health"><span><i class="dot"></i>Online</span><span>▣ <b id="battery"></b></span><span>⌁ Connected</span></div><button id="disconnect" class="disconnect">Disconnect</button></header><div class="workspace"><section class="routeCard card"><div class="routeHead"><b>Route Progress</b><span id="percent"></span></div><div class="map"><div class="racks"><div class="rack"></div><div class="rack"></div><div class="rack"></div><div class="rack"></div></div><svg class="routeSvg" viewBox="0 0 600 340" preserveAspectRatio="none"><polyline id="base" class="base" points="85,285 85,55 515,55 515,285 85,285"/><polyline id="done" class="done" points="85,285 85,55 515,55 515,285 85,285"/><circle id="marker" class="marker" r="10"/></svg></div><div class="legend">🔵 Completed &nbsp; 🟢 Current Position &nbsp; ⚪ Remaining</div><p><b>Current Task</b><br><span id="task" style="color:#8ec5ff"></span></p><div class="routeActions"><button id="routeBtn" class="primary routeBtn">▶ Go on your inspection route</button><button id="emergencyStopBtn" class="emergencyStopBtn">■ Emergency Stop</button></div></section><aside class="right card"><div class="tabs"><button id="imagesTab" class="active">Images</button><button id="commandsTab">Emergency Commands</button></div><div id="imagesPanel" class="panel images"><b>Live Images</b><div class="photo"></div><div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div></div><div id="commandsPanel" class="panel commands hidden"><div><b>Emergency Commands</b><p class="muted">Send a direct instruction to the selected dog.</p></div><div id="history" class="history"></div><div class="chat"><input id="commandInput" placeholder="Type an exact movement command..."><button id="send">➤</button></div></div></aside></div></section><section id="setup" class="setup" aria-labelledby="rsH1">
-    <div class="rsWrap">
-    <header class="rsHead">
-    <div>
-    <div class="rsTitle"><h1 id="rsH1">Route Setup</h1><span id="rsBadge" class="rsBadge"><i></i><span id="rsBadgeText">Pumbaa localized</span></span></div>
-    <p class="muted" style="margin:6px 0 0">Walk the dog to each inspection spot and press Record. </p>
-    </div>
-    <div class="rsControls">
-    <div class="rsField"><span class="rsLabel" id="rsDogLabel">Dog</span><div id="rsDogs" class="rsSeg" role="group" aria-labelledby="rsDogLabel"></div></div>
-    <div class="rsField" style="min-width:220px"><label class="rsLabel" for="rsRoute">Route</label><select id="rsRoute" class="rsSelect"></select></div>
-    <button id="rsNewToggle" class="rsGhost" type="button" aria-expanded="false">+ New route</button>
-    </div>
-    </header>
-    <form id="rsNewForm" class="rsNew hidden" style="justify-content:flex-end">
-    <input id="rsNewName" class="rsInput" placeholder="Route name, e.g. Ops Center Patrol" aria-label="New route name" style="width:300px">
-    <button class="rsGhost" type="submit">Create</button>
-    </form>
-    
-    <div class="rsRow">
-    <section class="rsCard" style="flex:999 1 560px">
-    <div class="rsCardHead"><h2>Dog position</h2><button id="rsRecenter" class="rsGhost" type="button" style="height:32px;font-size:12.5px;padding:0 12px">Recenter map</button></div>
-    <div class="rsPose" aria-live="polite">
-    <div><span class="rsLabel">X</span><b id="rsX">–</b></div>
-    <div><span class="rsLabel">Y</span><b id="rsY">–</b></div>
-    <div><span class="rsLabel">Facing</span><b id="rsYaw">–</b></div>
-    </div>
-    <div class="rsMap"><svg id="rsMap" viewBox="0 0 640 340" role="img" aria-label="Map of recorded stops and the dog's position"></svg></div>
-    <div class="rsLegend"><span><i style="background:#2f8cff"></i>Photo stop</span><span><i style="background:#3a5470"></i>No photo</span><span><i style="background:#35e08a"></i>Dog</span></div>
-    </section>
-    
-    <section class="rsCard" style="flex:1 1 360px">
-    <h2>Record a waypoint here</h2>
-    <div class="rsField"><label class="rsLabel" for="rsWpName">Name</label><input id="rsWpName" class="rsInput" placeholder="e.g. Corner 1" style="height:46px;font-size:15px"></div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-    <label class="rsOption"><span><span style="font-weight:600">Take a photo here</span><small>Sent for compliance analysis</small></span><input id="rsPhoto" type="checkbox" checked></label>
-    <label class="rsOption"><span><span style="font-weight:600">Required stop</span><small>Route ends if the dog can't reach it</small></span><input id="rsRequired" type="checkbox" checked></label>
-    </div>
-    <button id="rsRecord" class="rsRecord" type="button">Record at dog's position <kbd>Enter</kbd></button>
-    <div id="rsMsg" class="rsMsg" role="status"></div>
-    <div class="rsHelp"><b>How to use</b><span>1. Start the dog on the taped start spot.</span><span>2. Drive it to a spot and point it at what to photograph.</span><span>3. Name it and press Record. End with "Home".</span></div>
-    </section>
-    </div>
-    
-    <section class="rsCard">
-    <div class="rsCardHead"><h2 id="rsListTitle">Waypoints</h2><span id="rsCount" class="rsMono" style="font-size:12px;color:#6b829b"></span></div>
-    <div class="rsTableWrap"><table class="rsTable">
-    <thead><tr><th style="width:44px">#</th><th>Name</th><th>Position</th><th>Facing</th><th>Photo</th><th>Stop</th><th style="text-align:right">Actions</th></tr></thead>
-    <tbody id="rsBody"></tbody>
-    </table></div>
-    </section>
-    </div>
-    </section>
-    </main></div>
-    
-    <div id="dogModalBackdrop" class="dogModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="dogModalTitle">
-      <section class="dogModal card">
-        <div class="dogModalHead">
-          <div><h2 id="dogModalTitle">Add or Remove Dogs</h2><p class="muted">Configure the connection details used for each robotic dog.</p></div>
-          <button id="closeDogModal" class="dogModalClose" type="button" aria-label="Close">×</button>
+    <style>
+        :root {
+            --bg: #071421;
+            --panel: #0b1b2b;
+            --line: #274059;
+            --text: #f2f7ff;
+            --muted: #91a7c1;
+            --blue: #1684f8;
+            --green: #31df79;
+            --red: #ff6574;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #04101c;
+            color: var(--text);
+            font: 14px "Segoe UI", Arial, sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .app {
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 205px 1fr;
+        }
+
+        .side {
+            padding: 24px 14px;
+            background: #091927;
+            border-right: 1px solid var(--line);
+        }
+
+        .brand {
+            font-size: 19px;
+            font-weight: 700;
+            margin: 0 10px 30px;
+        }
+
+        .brand small {
+            display: block;
+            color: #9db7d2;
+            font-size: 12px;
+        }
+
+        .nav button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: #b9cae0;
+            text-align: left;
+            margin: 5px 0;
+        }
+
+        .nav button.active {
+            background: #114b8c;
+            color: white;
+        }
+
+        .navLabel {
+            margin: 22px 12px 6px;
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #5f7790;
+        }
+
+        .main {
+            min-width: 0;
+        }
+
+        .pair {
+            height: 100vh;
+            overflow: auto;
+            padding: 24px;
+        }
+
+        .pairHead {
+            display: flex;
+            gap: 24px;
+            justify-content: space-between;
+            align-items: stretch;
+        }
+
+        .pair h1,
+        .setup h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .card {
+            background: linear-gradient(145deg, #0c1b2a, #0a1826);
+            border: 1px solid var(--line);
+            border-radius: 9px;
+        }
+
+        .nim {
+            min-width: 500px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nim strong {
+            flex: 1;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            margin-right: 7px;
+        }
+
+        .nim button,
+        .disconnect {
+            border: 1px solid var(--red);
+            background: transparent;
+            color: #ff8791;
+            border-radius: 7px;
+            padding: 10px 18px;
+        }
+
+        .dogListHead {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .dogListHead h3 {
+            margin: 0;
+        }
+
+        .manageDogsBtn {
+            border: 1px solid #42698e;
+            background: #0b1b2b;
+            color: #dcecff;
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-weight: 600;
+        }
+
+        .manageDogsBtn:hover {
+            border-color: #62b6ff;
+            background: #10243a;
+        }
+
+        .dogGrid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(190px, 1fr));
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .dogCard {
+            padding: 14px;
+            min-height: 250px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dogCard.selected {
+            border: 2px solid #339cff;
+        }
+
+        .dogCard.offline {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .check {
+            position: absolute;
+            width: 23px;
+            height: 23px;
+            border: 2px solid #7189a3;
+            border-radius: 5px;
+            display: grid;
+            place-items: center;
+        }
+
+        .selected .check {
+            background: #1684f8;
+            border-color: #57b0ff;
+        }
+
+        .robot {
+            height: 130px;
+            margin: 5px 20px;
+            background:
+                linear-gradient(
+                    135deg,
+                    transparent 28%,
+                    #bac3c9 29% 52%,
+                    #354653 53% 65%,
+                    transparent 66%
+                );
+            filter: drop-shadow(0 15px 12px #0008);
+        }
+
+        .pairFoot {
+            margin-top: 16px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .primary {
+            border: 1px solid #62b6ff;
+            background: linear-gradient(#1684f8, #0862ce);
+            color: white;
+            border-radius: 7px;
+            padding: 12px 25px;
+        }
+
+        .primary:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .dogView {
+            display: none;
+            height: 100vh;
+        }
+
+        .top {
+            height: 88px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+        }
+
+        .avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background:
+                radial-gradient(
+                    circle,
+                    #bec8cf 25%,
+                    #263a4b 27% 50%,
+                    #aeb8bf 52%
+                );
+            margin-right: 14px;
+        }
+
+        .identity h2 {
+            margin: 0;
+        }
+
+        .health {
+            display: flex;
+            gap: 22px;
+            margin-left: 28px;
+        }
+
+        .disconnect {
+            margin-left: auto;
+        }
+
+        .workspace {
+            height: calc(100vh - 88px);
+            padding: 13px;
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 13px;
+        }
+
+        .routeCard {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .routeHead {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .map {
+            position: relative;
+            flex: 1;
+            min-height: 350px;
+            margin: 12px 0;
+            border: 1px solid #34516e;
+            border-radius: 7px;
+            background:
+                linear-gradient(90deg, #11283a 1px, transparent 1px),
+                linear-gradient(#11283a 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        .racks {
+            position: absolute;
+            inset: 88px 115px;
+            display: flex;
+            justify-content: space-between;
+            gap: 45px;
+            padding: 16px;
+        }
+
+        .rack {
+            width: 55px;
+            background:
+                repeating-linear-gradient(
+                    #283849 0 2px,
+                    #111f2e 2px 6px
+                );
+            border: 1px solid #617185;
+        }
+
+        .routeSvg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .base,
+        .done {
+            fill: none;
+            stroke-width: 9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .base {
+            stroke: #8295aa;
+        }
+
+        .done {
+            stroke: #1791ff;
+        }
+
+        .marker {
+            fill: var(--green);
+            stroke: white;
+            stroke-width: 5;
+        }
+
+        .legend {
+            display: flex;
+            gap: 22px;
+            color: #c5d3e2;
+        }
+
+        .routeActions {
+            margin-top: auto;
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 10px;
+        }
+
+        .routeBtn {
+            width: 100%;
+        }
+
+        .emergencyStopBtn {
+            border: 1px solid #ff6675;
+            background: linear-gradient(#a92335, #751725);
+            color: white;
+            border-radius: 7px;
+            padding: 12px 18px;
+            font-weight: 700;
+        }
+
+        .emergencyStopBtn.active {
+            background: #39131a;
+            color: #ff9da6;
+        }
+
+        .emergencyStopBtn:disabled {
+            cursor: not-allowed;
+            opacity: .8;
+        }
+
+        .right {
+            padding: 12px;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin: -12px -12px 12px;
+        }
+
+        .tabs button {
+            padding: 14px;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            background: #081725;
+            color: #9db1c9;
+        }
+
+        .tabs button.active {
+            background: #153d6c;
+            color: white;
+            border-color: #2fa0ff;
+        }
+
+        .panel {
+            min-height: 0;
+        }
+
+        .images {
+            height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr 100px;
+            gap: 10px;
+        }
+
+        .photo,
+        .thumb {
+            border: 1px solid #36506b;
+            border-radius: 7px;
+            background:
+                linear-gradient(
+                    90deg,
+                    #172530,
+                    #bec8c9 19%,
+                    #27343d 24% 43%,
+                    #c1c9c9 48%,
+                    #182630 53% 72%,
+                    #bdc6c7 77%,
+                    #192631
+                );
+        }
+
+        .thumbs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .commands {
+            height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 12px;
+        }
+
+        .history {
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .empty {
+            margin: auto;
+            color: #7d93ad;
+        }
+
+        .message {
+            align-self: flex-end;
+            max-width: 85%;
+            background: #125baa;
+            border: 1px solid #3ea2ff;
+            border-radius: 11px 11px 3px 11px;
+            padding: 10px;
+        }
+
+        .message small {
+            display: block;
+            color: #c2ddfb;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .chat {
+            display: grid;
+            grid-template-columns: 1fr 48px;
+            gap: 8px;
+        }
+
+        .chat input {
+            border: 1px solid #496b8c;
+            border-radius: 8px;
+            background: #091827;
+            color: white;
+            padding: 13px;
+        }
+
+        .chat button {
+            border: 0;
+            border-radius: 8px;
+            background: #147bed;
+            color: white;
+            font-size: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Route Setup */
+
+        .setup {
+            display: none;
+            height: 100vh;
+            overflow: auto;
+            padding: 28px;
+        }
+
+        .rsWrap {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .rsHead {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .rsTitle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .rsBadge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 4px 11px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #0f2a1d;
+            border: 1px solid #1d4a33;
+            color: #6ff0a8;
+        }
+
+        .rsBadge i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #35e08a;
+        }
+
+        .rsControls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .rsField {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .rsLabel {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #6b829b;
+        }
+
+        .rsSeg {
+            display: flex;
+            padding: 3px;
+            background: #071421;
+            border: 1px solid #1d3248;
+            border-radius: 10px;
+        }
+
+        .rsSeg button {
+            border: 0;
+            border-radius: 7px;
+            padding: 8px 18px;
+            min-height: 38px;
+            background: transparent;
+            color: #8aa1ba;
+        }
+
+        .rsSeg button[aria-pressed="true"] {
+            background: #12324f;
+            color: white;
+            font-weight: 600;
+        }
+
+        .rsInput,
+        .rsSelect {
+            height: 44px;
+            background: #071421;
+            color: var(--text);
+            border: 1px solid #1d3248;
+            border-radius: 10px;
+            padding: 0 12px;
+        }
+
+        .rsGhost {
+            height: 44px;
+            border: 1px solid #1d3248;
+            background: transparent;
+            color: #cfe0f5;
+            border-radius: 10px;
+            padding: 0 16px;
+        }
+
+        .rsNew {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rsRow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .rsCard {
+            background: #0a1826;
+            border: 1px solid #1b2f44;
+            border-radius: 14px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .rsCard h2 {
+            margin: 0;
+            font-size: 15px;
+            color: #dbe7f4;
+        }
+
+        .rsCardHead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rsPose {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .rsPose div {
+            background: #071421;
+            border: 1px solid #1b2f44;
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+
+        .rsPose b {
+            display: block;
+            font: 600 24px Consolas, monospace;
+            margin-top: 2px;
+        }
+
+        .rsPose b span {
+            font-size: 13px;
+            color: #6b829b;
+            margin-left: 4px;
+        }
+
+        .rsMap {
+            background: #071421;
+            border: 1px solid #1b2f44;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .rsMap svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .rsLegend {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: #8aa1ba;
+        }
+
+        .rsLegend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .rsLegend i {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .rsOption {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #071421;
+            border: 1px solid #1b2f44;
+            border-radius: 10px;
+            padding: 11px 14px;
+            min-height: 48px;
+        }
+
+        .rsOption span span {
+            display: block;
+        }
+
+        .rsOption small {
+            color: #8aa1ba;
+            font-size: 12px;
+        }
+
+        .rsRecord {
+            height: 50px;
+            border: 0;
+            border-radius: 10px;
+            background: #1f7ae6;
+            color: white;
+            font-weight: 600;
+        }
+
+        .rsMsg {
+            min-height: 20px;
+            font-size: 13px;
+            color: #6ff0a8;
+        }
+
+        .rsMsg.err {
+            color: #ff8a95;
+        }
+
+        .rsHelp {
+            margin-top: auto;
+            border-top: 1px solid #1b2f44;
+            padding-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: #8aa1ba;
+            font-size: 13px;
+        }
+
+        .rsTableWrap {
+            overflow-x: auto;
+        }
+
+        .rsTable {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rsTable th {
+            text-align: left;
+            color: #6b829b;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 8px 10px;
+        }
+
+        .rsTable td {
+            padding: 10px;
+            border-top: 1px solid #142739;
+        }
+
+        .rsTable tr.sel td {
+            background: #0d2034;
+        }
+
+        .rsNum {
+            display: inline-grid;
+            place-items: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #2f8cff;
+            font: 600 12px Consolas, monospace;
+        }
+
+        .rsNum.plain {
+            background: #3a5470;
+        }
+
+        .rsMono {
+            font-family: Consolas, monospace;
+            color: #a9bdd2;
+        }
+
+        .rsName {
+            width: 100%;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            color: var(--text);
+            padding: 5px 8px;
+        }
+
+        .rsTag {
+            border: 0;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .rsTag.photo {
+            background: #0f2440;
+            color: #8cc2ff;
+        }
+
+        .rsTag.nophoto {
+            background: #13202d;
+            color: #6b829b;
+        }
+
+        .rsTag.req {
+            background: #13283b;
+            color: #cfe0f5;
+        }
+
+        .rsTag.opt {
+            background: #2b2410;
+            color: #f5c46b;
+        }
+
+        .rsActs {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .rsIcon,
+        .rsDel {
+            height: 34px;
+            border: 1px solid #1d3248;
+            background: transparent;
+            color: #8aa1ba;
+            border-radius: 8px;
+        }
+
+        .rsDel {
+            border-color: #4a1f28;
+            color: #ff8a95;
+            padding: 0 12px;
+        }
+
+        .rsEmpty {
+            padding: 28px 10px;
+            text-align: center;
+            color: #7d93ad;
+        }
+
+        /* Dog Management */
+
+        .dogModalBackdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(1, 8, 14, .82);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .dogModalBackdrop.open {
+            display: flex;
+        }
+
+        .dogModal {
+            width: min(820px, 100%);
+            max-height: 90vh;
+            overflow: auto;
+            padding: 22px;
+        }
+
+        .dogModalHead {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .dogModalHead h2 {
+            margin: 0;
+        }
+
+        .dogModalClose {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #36536f;
+            background: #071421;
+            color: #dcecff;
+            border-radius: 8px;
+            font-size: 21px;
+        }
+
+        .dogForm {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr .8fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .dogForm label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            color: #7890a9;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .dogForm input {
+            height: 44px;
+            border: 1px solid #29445f;
+            border-radius: 8px;
+            background: #071421;
+            color: #f2f7ff;
+            padding: 0 11px;
+        }
+
+        .dogFormActions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .dogFormError {
+            grid-column: 1 / -1;
+            min-height: 18px;
+            color: #ff8a95;
+        }
+
+        .managedDogs {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .managedDog {
+            display: grid;
+            grid-template-columns: 1.1fr 1.25fr 1fr .8fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 11px 12px;
+            border: 1px solid #1e374e;
+            border-radius: 9px;
+            background: #071421;
+        }
+
+        .managedDog small {
+            display: block;
+            color: #7289a1;
+        }
+
+        .removeDogBtn {
+            border: 1px solid #59242e;
+            background: transparent;
+            color: #ff8a95;
+            border-radius: 7px;
+            padding: 8px 12px;
+        }
+
+        @media (max-width: 1000px) {
+            .dogGrid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pairHead {
+                display: block;
+            }
+
+            .nim {
+                min-width: 0;
+                margin-top: 15px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .right {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+    <aside class="side">
+        <div class="brand">
+            Robotic Dogs
+            <small>Agentic Paw Patrol</small>
         </div>
+
+        <nav class="nav">
+            <button id="pairNav" class="active">▣ &nbsp; Pair & Connect</button>
+            <div id="dogNav"></div>
+
+            <div class="navLabel">Setup</div>
+            <button id="setupNav">⌖ &nbsp; Route Setup</button>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <section id="pair" class="pair">
+            <div class="pairHead">
+                <div>
+                    <h1>Pair & Connect</h1>
+                    <p class="muted">
+                        Select any available robotic dogs to connect with.
+                    </p>
+                </div>
+
+                <div class="nim card">
+                    <span style="font-size:28px">◉</span>
+
+                    <strong>
+                        AI Model (Qwen)
+                        <small id="nimDetail" class="muted" style="display:block">
+                            Checking…
+                        </small>
+                    </strong>
+
+                    <span id="nimStatus">
+                        <i id="nimDot" class="dot"></i>
+                        <b id="nimText">…</b>
+                    </span>
+
+                    <button id="nimBtn">Check again</button>
+                </div>
+            </div>
+
+            <div class="dogListHead">
+                <h3>Available Robotic Dogs</h3>
+
+                <button id="manageDogsBtn" class="manageDogsBtn" type="button">
+                    + Add / Remove Dogs
+                </button>
+            </div>
+
+            <div id="dogGrid" class="dogGrid"></div>
+
+            <div class="pairFoot card">
+                <span id="summary">0 dogs selected</span>
+
+                <button id="pairBtn" class="primary" disabled>
+                    Pair & Connect
+                </button>
+            </div>
+        </section>
+
+        <section id="dogView" class="dogView">
+            <header class="top">
+                <div class="avatar"></div>
+
+                <div class="identity">
+                    <h2 id="dogName"></h2>
+                    <small id="unit"></small>
+                </div>
+
+                <div class="health">
+                    <span><i class="dot"></i>Online</span>
+                    <span>▣ <b id="battery"></b></span>
+                    <span>⌁ Connected</span>
+                </div>
+
+                <button id="disconnect" class="disconnect">
+                    Disconnect
+                </button>
+            </header>
+
+            <div class="workspace">
+                <section class="routeCard card">
+                    <div class="routeHead">
+                        <b>Route Progress</b>
+                        <span id="percent"></span>
+                    </div>
+
+                    <div class="map">
+                        <div class="racks">
+                            <div class="rack"></div>
+                            <div class="rack"></div>
+                            <div class="rack"></div>
+                            <div class="rack"></div>
+                        </div>
+
+                        <svg
+                            class="routeSvg"
+                            viewBox="0 0 600 340"
+                            preserveAspectRatio="none"
+                        >
+                            <polyline
+                                id="base"
+                                class="base"
+                                points="85,285 85,55 515,55 515,285 85,285"
+                            ></polyline>
+
+                            <polyline
+                                id="done"
+                                class="done"
+                                points="85,285 85,55 515,55 515,285 85,285"
+                            ></polyline>
+
+                            <circle id="marker" class="marker" r="10"></circle>
+                        </svg>
+                    </div>
+
+                    <div class="legend">
+                        🔵 Completed
+                        &nbsp;
+                        🟢 Current Position
+                        &nbsp;
+                        ⚪ Remaining
+                    </div>
+
+                    <p>
+                        <b>Current Task</b>
+                        <br>
+                        <span id="task" style="color:#8ec5ff"></span>
+                    </p>
+
+                    <div class="routeActions">
+                        <button id="routeBtn" class="primary routeBtn">
+                            ▶ Go on your inspection route
+                        </button>
+
+                        <button id="emergencyStopBtn" class="emergencyStopBtn">
+                            ■ Emergency Stop
+                        </button>
+                    </div>
+                </section>
+
+                <aside class="right card">
+                    <div class="tabs">
+                        <button id="imagesTab" class="active">Images</button>
+                        <button id="commandsTab">Emergency Commands</button>
+                    </div>
+
+                    <div id="imagesPanel" class="panel images">
+                        <b>Live Images</b>
+                        <div class="photo"></div>
+
+                        <div class="thumbs">
+                            <div class="thumb"></div>
+                            <div class="thumb"></div>
+                            <div class="thumb"></div>
+                        </div>
+                    </div>
+
+                    <div id="commandsPanel" class="panel commands hidden">
+                        <div>
+                            <b>Emergency Commands</b>
+                            <p class="muted">
+                                Send a direct instruction to the selected dog.
+                            </p>
+                        </div>
+
+                        <div id="history" class="history"></div>
+
+                        <div class="chat">
+                            <input
+                                id="commandInput"
+                                placeholder="Type an exact movement command..."
+                            >
+                            <button id="send">➤</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section id="setup" class="setup">
+            <div class="rsWrap">
+                <header class="rsHead">
+                    <div>
+                        <div class="rsTitle">
+                            <h1>Route Setup</h1>
+
+                            <span class="rsBadge">
+                                <i></i>
+                                <span id="rsBadgeText">No dog selected</span>
+                            </span>
+                        </div>
+
+                        <p class="muted">
+                            Walk the dog to each inspection spot and press Record.
+                        </p>
+                    </div>
+
+                    <div class="rsControls">
+                        <div class="rsField">
+                            <span class="rsLabel">Dog</span>
+                            <div id="rsDogs" class="rsSeg"></div>
+                        </div>
+
+                        <div class="rsField" style="min-width:220px">
+                            <label class="rsLabel" for="rsRoute">Route</label>
+                            <select id="rsRoute" class="rsSelect"></select>
+                        </div>
+
+                        <button id="rsNewToggle" class="rsGhost" type="button">
+                            + New route
+                        </button>
+                    </div>
+                </header>
+
+                <form id="rsNewForm" class="rsNew hidden">
+                    <input
+                        id="rsNewName"
+                        class="rsInput"
+                        placeholder="Route name"
+                        style="width:300px"
+                    >
+                    <button class="rsGhost" type="submit">Create</button>
+                </form>
+
+                <div class="rsRow">
+                    <section class="rsCard" style="flex:999 1 560px">
+                        <div class="rsCardHead">
+                            <h2>Dog position</h2>
+                            <button id="rsRecenter" class="rsGhost" type="button">
+                                Recenter map
+                            </button>
+                        </div>
+
+                        <div class="rsPose">
+                            <div>
+                                <span class="rsLabel">X</span>
+                                <b id="rsX">–</b>
+                            </div>
+
+                            <div>
+                                <span class="rsLabel">Y</span>
+                                <b id="rsY">–</b>
+                            </div>
+
+                            <div>
+                                <span class="rsLabel">Facing</span>
+                                <b id="rsYaw">–</b>
+                            </div>
+                        </div>
+
+                        <div class="rsMap">
+                            <svg id="rsMap" viewBox="0 0 640 340"></svg>
+                        </div>
+
+                        <div class="rsLegend">
+                            <span><i style="background:#2f8cff"></i>Photo stop</span>
+                            <span><i style="background:#3a5470"></i>No photo</span>
+                            <span><i style="background:#35e08a"></i>Dog</span>
+                        </div>
+                    </section>
+
+                    <section class="rsCard" style="flex:1 1 360px">
+                        <h2>Record a waypoint here</h2>
+
+                        <div class="rsField">
+                            <label class="rsLabel" for="rsWpName">Name</label>
+                            <input
+                                id="rsWpName"
+                                class="rsInput"
+                                placeholder="e.g. Corner 1"
+                            >
+                        </div>
+
+                        <label class="rsOption">
+                            <span>
+                                <span style="font-weight:600">Take a photo here</span>
+                                <small>Sent for compliance analysis</small>
+                            </span>
+                            <input id="rsPhoto" type="checkbox" checked>
+                        </label>
+
+                        <label class="rsOption">
+                            <span>
+                                <span style="font-weight:600">Required stop</span>
+                                <small>Route ends if the dog cannot reach it</small>
+                            </span>
+                            <input id="rsRequired" type="checkbox" checked>
+                        </label>
+
+                        <button id="rsRecord" class="rsRecord" type="button">
+                            Record at dog's position
+                        </button>
+
+                        <div id="rsMsg" class="rsMsg"></div>
+
+                        <div class="rsHelp">
+                            <b>How to use</b>
+                            <span>1. Start the dog on the taped start spot.</span>
+                            <span>2. Drive the dog to an inspection point.</span>
+                            <span>3. Name the point and press Record.</span>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="rsCard">
+                    <div class="rsCardHead">
+                        <h2 id="rsListTitle">Waypoints</h2>
+                        <span id="rsCount" class="rsMono"></span>
+                    </div>
+
+                    <div class="rsTableWrap">
+                        <table class="rsTable">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>Facing</th>
+                                <th>Photo</th>
+                                <th>Stop</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+
+                            <tbody id="rsBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div
+    id="dogModalBackdrop"
+    class="dogModalBackdrop"
+    role="dialog"
+    aria-modal="true"
+>
+    <section class="dogModal card">
+        <div class="dogModalHead">
+            <div>
+                <h2>Add or Remove Dogs</h2>
+                <p class="muted">
+                    Configure the connection information for each dog.
+                </p>
+            </div>
+
+            <button id="closeDogModal" class="dogModalClose" type="button">
+                ×
+            </button>
+        </div>
+
         <form id="addDogForm" class="dogForm" novalidate>
-          <label>Dog name<input id="newDogName" type="text" autocomplete="off" placeholder="e.g. Pumbaa"></label>
-          <label>IP address<input id="newDogIp" type="text" autocomplete="off" placeholder="e.g. 192.168.0.60"></label>
-          <label>SSH username<input id="newDogUser" type="text" autocomplete="off" placeholder="e.g. ubuntu"></label>
-          <label>ROS port<input id="newDogPort" type="number" min="1" max="65535" value="9090"></label>
-          <div id="dogFormError" class="dogFormError" role="alert"></div>
-          <div class="dogFormActions">
-            <button id="cancelAddDog" class="rsGhost" type="button">Cancel</button>
-            <button id="addDogBtn" class="primary addDogBtn" type="button">Add Dog</button>
-          </div>
+            <label>
+                Dog name
+                <input id="newDogName" placeholder="e.g. Pumbaa">
+            </label>
+
+            <label>
+                IP address
+                <input id="newDogIp" placeholder="e.g. 192.168.0.60">
+            </label>
+
+            <label>
+                SSH username
+                <input id="newDogUser" placeholder="e.g. hiwonder">
+            </label>
+
+            <label>
+                ROS port
+                <input id="newDogPort" type="number" value="9090">
+            </label>
+
+            <div id="dogFormError" class="dogFormError"></div>
+
+            <div class="dogFormActions">
+                <button id="cancelAddDog" class="rsGhost" type="button">
+                    Cancel
+                </button>
+
+                <button id="addDogBtn" class="primary" type="button">
+                    Add Dog
+                </button>
+            </div>
         </form>
+
         <h3>Configured Dogs</h3>
         <div id="managedDogs" class="managedDogs"></div>
-      </section>
-    </div>
+    </section>
+</div>
 
-    <script>
-    const dogs={};   // filled from /api/dogs by loadDogs()
-    let selected=new Set(),current='',nimOn=false;const dogStates=Object.fromEntries(Object.keys(dogs).map(n=>[n,{stopped:false,running:false}]));const histories=Object.fromEntries(Object.keys(dogs).map(n=>[n,[]]));const $=id=>document.getElementById(id);
-    function renderCards(){$('dogGrid').innerHTML=Object.entries(dogs).map(([n,d])=>`<article class="dogCard card ${selected.has(n)?'selected':''} ${d.online?'':'offline'}" data-dog="${n}"><div class="check">${selected.has(n)?'✓':''}</div><div class="robot"></div><h3>${n}</h3><span class="muted">${d.unit} · ${d.ip||'No IP'}</span><p style="color:${d.state==='ready'?'#40e582':d.state==='online'?'#f5c451':'#ff7a87'}">● ${d.label}</p></article>`).join('');document.querySelectorAll('.dogCard').forEach(c=>c.onclick=()=>toggle(c.dataset.dog));summary()}
-    function toggle(n){if(!dogs[n].online)return;pairMsg='';selected.has(n)?selected.delete(n):selected.add(n);renderCards()}
-    let pairMsg='';
-    function summary(){if(pairMsg){$('summary').textContent=pairMsg;$('pairBtn').disabled=!selected.size;return}$('summary').textContent=selected.size?`${selected.size} dog${selected.size>1?'s':''} selected: ${[...selected].join(', ')}`:'0 dogs selected';$('pairBtn').disabled=!selected.size}
-    function renderNav(){$('dogNav').innerHTML=[...selected].map(n=>`<button data-dog="${n}" class="${n===current?'active':''}">♙ &nbsp; ${n}</button>`).join('');document.querySelectorAll('#dogNav button').forEach(b=>b.onclick=()=>openDog(b.dataset.dog))}
-    function showPair(){$('setup').style.display='none';$('setupNav').classList.remove('active');$('pair').style.display='block';$('dogView').style.display='none';$('pairNav').classList.add('active');renderCards()}
-    function ensureDogState(n){if(!dogStates[n])dogStates[n]={stopped:false,running:false};if(!histories[n])histories[n]=[]}
-    function openDog(n){ensureDogState(n);current=n;renderNav();$('pairNav').classList.remove('active');$('setupNav').classList.remove('active');$('setup').style.display='none';$('pair').style.display='none';$('dogView').style.display='block';const d=dogs[n];$('dogName').textContent=n;$('unit').textContent=d.unit;$('battery').textContent=(d.battery??'--')+'%';setProgress(d.progress);renderDogState();showImages();renderHistory()}
-    
-    function renderDogState(){
-     const state=dogStates[current],d=dogs[current];
-     $('task').textContent=state.stopped?'Emergency stop activated':state.running?'Inspection route running':d.task;
-     $('routeBtn').textContent=state.stopped?'▶ Send back on inspection route':state.running?'■ Route running':'▶ Go on your inspection route';
-     $('emergencyStopBtn').classList.toggle('active',state.stopped);
-     $('emergencyStopBtn').textContent=state.stopped?'■ Stopped':'■ Emergency Stop';
-     $('emergencyStopBtn').disabled=state.stopped;
-    }
-    function setProgress(p){$('percent').textContent=p+'% Complete';const base=$('base'),done=$('done'),mark=$('marker'),len=base.getTotalLength();done.style.strokeDasharray=`${len} ${len}`;done.style.strokeDashoffset=len*(1-p/100);const pt=base.getPointAtLength(len*p/100);mark.setAttribute('cx',pt.x);mark.setAttribute('cy',pt.y)}
-    function renderHistory(){const h=$('history'),items=histories[current];h.innerHTML=items.length?items.map(x=>`<div class="message"><span>${escapeHtml(x)}</span><small>Sent to ${current}</small></div>`).join(''):`<div class="empty">No emergency commands sent to ${current}.</div>`;h.scrollTop=h.scrollHeight}
-    function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-    function send(){const v=$('commandInput').value.trim();if(!v||!current)return;histories[current].push(v);$('commandInput').value='';renderHistory()}
-    function showImages(){$('imagesPanel').classList.remove('hidden');$('commandsPanel').classList.add('hidden');$('imagesTab').classList.add('active');$('commandsTab').classList.remove('active')}
-    $('commandsTab').onclick=()=>{$('commandsPanel').classList.remove('hidden');$('imagesPanel').classList.add('hidden');$('commandsTab').classList.add('active');$('imagesTab').classList.remove('active');renderHistory()};$('imagesTab').onclick=showImages;$('send').onclick=send;$('commandInput').onkeydown=e=>{if(e.key==='Enter')send()};$('pairNav').onclick=showPair;$('pairBtn').onclick=pairSelected;$('disconnect').onclick=()=>{selected.delete(current);const next=[...selected][0];current='';renderNav();next?openDog(next):showPair()};$('nimBtn').onclick=nimButton;$('routeBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=false;dogStates[current].running=true;renderDogState()};$('emergencyStopBtn').onclick=()=>{if(!current)return;dogStates[current].stopped=true;dogStates[current].running=false;renderDogState()};
-    
-    
-    /* ---------- Dog Management ---------- */
-    function nextDogUnit(){
-      const used=Object.values(dogs).map(d=>Number(String(d.unit||'').replace(/\D/g,''))).filter(Number.isFinite);
-      const next=(used.length?Math.max(...used):0)+1;
-      return `Unit ${String(next).padStart(2,'0')}`;
-    }
-    function openDogModal(){
-      $('dogModalBackdrop').classList.add('open');
-      $('dogFormError').textContent='';
-      renderManagedDogs();
-      setTimeout(()=>$('newDogName').focus(),0);
-    }
-    function closeDogModal(){
-      $('dogModalBackdrop').classList.remove('open');
-      $('dogFormError').textContent='';
-    }
-    function renderManagedDogs(){
-      $('managedDogs').innerHTML=Object.entries(dogs).map(([name,d])=>`<div class="managedDog">
-        <div><b>${escapeHtml(name)}</b><small>${escapeHtml(d.unit||'')}</small></div>
-        <div><b>${escapeHtml(d.ip||'Not set')}</b><small>IP address</small></div>
-        <div><b>${escapeHtml(d.ssh_user||'hiwonder')}</b><small>SSH username</small></div>
-        <div><b>${escapeHtml(String(d.ros_port||9090))}</b><small>ROS port</small></div>
-        <button class="removeDogBtn" type="button" data-remove-dog="${escapeHtml(name)}">Remove</button>
-      </div>`).join('')||'<div class="empty">No dogs configured.</div>';
-      document.querySelectorAll('[data-remove-dog]').forEach(button=>button.onclick=()=>removeDog(button.dataset.removeDog));
-    }
-    function resetAddDogForm(){
-      $('newDogName').value='';
-      $('newDogIp').value='';
-      $('newDogUser').value='';
-      $('newDogPort').value='9090';
-      $('dogFormError').textContent='';
-    }
-    async function addDog(){
-      const body={name:$('newDogName').value.trim(),ip:$('newDogIp').value.trim(),
-                  ssh_user:$('newDogUser').value.trim()||'hiwonder',ros_port:Number($('newDogPort').value)||9090};
-      if(!body.name||!body.ip){$('dogFormError').textContent='Enter at least a name and an IP address.';return}
-      try{
-        const r=await fetch('/api/dogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-        const data=await r.json();
-        if(!r.ok){$('dogFormError').textContent=data.error||'Could not add the dog.';return}
-      }catch(e){$('dogFormError').textContent='Could not reach the app server.';return}
-      resetAddDogForm();
-      await loadDogs();
-      renderManagedDogs();
-    }
-    async function removeDog(name){
-      const d=dogs[name];if(!d)return;
-      if(!confirm(`Remove ${name} (${d.ip}) from the dog list?`))return;
-      try{
-        const r=await fetch(`/api/dogs/${encodeURIComponent(d.id)}`,{method:'DELETE'});
-        const data=await r.json();
-        if(!r.ok){$('dogFormError').textContent=data.error||'Could not remove the dog.';return}
-      }catch(e){$('dogFormError').textContent='Could not reach the app server.';return}
-      selected.delete(name);delete dogs[name];delete dogStates[name];delete histories[name];
-      if(current===name){current='';const next=[...selected][0];renderNav();next?openDog(next):showPair()}else{renderNav();renderCards()}
-      renderManagedDogs();
-    }
-    $('manageDogsBtn').onclick=openDogModal;
-    $('closeDogModal').onclick=closeDogModal;
-    $('cancelAddDog').onclick=()=>{resetAddDogForm();closeDogModal()};
-    $('addDogBtn').onclick=addDog;
-    $('addDogForm').onsubmit=e=>{e.preventDefault();addDog()};
-    $('dogModalBackdrop').onclick=e=>{if(e.target===$('dogModalBackdrop'))closeDogModal()};
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('dogModalBackdrop').classList.contains('open'))closeDogModal()});
+<script>
+    const $ = id => document.getElementById(id);
 
-    /* ---------- Route Setup (placeholder data; swap for /api/routes calls later) ---------- */
-    let rsRoutes={'Loading routes...':[]};   // filled from /api/routes by rsLoadRoutes()
-    const rsRouteFiles={};                       // route name -> file in routes/, for saving later
-    async function rsLoadRoutes(){
-     try{
-      const r=await fetch('/api/routes');const data=await r.json();
-      const loaded={};
-      data.routes.filter(x=>!x.error).forEach(x=>{loaded[x.name]=x.waypoints;rsRouteFiles[x.name]=x.file});
-      if(Object.keys(loaded).length){
-       rsRoutes=loaded;
-       rsRoute=Object.keys(loaded).find(n=>rsRouteFiles[n]==='data_center.json')||Object.keys(loaded)[0];
-      }
-     }catch(e){rsSay('Could not load routes from the server',true)}
-     rsSel=-1;rsView=null;
-     if($('setup').style.display==='block')rsRender();
-    }
-    let rsDogNames=Object.keys(dogs).filter(n=>dogs[n].online);
-    const rsPoses=Object.fromEntries(rsDogNames.map((n,i)=>[n,{x:3.64-i*.8,y:1.72+i*.4,yaw:0.5}]));
-    let rsDog=rsDogNames[0],rsRoute='Loading routes...',rsSel=-1,rsView=null;
-    const rsDeg=r=>Math.round(r*180/Math.PI)+'°';
-    function rsEsc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-    function rsSay(t,err){$('rsMsg').textContent=t;$('rsMsg').className='rsMsg'+(err?' err':'')}
-    
-    function showSetup(){rsDogNames=Object.keys(dogs);  // all configured dogs; offline ones show as offline
-     rsDog=rsDogNames.includes(rsDog)?rsDog:rsDogNames[0];rsDogNames.forEach((n,i)=>{if(!rsPoses[n])rsPoses[n]={x:3.64-i*.8,y:1.72+i*.4,yaw:0.5}});current='';renderNav();$('pair').style.display='none';$('dogView').style.display='none';$('setup').style.display='block';$('pairNav').classList.remove('active');$('setupNav').classList.add('active');rsRender()}
-    function rsRender(){
-     $('rsDogs').innerHTML=rsDogNames.map(n=>`<button type="button" data-dog="${n}" aria-pressed="${n===rsDog}">${n}</button>`).join('');
-     document.querySelectorAll('#rsDogs button').forEach(b=>b.onclick=()=>{rsDog=b.dataset.dog;rsView=null;rsRender()});
-     $('rsRoute').innerHTML=Object.keys(rsRoutes).map(r=>`<option${r===rsRoute?' selected':''}>${rsEsc(r)}</option>`).join('');
-     $('rsBadgeText').textContent=!rsDog?'No dogs configured':dogs[rsDog]&&dogs[rsDog].state==='ready'?`${rsDog} connected`:`${rsDog} offline`;
-     rsTable();rsPose();rsDraw();
-    }
-    function rsTable(){
-     const w=rsRoutes[rsRoute];
-     $('rsListTitle').textContent=`Waypoints · ${rsRoute}`;
-     $('rsCount').textContent=`${w.length} stop${w.length===1?'':'s'} · saved automatically`;
-     $('rsBody').innerHTML=w.length?w.map((p,i)=>`<tr class="${i===rsSel?'sel':''}" data-i="${i}">
-    <td><span class="rsNum ${p.photo?'':'plain'}">${i+1}</span></td>
-    <td><input class="rsName" value="${rsEsc(p.name)}" data-i="${i}" aria-label="Name of stop ${i+1}"></td>
-    <td class="rsMono">${p.x.toFixed(2)}, ${p.y.toFixed(2)}</td>
-    <td class="rsMono">${rsDeg(p.yaw)}</td>
-    <td><button type="button" class="rsTag ${p.photo?'photo':'nophoto'}" data-act="photo" data-i="${i}" aria-pressed="${p.photo}">${p.photo?'Photo':'No photo'}</button></td>
-    <td><button type="button" class="rsTag ${p.required?'req':'opt'}" data-act="req" data-i="${i}" aria-pressed="${p.required}">${p.required?'Required':'Optional'}</button></td>
-    <td class="rsActs"><button type="button" class="rsIcon" data-act="up" data-i="${i}" aria-label="Move ${rsEsc(p.name)} up"${i===0?' disabled':''}>↑</button> <button type="button" class="rsIcon" data-act="down" data-i="${i}" aria-label="Move ${rsEsc(p.name)} down"${i===w.length-1?' disabled':''}>↓</button> <button type="button" class="rsDel" data-act="del" data-i="${i}" aria-label="Delete ${rsEsc(p.name)}">Delete</button></td>
-    </tr>`).join(''):`<tr><td colspan="7" class="rsEmpty">No stops yet. Drive the dog to its start spot, name it "Start", and press Record.</td></tr>`;
-    }
-    function rsPose(){const p=rsPoses[rsDog]||{x:0,y:0,yaw:0};$('rsX').innerHTML=`${p.x.toFixed(2)}<span>m</span>`;$('rsY').innerHTML=`${p.y.toFixed(2)}<span>m</span>`;$('rsYaw').textContent=rsDeg(p.yaw)}
-    function rsDraw(){
-     const w=rsRoutes[rsRoute],p=rsPoses[rsDog]||{x:0,y:0,yaw:0},W=640,H=340,m=46;
-     const pts=w.map(q=>[q.x,q.y]).concat([[p.x,p.y]]);
-     const fits=v=>pts.every(([x,y])=>x>v.x0+.3&&x<v.x1-.3&&y>v.y0+.3&&y<v.y1-.3);
-     if(!rsView||!fits(rsView)){const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);rsView={x0:Math.min(...xs)-1,x1:Math.max(...xs)+1,y0:Math.min(...ys)-1,y1:Math.max(...ys)+1}}
-     const v=rsView,s=Math.min((W-2*m)/(v.x1-v.x0),(H-2*m)/(v.y1-v.y0)),ox=(W-s*(v.x1-v.x0))/2,oy=(H-s*(v.y1-v.y0))/2;
-     const X=x=>ox+(x-v.x0)*s,Y=y=>H-(oy+(y-v.y0)*s);
-     let g='';
-     for(let x=Math.ceil(v.x0);x<=v.x1;x++)g+=`<line x1="${X(x)}" y1="0" x2="${X(x)}" y2="${H}" stroke="#122438"/><text x="${X(x)+4}" y="${H-8}" fill="#4c6580" font-family="Consolas,monospace" font-size="11">${x}m</text>`;
-     for(let y=Math.ceil(v.y0);y<=v.y1;y++)g+=`<line x1="0" y1="${Y(y)}" x2="${W}" y2="${Y(y)}" stroke="#122438"/>`;
-     if(w.length>1)g+=`<polyline points="${w.map(q=>X(q.x)+','+Y(q.y)).join(' ')}" fill="none" stroke="#2f8cff" stroke-opacity=".6" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>`;
-     const seen=new Set();let shown=0;
-     w.forEach((q,i)=>{const key=q.x.toFixed(2)+','+q.y.toFixed(2);if(seen.has(key)&&i!==rsSel)return;seen.add(key);  // return-leg stops share a spot: draw it once
-      const below=(shown++%2===0),x=X(q.x),y=Y(q.y),c=q.photo?'#2f8cff':'#3a5470';
-      g+=`<line x1="${x}" y1="${y}" x2="${x+Math.cos(q.yaw)*22}" y2="${y-Math.sin(q.yaw)*22}" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`;
-      if(i===rsSel)g+=`<circle cx="${x}" cy="${y}" r="20" fill="#2f8cff" fill-opacity=".18"/>`;
-      g+=`<circle cx="${x}" cy="${y}" r="13" fill="${c}" stroke="#071421" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-family="Consolas,monospace" font-size="12" font-weight="600">${i+1}</text><text x="${x}" y="${below?y+30:y-20}" text-anchor="middle" fill="#dbe7f4" font-size="12.5" font-weight="600">${rsEsc(q.name)}</text>`});
-     const dx=X(p.x),dy=Y(p.y);
-     g+=`<circle cx="${dx}" cy="${dy}" r="24" fill="none" stroke="#35e08a" stroke-opacity=".25" stroke-width="2"/><g transform="translate(${dx} ${dy}) rotate(${-p.yaw*180/Math.PI})"><path d="M17 0 L-9 10 L-4 0 L-9 -10 Z" fill="#35e08a"/></g>`;
-     $('rsMap').innerHTML=g;
-    }
-    function rsRecord(){
-     const w=rsRoutes[rsRoute],p=rsPoses[rsDog];
-     const name=$('rsWpName').value.trim()||`Checkpoint${w.length+1}`;
-     if(w.some(q=>q.name===name)){rsSay(`There's already a stop called "${name}"`,true);return}
-     w.push({name,x:+p.x.toFixed(2),y:+p.y.toFixed(2),yaw:+p.yaw.toFixed(2),photo:$('rsPhoto').checked,required:$('rsRequired').checked});
-     rsSel=w.length-1;$('rsWpName').value='';rsSay(`Saved ${name} at ${p.x.toFixed(2)}, ${p.y.toFixed(2)}`);rsTable();rsDraw();
-    }
-    
-    $('setupNav').onclick=showSetup;
-    $('rsRecord').onclick=rsRecord;
-    $('rsWpName').onkeydown=e=>{if(e.key==='Enter')rsRecord()};
-    $('rsRoute').onchange=e=>{rsRoute=e.target.value;rsSel=-1;rsView=null;rsTable();rsDraw()};
-    $('rsRecenter').onclick=()=>{rsView=null;rsDraw()};
-    $('rsNewToggle').onclick=()=>{const f=$('rsNewForm');f.classList.toggle('hidden');$('rsNewToggle').setAttribute('aria-expanded',!f.classList.contains('hidden'));if(!f.classList.contains('hidden'))$('rsNewName').focus()};
-    $('rsNewForm').onsubmit=e=>{e.preventDefault();const n=$('rsNewName').value.trim();if(!n){rsSay('Type a name for the new route first',true);return}if(rsRoutes[n]){rsSay(`A route called "${n}" already exists`,true);return}rsRoutes[n]=[];rsRoute=n;rsSel=-1;rsView=null;$('rsNewName').value='';$('rsNewForm').classList.add('hidden');$('rsNewToggle').setAttribute('aria-expanded','false');rsSay(`Created ${n}. Record its first stop.`);rsRender();$('rsWpName').focus()};
-    $('rsBody').onclick=e=>{const b=e.target.closest('button'),tr=e.target.closest('tr[data-i]');if(!tr)return;const w=rsRoutes[rsRoute],i=+tr.dataset.i;
-     if(!b){rsSel=i;document.querySelectorAll('#rsBody tr').forEach(r=>r.classList.toggle('sel',+r.dataset.i===i));rsDraw();return}
-     const a=b.dataset.act;
-     if(a==='photo')w[i].photo=!w[i].photo;
-     if(a==='req')w[i].required=!w[i].required;
-     if(a==='up'&&i>0){[w[i-1],w[i]]=[w[i],w[i-1]];rsSel=i-1}
-     if(a==='down'&&i<w.length-1){[w[i+1],w[i]]=[w[i],w[i+1]];rsSel=i+1}
-     if(a==='del'){const n=w[i].name;w.splice(i,1);rsSel=-1;rsSay(`Deleted ${n}`)}
-     rsTable();rsDraw()};
-    $('rsBody').onchange=e=>{if(!e.target.classList.contains('rsName'))return;const w=rsRoutes[rsRoute],i=+e.target.dataset.i,n=e.target.value.trim();
-     if(!n||w.some((q,j)=>j!==i&&q.name===n)){rsSay(n?`There's already a stop called "${n}"`:"Name can't be empty",true);rsTable();return}
-     w[i].name=n;rsSay('Renamed');rsDraw()};
-    $('rsBody').onkeydown=e=>{if(e.key==='Enter'&&e.target.classList.contains('rsName'))e.target.blur()};
-    
-    selected.clear();current='';renderNav();showPair();
-    rsLoadRoutes();
+    const dogs = {};
+    const dogStates = {};
+    const histories = {};
 
-    /* ---------- Live status from the backend ---------- */
-    async function loadDogs(){
-     try{
-      const data=await (await fetch('/api/dogs')).json();
-      const names=new Set(data.dogs.map(x=>x.name));
-      Object.keys(dogs).forEach(n=>{if(!names.has(n)&&!dogs[n].preparing){delete dogs[n];selected.delete(n)}});
-      data.dogs.forEach(x=>{
-       if(dogs[x.name]&&dogs[x.name].preparing)return;   // Pair & Connect is updating this card
-       dogs[x.name]=Object.assign(dogs[x.name]||{progress:0,task:'Not on patrol'},
-         {id:x.id,unit:x.unit,ip:x.ip,ssh_user:x.ssh_user,ros_port:x.ros_port,online:x.online,state:x.state,label:x.label,battery:x.battery});
-       ensureDogState(x.name);
-       if(!x.online&&selected.has(x.name)&&!dogStates[x.name].running)selected.delete(x.name);
-      });
-     }catch(e){/* server unreachable: keep last known state */}
-     if($('pair').style.display!=='none')renderCards();
-    }
-    async function loadNim(){
-     let n={up:false,loaded:false,label:'Could not reach the app server'};
-     try{n=await (await fetch('/api/nim')).json()}catch(e){}
-     nimOn=!!n.loaded;
-     $('nimText').textContent=nimOn?'READY':n.up?'NOT LOADED':'OFF';
-     $('nimDetail').textContent=n.label+(n.model?` · ${n.model}`:'');
-     $('nimDot').style.background=nimOn?'var(--green)':'var(--red)';
-     $('nimDot').style.boxShadow=nimOn?'0 0 10px #31df7966':'0 0 10px #ff657466';
-     if(nimStarting&&!nimOn&&Date.now()<nimStarting){$('nimText').textContent='STARTING';$('nimBtn').textContent='Starting…';$('nimBtn').disabled=true}
-     else{nimStarting=0;$('nimBtn').disabled=false;$('nimBtn').textContent=nimOn?'Stop Qwen':n.up?'Check again':'Start Qwen'}
-    }
-    let nimStarting=0;
-    async function nimButton(){
-     const label=$('nimBtn').textContent;
-     if(label==='Check again'){loadNim();return}
-     const action=label==='Stop Qwen'?'stop':'start';
-     if(action==='stop'&&!confirm('Stop the AI model? Photo analysis will be unavailable until it is started again.'))return;
-     try{
-      const r=await fetch('/api/nim/'+action,{method:'POST'});const data=await r.json();
-      if(!r.ok){$('nimDetail').textContent=data.error||'Could not '+action+' the AI model';return}
-     }catch(e){$('nimDetail').textContent='Could not reach the app server';return}
-     if(action==='start'){nimStarting=Date.now()+5*60*1000;$('nimDetail').textContent='Loading the model, this takes a minute or two…'}
-     loadNim();setTimeout(loadNim,4000);
+    let selected = new Set();
+    let current = "";
+    let nimOn = false;
+    let nimStarting = 0;
+    let pairMsg = "";
+
+    let rsRoutes = {"Loading routes...": []};
+    const rsRouteFiles = {};
+    const rsPoses = {};
+
+    let rsDogNames = [];
+    let rsDog = "";
+    let rsRoute = "Loading routes...";
+    let rsSel = -1;
+    let rsView = null;
+
+    function ensureDogState(name) {
+        if (!dogStates[name]) {
+            dogStates[name] = {
+                stopped: false,
+                running: false
+            };
+        }
+
+        if (!histories[name]) {
+            histories[name] = [];
+        }
     }
 
-    /* Pair & Connect: put each selected dog in patrol mode over SSH, then open it */
-    async function prepareDog(name){
-     const d=dogs[name];
-     if(d.state==='ready')return true;
-     d.preparing=true;d.state='online';d.label='Starting…';renderCards();
-     let ok=false;
-     try{
-      const resp=await fetch(`/api/dogs/${encodeURIComponent(d.id)}/prepare`,{method:'POST'});
-      const reader=resp.body.getReader(),dec=new TextDecoder();let buf='';
-      while(true){
-       const {done,value}=await reader.read();if(done)break;
-       buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();
-       for(const line of lines){
-        if(!line.startsWith('data: '))continue;
-        const u=JSON.parse(line.slice(6));
-        if(u.done){ok=u.ok;d.label=u.ok?'Ready for patrol':'✗ '+u.msg;d.state=u.ok?'ready':'error'}
-        else d.label=`Step ${u.step}/${u.total} · ${u.msg}`;
+    function escapeHtml(value) {
+        return String(value).replace(
+            /[&<>"]/g,
+            character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;"
+            }[character])
+        );
+    }
+
+    function renderCards() {
+        $("dogGrid").innerHTML = Object.entries(dogs).map(([name, dog]) => `
+            <article
+                class="dogCard card ${selected.has(name) ? "selected" : ""} ${dog.online ? "" : "offline"}"
+                data-dog="${escapeHtml(name)}"
+            >
+                <div class="check">${selected.has(name) ? "✓" : ""}</div>
+                <div class="robot"></div>
+                <h3>${escapeHtml(name)}</h3>
+                <span class="muted">
+                    ${escapeHtml(dog.unit || "")} ·
+                    ${escapeHtml(dog.ip || "No IP")}
+                </span>
+                <p style="color:${
+                    dog.state === "ready"
+                        ? "#40e582"
+                        : dog.state === "online"
+                        ? "#f5c451"
+                        : "#ff7a87"
+                }">
+                    ● ${escapeHtml(dog.label || "Offline")}
+                </p>
+            </article>
+        `).join("");
+
+        document.querySelectorAll(".dogCard").forEach(card => {
+            card.onclick = () => toggleDog(card.dataset.dog);
+        });
+
+        updateSummary();
+    }
+
+    function toggleDog(name) {
+        if (!dogs[name] || !dogs[name].online) {
+            return;
+        }
+
+        pairMsg = "";
+
+        if (selected.has(name)) {
+            selected.delete(name);
+        } else {
+            selected.add(name);
+        }
+
         renderCards();
-       }
-      }
-     }catch(e){d.label='✗ Could not reach the app server';d.state='error'}
-     d.preparing=false;renderCards();
-     return ok;
     }
-    async function pairSelected(){
-     const names=[...selected];if(!names.length)return;
-     $('pairBtn').disabled=true;pairMsg=`Connecting ${names.join(', ')}…`;$('summary').textContent=pairMsg;
-     const results=await Promise.all(names.map(prepareDog));
-     const failed=names.filter((n,i)=>!results[i]);
-     failed.forEach(n=>selected.delete(n));
-     pairMsg='';
-     if(failed.length){
-      pairMsg=`Couldn't connect ${failed.join(', ')}. See the card for why.`+(selected.size?' The others are ready.':'');
-      renderCards();
-      if(!selected.size)return;
-     }
-     renderNav();openDog([...selected][0]);
+
+    function updateSummary() {
+        if (pairMsg) {
+            $("summary").textContent = pairMsg;
+            $("pairBtn").disabled = !selected.size;
+            return;
+        }
+
+        $("summary").textContent = selected.size
+            ? `${selected.size} dog${selected.size > 1 ? "s" : ""} selected: ${[...selected].join(", ")}`
+            : "0 dogs selected";
+
+        $("pairBtn").disabled = !selected.size;
     }
-    loadDogs();loadNim();
-    setInterval(loadDogs,5000);setInterval(loadNim,15000);
-    </script></body></html>
+
+    function renderNav() {
+        $("dogNav").innerHTML = [...selected].map(name => `
+            <button
+                data-dog="${escapeHtml(name)}"
+                class="${name === current ? "active" : ""}"
+            >
+                ♙ &nbsp; ${escapeHtml(name)}
+            </button>
+        `).join("");
+
+        document.querySelectorAll("#dogNav button").forEach(button => {
+            button.onclick = () => openDog(button.dataset.dog);
+        });
+    }
+
+    function showPair() {
+        $("setup").style.display = "none";
+        $("dogView").style.display = "none";
+        $("pair").style.display = "block";
+
+        $("setupNav").classList.remove("active");
+        $("pairNav").classList.add("active");
+
+        renderCards();
+    }
+
+    function openDog(name) {
+        ensureDogState(name);
+
+        current = name;
+
+        renderNav();
+
+        $("pairNav").classList.remove("active");
+        $("setupNav").classList.remove("active");
+
+        $("setup").style.display = "none";
+        $("pair").style.display = "none";
+        $("dogView").style.display = "block";
+
+        const dog = dogs[name];
+
+        $("dogName").textContent = name;
+        $("unit").textContent = dog.unit || "";
+        $("battery").textContent =
+            `${dog.battery ?? "--"}%`;
+
+        setProgress(dog.progress || 0);
+        renderDogState();
+        showImages();
+        renderHistory();
+    }
+
+    function renderDogState() {
+        if (!current || !dogs[current]) {
+            return;
+        }
+
+        const state = dogStates[current];
+        const dog = dogs[current];
+
+        $("task").textContent = state.stopped
+            ? "Emergency stop activated"
+            : dog.task || "Not on patrol";
+
+        $("routeBtn").textContent = state.stopped
+            ? "▶ Send back on inspection route"
+            : state.running
+            ? "■ Route running"
+            : "▶ Go on your inspection route";
+
+        $("routeBtn").disabled = state.running;
+
+        $("emergencyStopBtn").classList.toggle(
+            "active",
+            state.stopped
+        );
+
+        $("emergencyStopBtn").textContent = state.stopped
+            ? "■ Stopped"
+            : "■ Emergency Stop";
+
+        $("emergencyStopBtn").disabled = state.stopped;
+    }
+
+    function setProgress(percent) {
+        const safePercent = Math.max(
+            0,
+            Math.min(100, Number(percent) || 0)
+        );
+
+        $("percent").textContent =
+            `${safePercent}% Complete`;
+
+        const base = $("base");
+        const done = $("done");
+        const marker = $("marker");
+
+        const length = base.getTotalLength();
+
+        done.style.strokeDasharray =
+            `${length} ${length}`;
+
+        done.style.strokeDashoffset =
+            length * (1 - safePercent / 100);
+
+        const point = base.getPointAtLength(
+            length * safePercent / 100
+        );
+
+        marker.setAttribute("cx", point.x);
+        marker.setAttribute("cy", point.y);
+    }
+
+    async function startInspectionRoute() {
+        if (!current) {
+            return;
+        }
+
+        const dogName = current;
+        const dog = dogs[dogName];
+        const state = dogStates[dogName];
+
+        if (!dog || !dog.id) {
+            $("task").textContent =
+                "Could not determine which dog to start.";
+            return;
+        }
+
+        if (state.running) {
+            return;
+        }
+
+        const routeFile =
+            rsRouteFiles[rsRoute]
+            || "data_center.json";
+
+        state.stopped = false;
+        state.running = true;
+
+        dog.progress = 0;
+        dog.routeCompleted = 0;
+        dog.routeTotal = 0;
+        dog.task = "Starting inspection route...";
+
+        setProgress(0);
+        renderDogState();
+
+        try {
+            const response = await fetch(
+                "/patrol/start",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        dog_id: dog.id,
+                        route: routeFile
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                let message =
+                    "Could not start inspection route.";
+
+                try {
+                    const data = await response.json();
+                    message = data.error || message;
+                } catch (error) {
+                    console.error(error);
+                }
+
+                state.running = false;
+                dog.task = message;
+
+                if (dogName === current) {
+                    renderDogState();
+                }
+
+                return;
+            }
+
+            if (!response.body) {
+                state.running = false;
+                dog.task =
+                    "Patrol started, but no event stream was returned.";
+
+                if (dogName === current) {
+                    renderDogState();
+                }
+
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            let buffer = "";
+
+            while (true) {
+                const {done, value} =
+                    await reader.read();
+
+                if (done) {
+                    break;
+                }
+
+                buffer += decoder.decode(
+                    value,
+                    {stream: true}
+                );
+
+                const lines = buffer.split("\n");
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    if (!line.startsWith("data: ")) {
+                        continue;
+                    }
+
+                    try {
+                        const event = JSON.parse(
+                            line.slice(6)
+                        );
+
+                        handlePatrolEvent(
+                            dogName,
+                            event
+                        );
+
+                    } catch (error) {
+                        console.error(
+                            "Could not parse patrol event:",
+                            error
+                        );
+                    }
+                }
+            }
+
+        } catch (error) {
+            state.running = false;
+            dog.task =
+                "Could not reach the patrol server.";
+
+            if (dogName === current) {
+                renderDogState();
+            }
+
+            console.error(
+                "Patrol request failed:",
+                error
+            );
+        }
+    }
+
+    function handlePatrolEvent(dogName, event) {
+        const dog = dogs[dogName];
+        const state = dogStates[dogName];
+
+        if (!dog || !state) {
+            return;
+        }
+
+        if (event.type === "plan") {
+            dog.routeTotal = event.total || 0;
+            dog.routeCompleted = 0;
+            dog.progress = 0;
+            dog.task = "Inspection route started";
+
+            if (dogName === current) {
+                setProgress(0);
+            }
+        }
+
+        else if (event.type === "action_start") {
+            dog.currentWaypoint =
+                Number(event.index || 0) + 1;
+
+            dog.task =
+                `Navigating to ${event.action}`;
+
+            if (dog.routeTotal) {
+                dog.progress = Math.round(
+                    (
+                        (dog.routeCompleted || 0)
+                        / dog.routeTotal
+                    ) * 100
+                );
+
+                if (dogName === current) {
+                    setProgress(dog.progress);
+                }
+            }
+        }
+
+        else if (event.type === "action_done") {
+            dog.routeCompleted =
+                Number(event.index || 0) + 1;
+
+            if (dog.routeTotal) {
+                dog.progress = Math.round(
+                    (
+                        dog.routeCompleted
+                        / dog.routeTotal
+                    ) * 100
+                );
+
+                if (dogName === current) {
+                    setProgress(dog.progress);
+                }
+            }
+
+            dog.task =
+                `Completed ${event.action}`;
+        }
+
+        else if (event.type === "image") {
+            dog.task =
+                `Image captured at ${
+                    event.waypoint_name
+                    || "inspection stop"
+                }`;
+        }
+
+        else if (event.type === "done") {
+            state.running = false;
+            state.stopped = false;
+
+            dog.progress = 100;
+            dog.task =
+                "Inspection route complete";
+
+            if (dogName === current) {
+                setProgress(100);
+            }
+        }
+
+        else if (event.type === "error") {
+            state.running = false;
+
+            dog.task =
+                event.msg
+                || "Inspection route failed";
+        }
+
+        else if (
+            event.type === "log"
+            && event.msg
+        ) {
+            dog.task = event.msg;
+        }
+
+        if (dogName === current) {
+            renderDogState();
+        }
+    }
+
+    async function stopInspectionRoute() {
+        if (!current || !dogs[current]) {
+            return;
+        }
+
+        const dogName = current;
+        const dog = dogs[dogName];
+        const state = dogStates[dogName];
+
+        try {
+            await fetch(
+                "/patrol/stop",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        dog_id: dog.id
+                    })
+                }
+            );
+        } catch (error) {
+            console.error(
+                "Could not stop patrol:",
+                error
+            );
+        }
+
+        state.running = false;
+        state.stopped = true;
+        dog.task = "Emergency stop activated";
+
+        if (dogName === current) {
+            renderDogState();
+        }
+    }
+
+    function renderHistory() {
+        const history = $("history");
+        const items = histories[current] || [];
+
+        history.innerHTML = items.length
+            ? items.map(command => `
+                <div class="message">
+                    <span>${escapeHtml(command)}</span>
+                    <small>Sent to ${escapeHtml(current)}</small>
+                </div>
+            `).join("")
+            : `
+                <div class="empty">
+                    No emergency commands sent to ${escapeHtml(current)}.
+                </div>
+            `;
+
+        history.scrollTop =
+            history.scrollHeight;
+    }
+
+    async function sendCommand() {
+        const value =
+            $("commandInput").value.trim();
+
+        if (!value || !current) {
+            return;
+        }
+
+        histories[current].push(value);
+        $("commandInput").value = "";
+        renderHistory();
+
+        const dog = dogs[current];
+
+        try {
+            await fetch(
+                "/command",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        input: value,
+                        dog_id: dog.id
+                    })
+                }
+            );
+        } catch (error) {
+            console.error(
+                "Could not send command:",
+                error
+            );
+        }
+    }
+
+    function showImages() {
+        $("imagesPanel").classList.remove("hidden");
+        $("commandsPanel").classList.add("hidden");
+        $("imagesTab").classList.add("active");
+        $("commandsTab").classList.remove("active");
+    }
+
+    function showCommands() {
+        $("commandsPanel").classList.remove("hidden");
+        $("imagesPanel").classList.add("hidden");
+        $("commandsTab").classList.add("active");
+        $("imagesTab").classList.remove("active");
+
+        renderHistory();
+    }
+
+    /*
+     * Dog management
+     */
+
+    function openDogModal() {
+        $("dogModalBackdrop").classList.add("open");
+        $("dogFormError").textContent = "";
+        renderManagedDogs();
+
+        setTimeout(
+            () => $("newDogName").focus(),
+            0
+        );
+    }
+
+    function closeDogModal() {
+        $("dogModalBackdrop").classList.remove("open");
+        $("dogFormError").textContent = "";
+    }
+
+    function renderManagedDogs() {
+        $("managedDogs").innerHTML = Object.entries(dogs).map(
+            ([name, dog]) => `
+                <div class="managedDog">
+                    <div>
+                        <b>${escapeHtml(name)}</b>
+                        <small>${escapeHtml(dog.unit || "")}</small>
+                    </div>
+
+                    <div>
+                        <b>${escapeHtml(dog.ip || "Not set")}</b>
+                        <small>IP address</small>
+                    </div>
+
+                    <div>
+                        <b>${escapeHtml(dog.ssh_user || "hiwonder")}</b>
+                        <small>SSH username</small>
+                    </div>
+
+                    <div>
+                        <b>${escapeHtml(String(dog.ros_port || 9090))}</b>
+                        <small>ROS port</small>
+                    </div>
+
+                    <button
+                        class="removeDogBtn"
+                        type="button"
+                        data-remove-dog="${escapeHtml(name)}"
+                    >
+                        Remove
+                    </button>
+                </div>
+            `
+        ).join("") || `
+            <div class="empty">
+                No dogs configured.
+            </div>
+        `;
+
+        document.querySelectorAll(
+            "[data-remove-dog]"
+        ).forEach(button => {
+            button.onclick =
+                () => removeDog(button.dataset.removeDog);
+        });
+    }
+
+    function resetAddDogForm() {
+        $("newDogName").value = "";
+        $("newDogIp").value = "";
+        $("newDogUser").value = "";
+        $("newDogPort").value = "9090";
+        $("dogFormError").textContent = "";
+    }
+
+    async function addDog() {
+        const body = {
+            name: $("newDogName").value.trim(),
+            ip: $("newDogIp").value.trim(),
+            ssh_user:
+                $("newDogUser").value.trim()
+                || "hiwonder",
+            ros_port:
+                Number($("newDogPort").value)
+                || 9090
+        };
+
+        if (!body.name || !body.ip) {
+            $("dogFormError").textContent =
+                "Enter at least a name and an IP address.";
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                "/api/dogs",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                $("dogFormError").textContent =
+                    data.error
+                    || "Could not add the dog.";
+                return;
+            }
+
+        } catch (error) {
+            $("dogFormError").textContent =
+                "Could not reach the app server.";
+            return;
+        }
+
+        resetAddDogForm();
+        await loadDogs();
+        renderManagedDogs();
+    }
+
+    async function removeDog(name) {
+        const dog = dogs[name];
+
+        if (!dog) {
+            return;
+        }
+
+        if (
+            !confirm(
+                `Remove ${name} (${dog.ip}) from the dog list?`
+            )
+        ) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/api/dogs/${encodeURIComponent(dog.id)}`,
+                {method: "DELETE"}
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                $("dogFormError").textContent =
+                    data.error
+                    || "Could not remove the dog.";
+                return;
+            }
+
+        } catch (error) {
+            $("dogFormError").textContent =
+                "Could not reach the app server.";
+            return;
+        }
+
+        selected.delete(name);
+
+        delete dogs[name];
+        delete dogStates[name];
+        delete histories[name];
+
+        if (current === name) {
+            current = "";
+
+            const next = [...selected][0];
+
+            renderNav();
+
+            if (next) {
+                openDog(next);
+            } else {
+                showPair();
+            }
+        } else {
+            renderNav();
+            renderCards();
+        }
+
+        renderManagedDogs();
+    }
+
+    /*
+     * Route Setup
+     */
+
+    const rsDeg = radians =>
+        `${Math.round(radians * 180 / Math.PI)}°`;
+
+    function rsSay(text, error=false) {
+        $("rsMsg").textContent = text;
+        $("rsMsg").className =
+            `rsMsg${error ? " err" : ""}`;
+    }
+
+    async function rsLoadRoutes() {
+        try {
+            const response =
+                await fetch("/api/routes");
+
+            const data =
+                await response.json();
+
+            const loaded = {};
+
+            data.routes
+                .filter(route => !route.error)
+                .forEach(route => {
+                    loaded[route.name] =
+                        route.waypoints;
+
+                    rsRouteFiles[route.name] =
+                        route.file;
+                });
+
+            if (Object.keys(loaded).length) {
+                rsRoutes = loaded;
+
+                rsRoute =
+                    Object.keys(loaded).find(
+                        name =>
+                            rsRouteFiles[name]
+                            === "data_center.json"
+                    )
+                    || Object.keys(loaded)[0];
+            }
+
+        } catch (error) {
+            rsSay(
+                "Could not load routes from the server.",
+                true
+            );
+        }
+
+        rsSel = -1;
+        rsView = null;
+
+        if ($("setup").style.display === "block") {
+            rsRender();
+        }
+    }
+
+    function showSetup() {
+        rsDogNames = Object.keys(dogs);
+
+        rsDog =
+            rsDogNames.includes(rsDog)
+            ? rsDog
+            : rsDogNames[0] || "";
+
+        rsDogNames.forEach((name, index) => {
+            if (!rsPoses[name]) {
+                rsPoses[name] = {
+                    x: 3.64 - index * .8,
+                    y: 1.72 + index * .4,
+                    yaw: .5
+                };
+            }
+        });
+
+        current = "";
+
+        renderNav();
+
+        $("pair").style.display = "none";
+        $("dogView").style.display = "none";
+        $("setup").style.display = "block";
+
+        $("pairNav").classList.remove("active");
+        $("setupNav").classList.add("active");
+
+        rsRender();
+    }
+
+    function rsRender() {
+        $("rsDogs").innerHTML = rsDogNames.map(name => `
+            <button
+                type="button"
+                data-dog="${escapeHtml(name)}"
+                aria-pressed="${name === rsDog}"
+            >
+                ${escapeHtml(name)}
+            </button>
+        `).join("");
+
+        document.querySelectorAll(
+            "#rsDogs button"
+        ).forEach(button => {
+            button.onclick = () => {
+                rsDog = button.dataset.dog;
+                rsView = null;
+                rsRender();
+            };
+        });
+
+        $("rsRoute").innerHTML =
+            Object.keys(rsRoutes).map(name => `
+                <option
+                    value="${escapeHtml(name)}"
+                    ${name === rsRoute ? "selected" : ""}
+                >
+                    ${escapeHtml(name)}
+                </option>
+            `).join("");
+
+        $("rsBadgeText").textContent =
+            !rsDog
+            ? "No dogs configured"
+            : dogs[rsDog]?.state === "ready"
+            ? `${rsDog} connected`
+            : `${rsDog} offline`;
+
+        rsTable();
+        rsPose();
+        rsDraw();
+    }
+
+    function rsTable() {
+        const waypoints =
+            rsRoutes[rsRoute] || [];
+
+        $("rsListTitle").textContent =
+            `Waypoints · ${rsRoute}`;
+
+        $("rsCount").textContent =
+            `${waypoints.length} stop${
+                waypoints.length === 1 ? "" : "s"
+            }`;
+
+        $("rsBody").innerHTML = waypoints.length
+            ? waypoints.map((point, index) => `
+                <tr
+                    class="${index === rsSel ? "sel" : ""}"
+                    data-i="${index}"
+                >
+                    <td>
+                        <span class="rsNum ${point.photo ? "" : "plain"}">
+                            ${index + 1}
+                        </span>
+                    </td>
+
+                    <td>
+                        <input
+                            class="rsName"
+                            value="${escapeHtml(point.name)}"
+                            data-i="${index}"
+                        >
+                    </td>
+
+                    <td class="rsMono">
+                        ${point.x.toFixed(2)},
+                        ${point.y.toFixed(2)}
+                    </td>
+
+                    <td class="rsMono">
+                        ${rsDeg(point.yaw)}
+                    </td>
+
+                    <td>
+                        <button
+                            type="button"
+                            class="rsTag ${point.photo ? "photo" : "nophoto"}"
+                            data-act="photo"
+                            data-i="${index}"
+                        >
+                            ${point.photo ? "Photo" : "No photo"}
+                        </button>
+                    </td>
+
+                    <td>
+                        <button
+                            type="button"
+                            class="rsTag ${point.required ? "req" : "opt"}"
+                            data-act="req"
+                            data-i="${index}"
+                        >
+                            ${point.required ? "Required" : "Optional"}
+                        </button>
+                    </td>
+
+                    <td class="rsActs">
+                        <button
+                            type="button"
+                            class="rsIcon"
+                            data-act="up"
+                            data-i="${index}"
+                            ${index === 0 ? "disabled" : ""}
+                        >
+                            ↑
+                        </button>
+
+                        <button
+                            type="button"
+                            class="rsIcon"
+                            data-act="down"
+                            data-i="${index}"
+                            ${index === waypoints.length - 1 ? "disabled" : ""}
+                        >
+                            ↓
+                        </button>
+
+                        <button
+                            type="button"
+                            class="rsDel"
+                            data-act="del"
+                            data-i="${index}"
+                        >
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join("")
+            : `
+                <tr>
+                    <td colspan="7" class="rsEmpty">
+                        No stops yet.
+                    </td>
+                </tr>
+            `;
+    }
+
+    function rsPose() {
+        const pose =
+            rsPoses[rsDog]
+            || {x: 0, y: 0, yaw: 0};
+
+        $("rsX").innerHTML =
+            `${pose.x.toFixed(2)}<span>m</span>`;
+
+        $("rsY").innerHTML =
+            `${pose.y.toFixed(2)}<span>m</span>`;
+
+        $("rsYaw").textContent =
+            rsDeg(pose.yaw);
+    }
+
+    function rsDraw() {
+        const waypoints =
+            rsRoutes[rsRoute] || [];
+
+        const pose =
+            rsPoses[rsDog]
+            || {x: 0, y: 0, yaw: 0};
+
+        const width = 640;
+        const height = 340;
+        const margin = 46;
+
+        const points = waypoints
+            .map(point => [point.x, point.y])
+            .concat([[pose.x, pose.y]]);
+
+        const xs = points.map(point => point[0]);
+        const ys = points.map(point => point[1]);
+
+        if (!rsView) {
+            rsView = {
+                x0: Math.min(...xs) - 1,
+                x1: Math.max(...xs) + 1,
+                y0: Math.min(...ys) - 1,
+                y1: Math.max(...ys) + 1
+            };
+        }
+
+        const scale = Math.min(
+            (width - margin * 2)
+                / (rsView.x1 - rsView.x0 || 1),
+            (height - margin * 2)
+                / (rsView.y1 - rsView.y0 || 1)
+        );
+
+        const offsetX =
+            (width - scale * (rsView.x1 - rsView.x0)) / 2;
+
+        const offsetY =
+            (height - scale * (rsView.y1 - rsView.y0)) / 2;
+
+        const mapX = x =>
+            offsetX + (x - rsView.x0) * scale;
+
+        const mapY = y =>
+            height - (
+                offsetY + (y - rsView.y0) * scale
+            );
+
+        let graphics = "";
+
+        if (waypoints.length > 1) {
+            graphics += `
+                <polyline
+                    points="${
+                        waypoints
+                            .map(point =>
+                                `${mapX(point.x)},${mapY(point.y)}`
+                            )
+                            .join(" ")
+                    }"
+                    fill="none"
+                    stroke="#2f8cff"
+                    stroke-width="2"
+                    stroke-dasharray="3 7"
+                ></polyline>
+            `;
+        }
+
+        waypoints.forEach((point, index) => {
+            const x = mapX(point.x);
+            const y = mapY(point.y);
+            const color =
+                point.photo
+                ? "#2f8cff"
+                : "#3a5470";
+
+            graphics += `
+                <circle
+                    cx="${x}"
+                    cy="${y}"
+                    r="13"
+                    fill="${color}"
+                ></circle>
+
+                <text
+                    x="${x}"
+                    y="${y + 4}"
+                    text-anchor="middle"
+                    fill="white"
+                    font-size="12"
+                >
+                    ${index + 1}
+                </text>
+
+                <text
+                    x="${x}"
+                    y="${y + 31}"
+                    text-anchor="middle"
+                    fill="#dbe7f4"
+                    font-size="12"
+                >
+                    ${escapeHtml(point.name)}
+                </text>
+            `;
+        });
+
+        const dogX = mapX(pose.x);
+        const dogY = mapY(pose.y);
+
+        graphics += `
+            <circle
+                cx="${dogX}"
+                cy="${dogY}"
+                r="18"
+                fill="#35e08a"
+            ></circle>
+        `;
+
+        $("rsMap").innerHTML = graphics;
+    }
+
+    function rsRecord() {
+        const waypoints =
+            rsRoutes[rsRoute];
+
+        const pose =
+            rsPoses[rsDog];
+
+        if (!waypoints || !pose) {
+            rsSay(
+                "Select a route and dog first.",
+                true
+            );
+            return;
+        }
+
+        const name =
+            $("rsWpName").value.trim()
+            || `Checkpoint${waypoints.length + 1}`;
+
+        if (
+            waypoints.some(
+                point => point.name === name
+            )
+        ) {
+            rsSay(
+                `There is already a stop called "${name}".`,
+                true
+            );
+            return;
+        }
+
+        waypoints.push({
+            name,
+            x: Number(pose.x.toFixed(2)),
+            y: Number(pose.y.toFixed(2)),
+            yaw: Number(pose.yaw.toFixed(2)),
+            photo: $("rsPhoto").checked,
+            required: $("rsRequired").checked
+        });
+
+        rsSel = waypoints.length - 1;
+
+        $("rsWpName").value = "";
+
+        rsSay(`Saved ${name}.`);
+
+        rsTable();
+        rsDraw();
+    }
+
+    /*
+     * Backend status
+     */
+
+    async function loadDogs() {
+        try {
+            const response =
+                await fetch("/api/dogs");
+
+            const data =
+                await response.json();
+
+            const names =
+                new Set(
+                    data.dogs.map(dog => dog.name)
+                );
+
+            Object.keys(dogs).forEach(name => {
+                if (
+                    !names.has(name)
+                    && !dogs[name].preparing
+                ) {
+                    delete dogs[name];
+                    selected.delete(name);
+                }
+            });
+
+            data.dogs.forEach(dog => {
+                if (
+                    dogs[dog.name]
+                    && dogs[dog.name].preparing
+                ) {
+                    return;
+                }
+
+                dogs[dog.name] = Object.assign(
+                    dogs[dog.name] || {
+                        progress: 0,
+                        task: "Not on patrol"
+                    },
+                    {
+                        id: dog.id,
+                        unit: dog.unit,
+                        ip: dog.ip,
+                        ssh_user: dog.ssh_user,
+                        ros_port: dog.ros_port,
+                        online: dog.online,
+                        state: dog.state,
+                        label: dog.label,
+                        battery: dog.battery
+                    }
+                );
+
+                ensureDogState(dog.name);
+
+                if (
+                    !dog.online
+                    && selected.has(dog.name)
+                    && !dogStates[dog.name].running
+                ) {
+                    selected.delete(dog.name);
+                }
+            });
+
+        } catch (error) {
+            console.error(
+                "Could not load dogs:",
+                error
+            );
+        }
+
+        if ($("pair").style.display !== "none") {
+            renderCards();
+        }
+    }
+
+    async function loadNim() {
+        let model = {
+            up: false,
+            loaded: false,
+            label: "Could not reach the app server"
+        };
+
+        try {
+            const response =
+                await fetch("/api/nim");
+
+            model =
+                await response.json();
+
+        } catch (error) {
+            console.error(error);
+        }
+
+        nimOn = Boolean(model.loaded);
+
+        $("nimText").textContent = nimOn
+            ? "READY"
+            : model.up
+            ? "NOT LOADED"
+            : "OFF";
+
+        $("nimDetail").textContent =
+            model.label
+            + (
+                model.model
+                ? ` · ${model.model}`
+                : ""
+            );
+
+        $("nimDot").style.background =
+            nimOn
+            ? "var(--green)"
+            : "var(--red)";
+
+        if (
+            nimStarting
+            && !nimOn
+            && Date.now() < nimStarting
+        ) {
+            $("nimText").textContent = "STARTING";
+            $("nimBtn").textContent = "Starting…";
+            $("nimBtn").disabled = true;
+        } else {
+            nimStarting = 0;
+            $("nimBtn").disabled = false;
+            $("nimBtn").textContent = nimOn
+                ? "Stop Qwen"
+                : model.up
+                ? "Check again"
+                : "Start Qwen";
+        }
+    }
+
+    async function nimButton() {
+        const label =
+            $("nimBtn").textContent;
+
+        if (label === "Check again") {
+            loadNim();
+            return;
+        }
+
+        const action =
+            label === "Stop Qwen"
+            ? "stop"
+            : "start";
+
+        try {
+            const response = await fetch(
+                `/api/nim/${action}`,
+                {method: "POST"}
+            );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+                $("nimDetail").textContent =
+                    data.error
+                    || `Could not ${action} Qwen`;
+                return;
+            }
+
+        } catch (error) {
+            $("nimDetail").textContent =
+                "Could not reach the app server.";
+            return;
+        }
+
+        if (action === "start") {
+            nimStarting =
+                Date.now() + 5 * 60 * 1000;
+
+            $("nimDetail").textContent =
+                "Loading the model…";
+        }
+
+        loadNim();
+        setTimeout(loadNim, 4000);
+    }
+
+    async function prepareDog(name) {
+        const dog = dogs[name];
+
+        if (dog.state === "ready") {
+            return true;
+        }
+
+        dog.preparing = true;
+        dog.state = "online";
+        dog.label = "Starting…";
+
+        renderCards();
+
+        let successful = false;
+
+        try {
+            const response = await fetch(
+                `/api/dogs/${encodeURIComponent(dog.id)}/prepare`,
+                {method: "POST"}
+            );
+
+            const reader =
+                response.body.getReader();
+
+            const decoder =
+                new TextDecoder();
+
+            let buffer = "";
+
+            while (true) {
+                const {done, value} =
+                    await reader.read();
+
+                if (done) {
+                    break;
+                }
+
+                buffer += decoder.decode(
+                    value,
+                    {stream: true}
+                );
+
+                const lines =
+                    buffer.split("\n");
+
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    if (!line.startsWith("data: ")) {
+                        continue;
+                    }
+
+                    const update =
+                        JSON.parse(line.slice(6));
+
+                    if (update.done) {
+                        successful = update.ok;
+
+                        dog.label = update.ok
+                            ? "Ready for patrol"
+                            : `✗ ${update.msg}`;
+
+                        dog.state = update.ok
+                            ? "ready"
+                            : "error";
+                    } else {
+                        dog.label =
+                            `Step ${update.step}/${update.total} · ${update.msg}`;
+                    }
+
+                    renderCards();
+                }
+            }
+
+        } catch (error) {
+            dog.label =
+                "✗ Could not reach the app server";
+
+            dog.state = "error";
+        }
+
+        dog.preparing = false;
+
+        renderCards();
+
+        return successful;
+    }
+
+    async function pairSelected() {
+        const names = [...selected];
+
+        if (!names.length) {
+            return;
+        }
+
+        $("pairBtn").disabled = true;
+
+        pairMsg =
+            `Connecting ${names.join(", ")}…`;
+
+        $("summary").textContent =
+            pairMsg;
+
+        const results =
+            await Promise.all(
+                names.map(prepareDog)
+            );
+
+        const failed =
+            names.filter(
+                (name, index) =>
+                    !results[index]
+            );
+
+        failed.forEach(
+            name => selected.delete(name)
+        );
+
+        pairMsg = "";
+
+        if (failed.length) {
+            pairMsg =
+                `Could not connect ${failed.join(", ")}.`;
+
+            renderCards();
+
+            if (!selected.size) {
+                return;
+            }
+        }
+
+        renderNav();
+        openDog([...selected][0]);
+    }
+
+    /*
+     * Event handlers
+     */
+
+    $("commandsTab").onclick =
+        showCommands;
+
+    $("imagesTab").onclick =
+        showImages;
+
+    $("send").onclick =
+        sendCommand;
+
+    $("commandInput").onkeydown =
+        event => {
+            if (event.key === "Enter") {
+                sendCommand();
+            }
+        };
+
+    $("pairNav").onclick =
+        showPair;
+
+    $("pairBtn").onclick =
+        pairSelected;
+
+    $("disconnect").onclick = () => {
+        selected.delete(current);
+
+        const next =
+            [...selected][0];
+
+        current = "";
+
+        renderNav();
+
+        if (next) {
+            openDog(next);
+        } else {
+            showPair();
+        }
+    };
+
+    $("nimBtn").onclick =
+        nimButton;
+
+    $("routeBtn").onclick =
+        startInspectionRoute;
+
+    $("emergencyStopBtn").onclick =
+        stopInspectionRoute;
+
+    $("manageDogsBtn").onclick =
+        openDogModal;
+
+    $("closeDogModal").onclick =
+        closeDogModal;
+
+    $("cancelAddDog").onclick = () => {
+        resetAddDogForm();
+        closeDogModal();
+    };
+
+    $("addDogBtn").onclick =
+        addDog;
+
+    $("addDogForm").onsubmit =
+        event => {
+            event.preventDefault();
+            addDog();
+        };
+
+    $("dogModalBackdrop").onclick =
+        event => {
+            if (
+                event.target
+                === $("dogModalBackdrop")
+            ) {
+                closeDogModal();
+            }
+        };
+
+    $("setupNav").onclick =
+        showSetup;
+
+    $("rsRecord").onclick =
+        rsRecord;
+
+    $("rsWpName").onkeydown =
+        event => {
+            if (event.key === "Enter") {
+                rsRecord();
+            }
+        };
+
+    $("rsRoute").onchange =
+        event => {
+            rsRoute =
+                event.target.value;
+
+            rsSel = -1;
+            rsView = null;
+
+            rsTable();
+            rsDraw();
+        };
+
+    $("rsRecenter").onclick = () => {
+        rsView = null;
+        rsDraw();
+    };
+
+    $("rsNewToggle").onclick = () => {
+        $("rsNewForm").classList.toggle(
+            "hidden"
+        );
+    };
+
+    $("rsNewForm").onsubmit =
+        event => {
+            event.preventDefault();
+
+            const name =
+                $("rsNewName")
+                .value
+                .trim();
+
+            if (!name) {
+                rsSay(
+                    "Enter a route name.",
+                    true
+                );
+                return;
+            }
+
+            if (rsRoutes[name]) {
+                rsSay(
+                    "That route already exists.",
+                    true
+                );
+                return;
+            }
+
+            rsRoutes[name] = [];
+            rsRoute = name;
+
+            $("rsNewName").value = "";
+            $("rsNewForm").classList.add("hidden");
+
+            rsRender();
+        };
+
+    $("rsBody").onclick = event => {
+        const button =
+            event.target.closest("button");
+
+        const row =
+            event.target.closest("tr[data-i]");
+
+        if (!row) {
+            return;
+        }
+
+        const waypoints =
+            rsRoutes[rsRoute];
+
+        const index =
+            Number(row.dataset.i);
+
+        if (!button) {
+            rsSel = index;
+            rsTable();
+            rsDraw();
+            return;
+        }
+
+        const action =
+            button.dataset.act;
+
+        if (action === "photo") {
+            waypoints[index].photo =
+                !waypoints[index].photo;
+        }
+
+        if (action === "req") {
+            waypoints[index].required =
+                !waypoints[index].required;
+        }
+
+        if (
+            action === "up"
+            && index > 0
+        ) {
+            [
+                waypoints[index - 1],
+                waypoints[index]
+            ] = [
+                waypoints[index],
+                waypoints[index - 1]
+            ];
+        }
+
+        if (
+            action === "down"
+            && index < waypoints.length - 1
+        ) {
+            [
+                waypoints[index + 1],
+                waypoints[index]
+            ] = [
+                waypoints[index],
+                waypoints[index + 1]
+            ];
+        }
+
+        if (action === "del") {
+            waypoints.splice(index, 1);
+            rsSel = -1;
+        }
+
+        rsTable();
+        rsDraw();
+    };
+
+    document.addEventListener(
+        "keydown",
+        event => {
+            if (
+                event.key === "Escape"
+                && $("dogModalBackdrop")
+                    .classList
+                    .contains("open")
+            ) {
+                closeDogModal();
+            }
+        }
+    );
+
+    /*
+     * Initial load
+     */
+
+    selected.clear();
+    current = "";
+
+    renderNav();
+    showPair();
+
+    rsLoadRoutes();
+    loadDogs();
+    loadNim();
+
+    setInterval(loadDogs, 5000);
+    setInterval(loadNim, 15000);
+</script>
+</body>
+</html>
