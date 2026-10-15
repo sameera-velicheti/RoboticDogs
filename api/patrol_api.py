@@ -280,6 +280,7 @@ def patrol_start():
                     "image",
                     {
                         "src": f"/captures/{label}",
+                        "filepath": event["image"],     
                         "label": label,
                         "captured_at": event.get(
                             "time",

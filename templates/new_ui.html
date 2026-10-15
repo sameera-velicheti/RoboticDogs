@@ -466,6 +466,130 @@
             gap: 8px;
         }
 
+        /* Live photos + inspection analysis */
+        .images {
+            grid-template-rows: auto minmax(140px, 1fr) auto auto;
+        }
+
+        .imgHead {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .analyzeBtn {
+            border: 1px solid #2fa0ff;
+            border-radius: 7px;
+            background: #125baa;
+            color: white;
+            padding: 7px 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .analyzeBtn:disabled {
+            opacity: .45;
+            cursor: default;
+        }
+
+        .photo {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            color: #9db1c9;
+        }
+
+        .photo.live,
+        .thumb.live {
+            background: #050d16;
+        }
+
+        .photo img,
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .photo .cap {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 6px 10px;
+            background: rgba(4, 12, 22, .78);
+            font-size: 13px;
+        }
+
+        .thumbs.live {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            height: 100px;
+        }
+
+        .thumbs.live .thumb {
+            flex: 0 0 120px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .thumb.sel {
+            border-color: #2fa0ff;
+        }
+
+        .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #04111e;
+        }
+
+        .badge.PASS { background: #35e08a; }
+        .badge.WARNING { background: #ffc24b; }
+        .badge.FAIL { background: #ff5d5d; }
+        .badge.WAIT { background: #9db1c9; }
+
+        .analysis {
+            max-height: 220px;
+            overflow: auto;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .analysis:empty {
+            display: none;
+        }
+
+        .finding {
+            border-left: 3px solid #ff5d5d;
+            padding: 3px 8px;
+            background: #0b1b2c;
+        }
+
+        .finding.MEDIUM,
+        .finding.LOW {
+            border-color: #ffc24b;
+        }
+
+        .reportLine {
+            font-weight: 700;
+        }
+
+        .reportLine a {
+            color: #8ec5ff;
+        }
+
         .commands {
             height: 100%;
             display: grid;
@@ -1145,13 +1269,13 @@
                             <polyline
                                 id="base"
                                 class="base"
-                                points="85,285 85,55 515,55 515,285 85,285"
+                                points="70,140 530,140 530,200 70,200"
                             ></polyline>
 
                             <polyline
                                 id="done"
                                 class="done"
-                                points="85,285 85,55 515,55 515,285 85,285"
+                                points="70,140 530,140 530,200 70,200"
                             ></polyline>
 
                             <circle id="marker" class="marker" r="10"></circle>
@@ -1190,14 +1314,21 @@
                     </div>
 
                     <div id="imagesPanel" class="panel images">
-                        <b>Live Images</b>
-                        <div class="photo"></div>
+                        <div class="imgHead">
+                            <b>Live Images <span id="imgCount" class="muted"></span></b>
+                            <button id="analyzeBtn" class="analyzeBtn" disabled>
+                                Analyze inspection
+                            </button>
+                        </div>
+                        <div id="photoMain" class="photo"></div>
 
-                        <div class="thumbs">
+                        <div id="thumbs" class="thumbs">
                             <div class="thumb"></div>
                             <div class="thumb"></div>
                             <div class="thumb"></div>
                         </div>
+
+                        <div id="analysis" class="analysis"></div>
                     </div>
 
                     <div id="commandsPanel" class="panel commands hidden">
@@ -1462,7 +1593,13 @@
         if (!dogStates[name]) {
             dogStates[name] = {
                 stopped: false,
-                running: false
+                running: false,
+                images: [],
+                shown: -1,
+                analyzing: false,
+                results: {},
+                report: null,
+                analysisMsg: ""
             };
         }
 
@@ -1628,6 +1765,212 @@
             : "■ Emergency Stop";
 
         $("emergencyStopBtn").disabled = state.stopped;
+
+        renderImages();
+    }
+
+    /*
+     * Live photos + Analyze inspection
+     */
+
+    function renderImages() {
+        const state = dogStates[current];
+
+        if (!state) {
+            return;
+        }
+
+        const images = state.images;
+        const main = $("photoMain");
+        const thumbs = $("thumbs");
+
+        $("imgCount").textContent =
+            images.length ? `(${images.length})` : "";
+
+        $("analyzeBtn").disabled =
+            !images.length || state.running || state.analyzing;
+
+        $("analyzeBtn").textContent =
+            state.analyzing ? "Analyzing..." : "Analyze inspection";
+
+        if (!images.length) {
+            main.className = "photo";
+            main.innerHTML = "";
+            thumbs.className = "thumbs";
+            thumbs.innerHTML =
+                '<div class="thumb"></div>'.repeat(3);
+        } else {
+            const index =
+                state.shown >= 0 ? state.shown : images.length - 1;
+            const image = images[index];
+
+            main.className = "photo live";
+            main.innerHTML = `
+                <img src="${escapeHtml(image.src)}" alt="">
+                <div class="cap">${escapeHtml(image.waypoint_name || image.label)}</div>
+            `;
+
+            thumbs.className = "thumbs live";
+            thumbs.innerHTML = images.map((img, i) => {
+                const result = state.results[img.label];
+                const badge = result
+                    ? `<span class="badge ${result.status}">${result.status}</span>`
+                    : state.analyzing
+                    ? '<span class="badge WAIT">...</span>'
+                    : "";
+
+                return `
+                    <div class="thumb live ${i === index ? "sel" : ""}" data-i="${i}"
+                         title="${escapeHtml(img.waypoint_name || img.label)}">
+                        <img src="${escapeHtml(img.src)}" alt="">
+                        ${badge}
+                    </div>
+                `;
+            }).join("");
+
+            thumbs.scrollLeft = thumbs.scrollWidth;
+        }
+
+        renderAnalysis(state);
+    }
+
+    function renderAnalysis(state) {
+        let html = "";
+
+        if (state.analysisMsg) {
+            html += `<div class="muted">${escapeHtml(state.analysisMsg)}</div>`;
+        }
+
+        if (state.report) {
+            const r = state.report;
+            html += `
+                <div class="reportLine">
+                    Overall: ${escapeHtml(r.overall)} ·
+                    ${r.total_fails} issue(s) in ${r.total_images} photo(s) ·
+                    <a href="/reports/${encodeURIComponent(r.report_file)}" target="_blank">
+                        Open report
+                    </a>
+                </div>
+            `;
+        }
+
+        Object.values(state.results).forEach(result => {
+            result.findings
+                .filter(f => f.status === "FAIL")
+                .forEach(f => {
+                    html += `
+                        <div class="finding ${escapeHtml(f.severity)}">
+                            <b>${escapeHtml(result.waypoint_name || result.filename)}</b>:
+                            ${escapeHtml(f.rule_name)} (${escapeHtml(f.severity)})
+                            <div class="muted">${escapeHtml(f.remediation || "")}</div>
+                        </div>
+                    `;
+                });
+        });
+
+        $("analysis").innerHTML = html;
+    }
+
+    async function analyzeInspection() {
+        const dogName = current;
+        const dog = dogs[dogName];
+        const state = dogStates[dogName];
+
+        if (!dog || !state || !state.images.length || state.analyzing) {
+            return;
+        }
+
+        state.analyzing = true;
+        state.results = {};
+        state.report = null;
+        state.analysisMsg =
+            `Sending ${state.images.length} photo(s) to the AI model...`;
+        renderImages();
+
+        try {
+            const response = await fetch("/analyze", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    images: state.images.map(img => ({
+                        filepath: img.filepath,
+                        waypoint_name: img.waypoint_name,
+                        route_name: img.route_name
+                    })),
+                    dog_id: dog.id,
+                    route_name:
+                        (state.images.find(img => img.route_name) || {})
+                        .route_name || null
+                })
+            });
+
+            if (!response.ok) {
+                let message = "Could not start the analysis.";
+                try {
+                    message = (await response.json()).error || message;
+                } catch (error) {
+                    console.error(error);
+                }
+                throw new Error(message);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const {done, value} = await reader.read();
+
+                if (done) {
+                    break;
+                }
+
+                buffer += decoder.decode(value, {stream: true});
+                const lines = buffer.split("\n");
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    if (!line.startsWith("data: ")) {
+                        continue;
+                    }
+
+                    let event;
+                    try {
+                        event = JSON.parse(line.slice(6));
+                    } catch (error) {
+                        continue;
+                    }
+
+                    if (event.type === "image_findings") {
+                        state.results[event.filename] = event;
+                        state.analysisMsg =
+                            `Checked ${Object.keys(state.results).length}`
+                            + ` of ${state.images.length} photo(s)...`;
+                    } else if (event.type === "report_summary") {
+                        state.report = event;
+                    } else if (event.type === "done") {
+                        state.analysisMsg = "Analysis complete.";
+                    } else if (event.type === "error") {
+                        state.analysisMsg = `Analysis failed: ${event.msg}`;
+                    } else if (event.type === "log" && event.msg) {
+                        state.analysisMsg = event.msg;
+                    }
+
+                    if (dogName === current) {
+                        renderImages();
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Analyze failed:", error);
+            state.analysisMsg = `Analysis failed: ${error.message}`;
+        } finally {
+            state.analyzing = false;
+
+            if (dogName === current) {
+                renderImages();
+            }
+        }
     }
 
     function setProgress(percent) {
@@ -1811,6 +2154,12 @@
         }
 
         if (event.type === "plan") {
+            state.images = [];
+            state.shown = -1;
+            state.results = {};
+            state.report = null;
+            state.analysisMsg = "";
+
             dog.routeTotal = event.total || 0;
             dog.routeCompleted = 0;
             dog.progress = 0;
@@ -1864,6 +2213,15 @@
         }
 
         else if (event.type === "image") {
+            state.images.push({
+                src: event.src,
+                label: event.label,
+                filepath: event.filepath,
+                waypoint_name: event.waypoint_name || null,
+                route_name: event.route_name || null
+            });
+            state.shown = -1;
+
             dog.task =
                 `Image captured at ${
                     event.waypoint_name
@@ -2951,6 +3309,18 @@
 
     $("commandsTab").onclick =
         showCommands;
+
+    $("analyzeBtn").onclick = analyzeInspection;
+
+    $("thumbs").onclick = event => {
+        const thumb = event.target.closest("[data-i]");
+        const state = dogStates[current];
+
+        if (thumb && state) {
+            state.shown = Number(thumb.dataset.i);
+            renderImages();
+        }
+    };
 
     $("imagesTab").onclick =
         showImages;
