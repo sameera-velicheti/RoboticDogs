@@ -634,6 +634,26 @@
             margin-top: 5px;
         }
 
+        .message.dog {
+            align-self: flex-start;
+            background: #0f2236;
+            border-color: #2b4a69;
+            border-radius: 11px 11px 11px 3px;
+        }
+
+        .message.dog small {
+            text-align: left;
+        }
+
+        .message.ok {
+            border-color: #2f9e63;
+        }
+
+        .message.error {
+            border-color: #ff6574;
+            background: #2a1218;
+        }
+
         .chat {
             display: grid;
             grid-template-columns: 1fr 48px;
@@ -1820,6 +1840,13 @@
     }
 
     function updateSummary() {
+        if (!nimOn) {
+            $("summary").textContent =
+                "Start Qwen before pairing a dog.";
+            $("pairBtn").disabled = true;
+            return;
+        }
+
         if (pairMsg) {
             $("summary").textContent = pairMsg;
             $("pairBtn").disabled = !selected.size;
@@ -2728,60 +2755,153 @@
         }
     }
 
+    /*
+     * Emergency Commands chat
+     */
+
+    function addHistory(dogName, entry) {
+        if (!histories[dogName]) {
+            histories[dogName] = [];
+        }
+
+        histories[dogName].push(entry);
+
+        if (dogName === current) {
+            renderHistory();
+        }
+    }
+
     function renderHistory() {
         const history = $("history");
         const items = histories[current] || [];
 
         history.innerHTML = items.length
-            ? items.map(command => `
-                <div class="message">
-                    <span>${escapeHtml(command)}</span>
-                    <small>Sent to ${escapeHtml(current)}</small>
-                </div>
-            `).join("")
+            ? items.map(item => {
+                const entry = typeof item === "string"
+                    ? {from: "you", text: item}
+                    : item;
+
+                if (entry.from === "you") {
+                    return `
+                        <div class="message">
+                            <span>${escapeHtml(entry.text)}</span>
+                            <small>Sent to ${escapeHtml(current)}</small>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="message dog ${escapeHtml(entry.kind || "")}">
+                        <span>${escapeHtml(entry.text)}</span>
+                        <small>${escapeHtml(current)}</small>
+                    </div>
+                `;
+            }).join("")
             : `
                 <div class="empty">
                     No emergency commands sent to ${escapeHtml(current)}.
                 </div>
             `;
 
-        history.scrollTop =
-            history.scrollHeight;
+        history.scrollTop = history.scrollHeight;
+    }
+
+    function describeCommandEvent(event) {
+        const pretty = value =>
+            String(value || "").replace(/_/g, " ");
+
+        if (event.type === "action_start") {
+            return {text: `Running ${pretty(event.action)}...`};
+        }
+
+        if (event.type === "action_done") {
+            return {text: `Finished ${pretty(event.action)}`, kind: "ok"};
+        }
+
+        return null;
     }
 
     async function sendCommand() {
-        const value =
-            $("commandInput").value.trim();
+        const value = $("commandInput").value.trim();
 
         if (!value || !current) {
             return;
         }
 
-        histories[current].push(value);
-        $("commandInput").value = "";
-        renderHistory();
+        // Lock in the dog now, so replies stay with this dog
+        // even if you switch to a different dog's page.
+        const dogName = current;
+        const dog = dogs[dogName];
 
-        const dog = dogs[current];
+        $("commandInput").value = "";
+        addHistory(dogName, {from: "you", text: value});
 
         try {
-            await fetch(
-                "/command",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        input: value,
-                        dog_id: dog.id
-                    })
+            const response = await fetch("/command", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    input: value,
+                    dog_id: dog.id
+                })
+            });
+
+            if (!response.ok) {
+                let message = "Command was rejected.";
+                try {
+                    message = (await response.json()).error || message;
+                } catch (error) {}
+
+                addHistory(dogName, {
+                    from: "dog",
+                    text: `✗ ${message}`,
+                    kind: "error"
+                });
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const {done, value: chunk} = await reader.read();
+
+                if (done) {
+                    break;
                 }
-            );
+
+                buffer += decoder.decode(chunk, {stream: true});
+                const lines = buffer.split("\n");
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    if (!line.startsWith("data: ")) {
+                        continue;
+                    }
+
+                    let event;
+                    try {
+                        event = JSON.parse(line.slice(6));
+                    } catch (error) {
+                        continue;
+                    }
+
+                    const entry = describeCommandEvent(event);
+
+                    if (entry) {
+                        addHistory(dogName, {from: "dog", ...entry});
+                    }
+                }
+            }
+
         } catch (error) {
-            console.error(
-                "Could not send command:",
-                error
-            );
+            console.error("Could not send command:", error);
+            addHistory(dogName, {
+                from: "dog",
+                text: "✗ Could not reach the app server.",
+                kind: "error"
+            });
         }
     }
 
@@ -3510,6 +3630,25 @@
 
         nimOn = Boolean(model.loaded);
 
+        // If Qwen goes off, send the user back to Pair & Connect.
+        // Wait if a dog is mid-route so its progress and photos stay visible.
+        const routeRunning = [...selected].some(
+            name => dogStates[name] && dogStates[name].running
+        );
+
+        if (!nimOn && !nimStarting && selected.size && !routeRunning) {
+            if ($("photoMain").classList.contains("photoFocus")) {
+                closePhotoFocus();
+            }
+
+            selected.clear();
+            current = "";
+            renderNav();
+            showPair();
+        }
+
+        updateSummary();
+
         $("nimText").textContent = nimOn
             ? "READY"
             : model.up
@@ -3517,7 +3656,7 @@
             : "OFF";
 
         $("nimDetail").textContent =
-            model.label
+            (model.label || "")
             + (
                 model.model
                 ? ` · ${model.model}`
@@ -3687,7 +3826,7 @@
     async function pairSelected() {
         const names = [...selected];
 
-        if (!names.length) {
+        if (!names.length || !nimOn) {
             return;
         }
 
