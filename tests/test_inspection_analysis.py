@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import app as flask_app
+from api import vision_api
 from vision import compliance_checker, report_generator
 
 
@@ -13,7 +14,7 @@ def test_analyze_combines_images_and_keeps_waypoint_sources(tmp_path, monkeypatc
         image_path.write_bytes(b"image")
 
     monkeypatch.setattr(report_generator, "REPORTS_DIR", str(tmp_path / "reports"))
-    monkeypatch.setattr(flask_app, "CAPTURE_DIR", str(capture_dir))
+    monkeypatch.setattr(vision_api, "CAPTURE_DIR", str(capture_dir))
 
     def fake_check(filepath, timestamp=None):
         is_issue = filepath.endswith("corner2.jpg")
@@ -73,7 +74,7 @@ def test_analyze_rejects_image_paths_outside_capture_directory(tmp_path, monkeyp
     capture_dir.mkdir()
     outside_image = tmp_path / "outside.jpg"
     outside_image.write_bytes(b"image")
-    monkeypatch.setattr(flask_app, "CAPTURE_DIR", str(capture_dir))
+    monkeypatch.setattr(vision_api, "CAPTURE_DIR", str(capture_dir))
 
     response = flask_app.app.test_client().post("/analyze", json={
         "images": [{"filepath": str(outside_image)}],
@@ -88,7 +89,7 @@ def test_analyze_keeps_legacy_single_filepath_requests(tmp_path, monkeypatch):
     capture_dir.mkdir()
     image_path = capture_dir / "single.jpg"
     image_path.write_bytes(b"image")
-    monkeypatch.setattr(flask_app, "CAPTURE_DIR", str(capture_dir))
+    monkeypatch.setattr(vision_api, "CAPTURE_DIR", str(capture_dir))
     monkeypatch.setattr(report_generator, "REPORTS_DIR", str(tmp_path / "reports"))
     monkeypatch.setattr(compliance_checker, "check_compliance_with_nim", lambda **kwargs: [])
 
