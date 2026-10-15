@@ -436,13 +436,6 @@
             min-height: 0;
         }
 
-        .images {
-            height: 100%;
-            display: grid;
-            grid-template-rows: auto 1fr 100px;
-            gap: 10px;
-        }
-
         .photo,
         .thumb {
             border: 1px solid #36506b;
@@ -468,7 +461,10 @@
 
         /* Live photos + inspection analysis */
         .images {
+            height: 100%;
+            display: grid;
             grid-template-rows: auto minmax(140px, 1fr) auto auto;
+            gap: 10px;
         }
 
         .imgHead {
@@ -573,17 +569,27 @@
 
         .finding {
             border-left: 3px solid #ff5d5d;
-            padding: 3px 8px;
+            padding: 8px 10px;
             background: #0b1b2c;
+            border-radius: 6px;
         }
 
         .finding.MEDIUM,
-        .finding.LOW {
+        .finding.LOW,
+        .finding.WARNING {
             border-color: #ffc24b;
+        }
+
+        .finding.PASS {
+            border-color: #35e08a;
         }
 
         .reportLine {
             font-weight: 700;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
 
         .reportLine a {
@@ -652,6 +658,147 @@
 
         .hidden {
             display: none !important;
+        }
+
+        /* Inspection review / photo focus */
+
+        .reviewPhotoBtn {
+            margin-top: 10px;
+            border: 1px solid #4da6ff;
+            background: #0f5fae;
+            color: #ffffff;
+            border-radius: 7px;
+            padding: 8px 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .reviewPhotoBtn:hover {
+            background: #1976d2;
+            border-color: #77bcff;
+        }
+
+        .photo.photoFocus {
+            position: fixed;
+            z-index: 12000;
+            inset: 5vh 5vw;
+            width: 90vw;
+            height: 90vh;
+            max-width: none;
+            max-height: none;
+            background: #030a12;
+            border: 2px solid #4da6ff;
+            border-radius: 12px;
+            box-shadow: 0 20px 70px rgba(0, 0, 0, .8);
+        }
+
+        .photo.photoFocus img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .photoReviewActions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 3;
+            display: flex;
+            gap: 8px;
+        }
+
+        .photoReviewActions button {
+            border: 1px solid #6e8eae;
+            background: rgba(5, 18, 31, .92);
+            color: #ffffff;
+            border-radius: 7px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .photoReviewActions button:hover {
+            background: #173e64;
+        }
+
+        .selectedFinding {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 40px;
+            z-index: 2;
+            max-height: 40%;
+            overflow: auto;
+            border: 1px solid #744552;
+            border-left: 4px solid #ff6574;
+            border-radius: 8px;
+            background: rgba(33, 19, 26, .95);
+            padding: 12px;
+        }
+
+        .selectedFinding.WARNING,
+        .selectedFinding.MEDIUM,
+        .selectedFinding.LOW {
+            border-color: #705d30;
+            border-left-color: #f5c451;
+            background: rgba(33, 29, 18, .95);
+        }
+
+        .selectedFindingLabel {
+            color: #ff9daa;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .selectedFinding.WARNING .selectedFindingLabel,
+        .selectedFinding.MEDIUM .selectedFindingLabel,
+        .selectedFinding.LOW .selectedFindingLabel {
+            color: #f5c451;
+        }
+
+        .selectedFinding h4 {
+            margin: 5px 0;
+        }
+
+        .selectedFinding p {
+            margin: 5px 0 0;
+        }
+
+        .findingHeader {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .findingSeverity {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 3px 8px;
+            background: #4a1822;
+            color: #ff9daa;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .findingSeverity.WARNING,
+        .findingSeverity.MEDIUM,
+        .findingSeverity.LOW {
+            background: #3b3218;
+            color: #f5c451;
+        }
+
+        .photoFocusBackdrop {
+            display: none;
+            position: fixed;
+            z-index: 11999;
+            inset: 0;
+            background: rgba(0, 0, 0, .82);
+        }
+
+        .photoFocusBackdrop.open {
+            display: block;
         }
 
         /* Route Setup */
@@ -1320,6 +1467,7 @@
                                 Analyze inspection
                             </button>
                         </div>
+
                         <div id="photoMain" class="photo"></div>
 
                         <div id="thumbs" class="thumbs">
@@ -1566,6 +1714,9 @@
     </section>
 </div>
 
+<!-- Must come BEFORE the script so its click handler can attach -->
+<div id="photoFocusBackdrop" class="photoFocusBackdrop"></div>
+
 <script>
     const $ = id => document.getElementById(id);
 
@@ -1609,7 +1760,7 @@
     }
 
     function escapeHtml(value) {
-        return String(value).replace(
+        return String(value ?? "").replace(
             /[&<>"]/g,
             character => ({
                 "&": "&amp;",
@@ -1783,6 +1934,7 @@
         const images = state.images;
         const main = $("photoMain");
         const thumbs = $("thumbs");
+        const focused = main.classList.contains("photoFocus");
 
         $("imgCount").textContent =
             images.length ? `(${images.length})` : "";
@@ -1804,17 +1956,73 @@
                 state.shown >= 0 ? state.shown : images.length - 1;
             const image = images[index];
 
-            main.className = "photo live";
+            main.className = focused
+                ? "photo live photoFocus"
+                : "photo live";
+
+            const flagged =
+                getFlaggedFindingForImage(state, image);
+
+            const severity = flagged
+                ? escapeHtml(
+                    flagged.finding.severity
+                    || flagged.finding.status
+                    || "WARNING"
+                )
+                : "";
+
             main.innerHTML = `
-                <img src="${escapeHtml(image.src)}" alt="">
-                <div class="cap">${escapeHtml(image.waypoint_name || image.label)}</div>
+                <img
+                    src="${escapeHtml(image.src)}"
+                    alt="${escapeHtml(image.waypoint_name || image.label || "Inspection photo")}"
+                >
+
+                <div class="photoReviewActions">
+                    ${
+                        focused
+                        ? '<button type="button" data-close-photo>Close</button>'
+                        : '<button type="button" data-enlarge-photo>Enlarge Photo</button>'
+                    }
+                </div>
+
+                <div class="cap">
+                    ${escapeHtml(image.waypoint_name || image.label)}
+                </div>
+
+                ${
+                    flagged
+                    ? `
+                        <div class="selectedFinding ${severity}">
+                            <span class="selectedFindingLabel">
+                                Photo requires review
+                            </span>
+
+                            <h4>
+                                ${escapeHtml(flagged.finding.rule_name || "Inspection finding")}
+                            </h4>
+
+                            ${
+                                flagged.finding.description
+                                ? `<p>${escapeHtml(flagged.finding.description)}</p>`
+                                : ""
+                            }
+
+                            ${
+                                flagged.finding.remediation
+                                ? `<p><b>Recommended action:</b> ${escapeHtml(flagged.finding.remediation)}</p>`
+                                : ""
+                            }
+                        </div>
+                    `
+                    : ""
+                }
             `;
 
             thumbs.className = "thumbs live";
             thumbs.innerHTML = images.map((img, i) => {
                 const result = state.results[img.label];
-                const badge = result
-                    ? `<span class="badge ${result.status}">${result.status}</span>`
+                const badge = result && result.status
+                    ? `<span class="badge ${escapeHtml(result.status)}">${escapeHtml(result.status)}</span>`
                     : state.analyzing
                     ? '<span class="badge WAIT">...</span>'
                     : "";
@@ -1838,37 +2046,257 @@
         let html = "";
 
         if (state.analysisMsg) {
-            html += `<div class="muted">${escapeHtml(state.analysisMsg)}</div>`;
-        }
-
-        if (state.report) {
-            const r = state.report;
             html += `
-                <div class="reportLine">
-                    Overall: ${escapeHtml(r.overall)} ·
-                    ${r.total_fails} issue(s) in ${r.total_images} photo(s) ·
-                    <a href="/reports/${encodeURIComponent(r.report_file)}" target="_blank">
-                        Open report
-                    </a>
+                <div class="muted">
+                    ${escapeHtml(state.analysisMsg)}
                 </div>
             `;
         }
 
-        Object.values(state.results).forEach(result => {
-            result.findings
-                .filter(f => f.status === "FAIL")
-                .forEach(f => {
+        if (state.report) {
+            const report = state.report;
+
+            html += `
+                <div class="reportLine">
+                    <b>Overall: ${escapeHtml(report.overall || "Complete")}</b>
+
+                    <span>
+                        ${Number(report.total_fails || 0)} issue(s)
+                        in
+                        ${Number(report.total_images || state.images.length)} photo(s)
+                    </span>
+
+                    ${
+                        report.report_file
+                        ? `
+                            <a
+                                href="/reports/${encodeURIComponent(report.report_file)}"
+                                target="_blank"
+                                rel="noopener"
+                            >
+                                Open full report
+                            </a>
+                        `
+                        : ""
+                    }
+                </div>
+            `;
+        }
+
+        const flaggedResults =
+            Object.values(state.results)
+                .filter(result =>
+                    (result.findings || []).some(
+                        finding =>
+                            finding.status === "FAIL"
+                            || finding.status === "WARNING"
+                    )
+                );
+
+        const flaggedPhotoCount = flaggedResults.length;
+
+        flaggedResults.forEach(result => {
+            const imageIndex =
+                findImageIndexForResult(state, result);
+
+            (result.findings || [])
+                .filter(finding =>
+                    finding.status === "FAIL"
+                    || finding.status === "WARNING"
+                )
+                .forEach(finding => {
+                    const waypoint =
+                        result.waypoint_name
+                        || findWaypointForResult(state, result)
+                        || result.filename
+                        || "inspection photo";
+
+                    const buttonLabel =
+                        flaggedPhotoCount === 1
+                        ? "View Photo"
+                        : `View ${waypoint} Photo`;
+
+                    const severity = escapeHtml(
+                        finding.severity
+                        || finding.status
+                        || "WARNING"
+                    );
+
                     html += `
-                        <div class="finding ${escapeHtml(f.severity)}">
-                            <b>${escapeHtml(result.waypoint_name || result.filename)}</b>:
-                            ${escapeHtml(f.rule_name)} (${escapeHtml(f.severity)})
-                            <div class="muted">${escapeHtml(f.remediation || "")}</div>
+                        <div class="finding ${severity}">
+                            <div class="findingHeader">
+                                <div>
+                                    <b>${escapeHtml(waypoint)}</b>
+                                    <div>
+                                        ${escapeHtml(finding.rule_name || "Inspection finding")}
+                                    </div>
+                                </div>
+
+                                <span class="findingSeverity ${severity}">
+                                    ${severity}
+                                </span>
+                            </div>
+
+                            ${
+                                finding.description
+                                ? `<div class="muted">${escapeHtml(finding.description)}</div>`
+                                : ""
+                            }
+
+                            ${
+                                finding.remediation
+                                ? `<div class="muted"><b>Recommended action:</b> ${escapeHtml(finding.remediation)}</div>`
+                                : ""
+                            }
+
+                            ${
+                                imageIndex >= 0
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="reviewPhotoBtn"
+                                        data-review-image="${imageIndex}"
+                                    >
+                                        ${escapeHtml(buttonLabel)}
+                                    </button>
+                                `
+                                : `
+                                    <div class="muted">
+                                        The source photo could not
+                                        be matched in this inspection.
+                                    </div>
+                                `
+                            }
                         </div>
                     `;
                 });
         });
 
+        if (state.report && flaggedPhotoCount === 0) {
+            html += `
+                <div class="finding PASS">
+                    <b>Inspection passed</b>
+                    <div class="muted">
+                        Qwen did not flag any inspection
+                        photos for review.
+                    </div>
+                </div>
+            `;
+        }
+
         $("analysis").innerHTML = html;
+    }
+
+    function baseFilename(value) {
+        return String(value || "")
+            .replace(/\\/g, "/")
+            .split("/")
+            .pop();
+    }
+
+    function findImageIndexForResult(state, result) {
+        const resultFilename = baseFilename(
+            result.filename
+            || result.filepath
+            || result.source_image
+        );
+
+        let index = state.images.findIndex(image => {
+            const imageLabel = baseFilename(image.label);
+            const imagePath = baseFilename(image.filepath);
+
+            return (
+                resultFilename
+                && (
+                    resultFilename === imageLabel
+                    || resultFilename === imagePath
+                )
+            );
+        });
+
+        if (index < 0 && result.waypoint_name) {
+            index = state.images.findIndex(
+                image => image.waypoint_name === result.waypoint_name
+            );
+        }
+
+        return index;
+    }
+
+    function findWaypointForResult(state, result) {
+        const index = findImageIndexForResult(state, result);
+
+        if (index < 0) {
+            return "";
+        }
+
+        return (
+            state.images[index].waypoint_name
+            || state.images[index].label
+            || ""
+        );
+    }
+
+    function getFlaggedFindingForImage(state, image) {
+        const result =
+            state.results[image.label]
+            || Object.values(state.results).find(candidate => {
+                const resultFilename = baseFilename(
+                    candidate.filename
+                    || candidate.filepath
+                    || candidate.source_image
+                );
+
+                return (
+                    resultFilename === baseFilename(image.label)
+                    || resultFilename === baseFilename(image.filepath)
+                );
+            });
+
+        if (!result) {
+            return null;
+        }
+
+        const finding = (result.findings || []).find(item =>
+            item.status === "FAIL"
+            || item.status === "WARNING"
+        );
+
+        if (!finding) {
+            return null;
+        }
+
+        return {result, finding};
+    }
+
+    function viewFlaggedPhoto(imageIndex) {
+        const state = dogStates[current];
+
+        if (
+            !state
+            || imageIndex < 0
+            || imageIndex >= state.images.length
+        ) {
+            return;
+        }
+
+        state.shown = imageIndex;
+
+        openPhotoFocus();
+        renderImages();
+    }
+
+    function openPhotoFocus() {
+        $("photoMain").classList.add("photoFocus");
+        $("photoFocusBackdrop").classList.add("open");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closePhotoFocus() {
+        $("photoMain").classList.remove("photoFocus");
+        $("photoFocusBackdrop").classList.remove("open");
+        document.body.style.overflow = "";
+        renderImages();
     }
 
     async function analyzeInspection() {
@@ -2567,7 +2995,7 @@
     const rsDeg = radians =>
         `${Math.round(radians * 180 / Math.PI)}°`;
 
-    function rsSay(text, error=false) {
+    function rsSay(text, error = false) {
         $("rsMsg").textContent = text;
         $("rsMsg").className =
             `rsMsg${error ? " err" : ""}`;
@@ -3310,7 +3738,8 @@
     $("commandsTab").onclick =
         showCommands;
 
-    $("analyzeBtn").onclick = analyzeInspection;
+    $("analyzeBtn").onclick =
+        analyzeInspection;
 
     $("thumbs").onclick = event => {
         const thumb = event.target.closest("[data-i]");
@@ -3321,6 +3750,38 @@
             renderImages();
         }
     };
+
+    /*
+     * Inspection report photo navigation
+     */
+
+    $("analysis").onclick = event => {
+        const button =
+            event.target.closest("[data-review-image]");
+
+        if (!button) {
+            return;
+        }
+
+        viewFlaggedPhoto(
+            Number(button.dataset.reviewImage)
+        );
+    };
+
+    $("photoMain").onclick = event => {
+        if (event.target.closest("[data-enlarge-photo]")) {
+            openPhotoFocus();
+            renderImages();
+            return;
+        }
+
+        if (event.target.closest("[data-close-photo]")) {
+            closePhotoFocus();
+        }
+    };
+
+    $("photoFocusBackdrop").onclick =
+        closePhotoFocus;
 
     $("imagesTab").onclick =
         showImages;
@@ -3539,15 +4000,23 @@
         rsDraw();
     };
 
+    /*
+     * One Escape handler for both overlays
+     */
+
     document.addEventListener(
         "keydown",
         event => {
-            if (
-                event.key === "Escape"
-                && $("dogModalBackdrop")
-                    .classList
-                    .contains("open")
-            ) {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            if ($("photoMain").classList.contains("photoFocus")) {
+                closePhotoFocus();
+                return;
+            }
+
+            if ($("dogModalBackdrop").classList.contains("open")) {
                 closeDogModal();
             }
         }
