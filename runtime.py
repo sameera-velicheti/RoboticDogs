@@ -123,7 +123,21 @@ def get_bridge(dog_id):
     """
 
     with _bridge_lock:
+        # A cached bridge whose connection dropped (dog rebooted, WiFi disconnects, would make every command time out)
+        cached = _bridges.get(dog_id)
 
+        if cached is not None:
+            try:
+                alive = cached.client.is_connected
+            except Exception:
+                alive = False
+
+            if not alive:
+                try:
+                    cached.close()
+                except Exception:
+                    pass
+                _bridges[dog_id] = None
         if (
             dog_id not in _bridges
             or _bridges[dog_id] is None

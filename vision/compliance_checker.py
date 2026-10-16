@@ -95,10 +95,28 @@ NO if the issue is not visible or you are not sure."""
             **extra_params(),
         }
 
-        r = requests.post(NIM_URL, json=payload, headers=nim_headers(), timeout=120)
-        data = r.json()
-        message = data["choices"][0]["message"]
+        try:
+            r = requests.post(NIM_URL, json=payload, headers=nim_headers(), timeout=120)
+        except requests.exceptions.ConnectionError:
+            raise RuntimeError(
+                f"Can't reach the AI model at {NIM_URL}. "
+                "Is Qwen started?"
+            )
+        except requests.exceptions.Timeout:
+            raise RuntimeError(
+                "The AI model took over 2 minutes to respond. "
+                "It may still be loading; wait and press Analyze again. "
+            )
+        try: 
+            data = r.json()
+            message = data["choices"][0]["message"]
+        except(ValueError, KeyError, IndexError, TypeError):
+            raise RuntimeError(
+                f"The AI Model returned an error (HTTP {r.status_code}): "
+                f"{r.text[:200]}"
+            )
         answer = extract_answer(message)
+        
 
         print(f"  Checking [{rule['id']}] {rule['name']}... ", end="", flush=True)
 

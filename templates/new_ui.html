@@ -2583,6 +2583,14 @@
                     }
                 }
             }
+            if (state.running){
+                state.running = false;
+                dog.task = "Lost connection to the patrol. " + "Check the dog, then press Go to start again.";
+                
+                if(dogName == current){
+                    renderDogState();
+                }
+            }
 
         } catch (error) {
             state.running = false;
@@ -2685,15 +2693,21 @@
         }
 
         else if (event.type === "done") {
+            const wasStopped = state.stopped || /stopped/i.test(event.msg || "");
+
             state.running = false;
-            state.stopped = false;
 
-            dog.progress = 100;
-            dog.task =
-                "Inspection route complete";
+            if(wasStopped) {
+                //stopped early keep the progress where the dog stopped
+                dog.task = "Route stopped. Press Go to start again.";
+            }else{
+                state.stopped = false;
+                dog.progress = 100;
+                dog.task = "Inspection route complete";
 
-            if (dogName === current) {
-                setProgress(100);
+                if(dogName === current){
+                    setProgress(100);
+                }
             }
         }
 
