@@ -1921,9 +1921,9 @@
         const state = dogStates[current];
         const dog = dogs[current];
 
-        $("task").textContent = state.stopped
-            ? "Emergency stop activated"
-            : dog.task || "Not on patrol";
+        // dog.task already holds the right message, including
+        // "Emergency stop activated" and "Route stopped. Press Go...".
+        $("task").textContent = dog.task || "Not on patrol";
 
         $("routeBtn").textContent = state.stopped
             ? "▶ Send back on inspection route"
@@ -2583,11 +2583,15 @@
                     }
                 }
             }
-            if (state.running){
+
+            // Stream ended without a done/error event: the connection dropped.
+            if (state.running) {
                 state.running = false;
-                dog.task = "Lost connection to the patrol. " + "Check the dog, then press Go to start again.";
-                
-                if(dogName == current){
+                dog.task =
+                    "Lost connection to the patrol. "
+                    + "Check the dog, then press Go to start again.";
+
+                if (dogName === current) {
                     renderDogState();
                 }
             }
@@ -2693,19 +2697,21 @@
         }
 
         else if (event.type === "done") {
-            const wasStopped = state.stopped || /stopped/i.test(event.msg || "");
+            const wasStopped =
+                state.stopped
+                || /stopped/i.test(event.msg || "");
 
             state.running = false;
 
-            if(wasStopped) {
-                //stopped early keep the progress where the dog stopped
+            if (wasStopped) {
+                // Stopped early: keep the progress where the dog stopped.
                 dog.task = "Route stopped. Press Go to start again.";
-            }else{
+            } else {
                 state.stopped = false;
                 dog.progress = 100;
                 dog.task = "Inspection route complete";
 
-                if(dogName === current){
+                if (dogName === current) {
                     setProgress(100);
                 }
             }
@@ -2741,8 +2747,10 @@
         const state = dogStates[dogName];
 
         try {
+            // /cancel stops the route AND any running chat command,
+            // then sends the stop signal to the dog's legs.
             await fetch(
-                "/patrol/stop",
+                "/cancel",
                 {
                     method: "POST",
                     headers: {
@@ -2755,7 +2763,7 @@
             );
         } catch (error) {
             console.error(
-                "Could not stop patrol:",
+                "Could not send emergency stop:",
                 error
             );
         }
@@ -2763,6 +2771,12 @@
         state.running = false;
         state.stopped = true;
         dog.task = "Emergency stop activated";
+
+        addHistory(dogName, {
+            from: "dog",
+            text: "Emergency stop activated",
+            kind: "error"
+        });
 
         if (dogName === current) {
             renderDogState();
