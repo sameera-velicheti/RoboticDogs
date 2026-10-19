@@ -1936,7 +1936,8 @@
             ? "■ Stopped"
             : "■ Emergency Stop";
 
-        $("emergencyStopBtn").disabled = state.stopped;
+        // Emergency stop must ALWAYS be clickable, even right after a stop.
+        $("emergencyStopBtn").disabled = false;
 
         renderImages();
     }
@@ -2330,6 +2331,7 @@
         const dogName = current;
         const dog = dogs[dogName];
         const state = dogStates[dogName];
+        }
 
         if (!dog || !state || !state.images.length || state.analyzing) {
             return;
@@ -2426,7 +2428,7 @@
                 renderImages();
             }
         }
-    }
+    
 
     function renderBattery() {
         const dog = dogs[current];
@@ -2882,6 +2884,15 @@
         // even if you switch to a different dog's page.
         const dogName = current;
         const dog = dogs[dogName];
+
+        // A new command means the dog may move again: clear the stopped
+        // state so the Emergency Stop button is ready to press.
+        const state = dogStates[dogName];
+        state.stopped = false;
+        dog.task = `Running command: ${value}`;
+        if (dogName === current) {
+            renderDogState();
+        }
 
         $("commandInput").value = "";
         addHistory(dogName, {from: "you", text: value});
