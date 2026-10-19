@@ -118,9 +118,15 @@ def patrol_start():
         # Capture an image at a named waypoint.
         def capture(waypoint_name):
 
-            path = bridge.take_picture(
-                save_dir=CAPTURE_DIR
-            )
+            try:
+                path = bridge.take_picture(
+                    save_dir=CAPTURE_DIR
+                )
+            except Exception as error:
+                raise RuntimeError(
+                    f"{dog_name}'s camera isn't sending images. "
+                    "Reboot the dog, then Pair & Connect again."
+                ) from error
 
             stamp = datetime.now().strftime(
                 "%Y%m%d_%H%M%S"
@@ -264,6 +270,18 @@ def patrol_start():
                     {
                         "index": index,
                         "action": event["waypoint_name"]
+                    }
+                )
+
+            elif route_status == "capture_failed":
+
+                yield sse(
+                    "warning",
+                    {
+                        "msg":
+                            f"No photo at "
+                            f"{event.get('waypoint_name') or 'this stop'}: "
+                            f"{event.get('message') or 'camera error'}"
                     }
                 )
 

@@ -2063,6 +2063,15 @@
     function renderAnalysis(state) {
         let html = "";
 
+        if (state.warning) {
+            html += `
+                <div class="finding HIGH">
+                    <b>⚠ Camera problem</b>
+                    <div class="muted">${escapeHtml(state.warning)}</div>
+                </div>
+            `;
+        }
+
         if (state.analysisMsg) {
             html += `
                 <div class="muted">
@@ -2627,6 +2636,7 @@
         }
 
         if (event.type === "plan") {
+            state.warning = "";
             state.images = [];
             state.shown = -1;
             state.results = {};
@@ -2721,6 +2731,12 @@
                     setProgress(100);
                 }
             }
+        }
+
+        else if (event.type === "warning") {
+            state.warning = event.msg;
+            dog.task = `⚠ ${event.msg}`;
+            renderImages();
         }
 
         else if (event.type === "error") {
