@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Agentic Paw Patrol
+Comment=Start the robotic dogs inspection application
+Exec=/home/YOURNAME/Downloads/RoboticDogs/start_pawpatrol.sh
+Path=/home/YOURNAME/Downloads/RoboticDogs
+Icon=applications-science
+Terminal=false
+Categories=Utility;
