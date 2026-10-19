@@ -36,6 +36,7 @@ from nim_config import (
 )
 from startup import dog_prep
 from status.system_status import status
+from status import battery as battery_status
 
 from runtime import (
     DOG_IPS,
@@ -267,6 +268,15 @@ def _dog_status(dog):
 
         label = "On patrol"
 
+    # Battery comes from the dog's rosbridge, which runs in both app mode
+    # and patrol mode. Subscribing happens in the background.
+    if state == "offline":
+        battery_status.forget(dog["id"])
+        battery_info = None
+    else:
+        battery_status.watch(dog["id"])
+        battery_info = battery_status.battery(dog["id"])
+
     ids = list(
         DOG_IPS
     )
@@ -299,7 +309,9 @@ def _dog_status(dog):
         "label": label,
         "online": state != "offline",
         "on_patrol": on_patrol,
-        "battery": None,
+        "battery": battery_info["percent"] if battery_info else None,
+        "battery_volts": battery_info["volts"] if battery_info else None,
+        "battery_low": battery_info["low"] if battery_info else False,
     }
 
 

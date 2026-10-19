@@ -1904,8 +1904,7 @@
 
         $("dogName").textContent = name;
         $("unit").textContent = dog.unit || "";
-        $("battery").textContent =
-            `${dog.battery ?? "--"}%`;
+        renderBattery();
 
         setProgress(dog.progress || 0);
         renderDogState();
@@ -2426,6 +2425,21 @@
                 renderImages();
             }
         }
+    }
+
+    function renderBattery() {
+        const dog = dogs[current];
+        const el = $("battery");
+
+        if (!dog || !el) {
+            return;
+        }
+
+        el.textContent = `${dog.battery ?? "--"}%`;
+        el.title = dog.battery_volts
+            ? `${dog.battery_volts} V`
+            : "No battery reading yet";
+        el.style.color = dog.battery_low ? "#ff5d5d" : "";
     }
 
     function setProgress(percent) {
@@ -3611,9 +3625,15 @@
                         online: dog.online,
                         state: dog.state,
                         label: dog.label,
-                        battery: dog.battery
+                        battery: dog.battery,
+                        battery_volts: dog.battery_volts,
+                        battery_low: dog.battery_low
                     }
                 );
+
+                if (dog.name === current) {
+                    renderBattery();
+                }
 
                 ensureDogState(dog.name);
 

@@ -41,6 +41,14 @@ PATROL_LAUNCH = (f"setsid nohup roslaunch pug_navigation patrol.launch map:={MAP
 
 _lock = threading.Lock()
 
+# Dogs confirmed in patrol mode (navigation running, clock right) since the
+# app started. The dog's normal app mode also runs rosbridge on port 9090,
+# so an open port alone does NOT mean patrol mode.
+_verified = set()
+
+# How far off (seconds) the dog's clock may be before we fix it.
+CLOCK_TOLERANCE = 120
+
 
 # ---------------------------------------------------------------- dog list --
 
@@ -108,12 +116,31 @@ def port_open(ip, port, timeout=0.6):
 
 
 def dog_status(dog):
-    """offline / online (on, patrol mode not started) / ready (patrol mode up)."""
+    """offline / online (on, patrol mode not confirmed) / ready (patrol mode up)."""
     if port_open(dog["ip"], dog.get("ros_port", 9090)):
-        return "ready", "Ready for patrol"
+        if dog["id"] in _verified:
+            return "ready", "Ready for patrol"
+        return "online", "On · press Pair & Connect to start patrol mode"
+    _verified.discard(dog["id"])
     if port_open(dog["ip"], 22):
         return "online", "On · press Pair & Connect to start patrol mode"
     return "offline", "Offline · check the dog is on and on the TP-Link WiFi"
+
+
+def _already_patrolling(dog):
+    """True if navigation is running on the dog AND its clock is right.
+
+    Checked over SSH because the dog's app mode also opens port 9090.
+    """
+    ok, out = _ssh(dog, "rosnode list 2>/dev/null; echo CLOCK=$(date +%s)")
+    if not ok and "CLOCK=" not in out:
+        return False
+    nodes_up = all(n in out for n in ("/move_base_node", "/amcl", "/rosbridge_websocket"))
+    try:
+        dog_clock = int(out.rsplit("CLOCK=", 1)[1].split()[0])
+    except (IndexError, ValueError):
+        return False
+    return nodes_up and abs(dog_clock - time.time()) <= CLOCK_TOLERANCE
 
 
 # ----------------------------------------------------------------- ssh prep --
@@ -159,9 +186,12 @@ def prepare_dog(dog, ready_timeout=90):
     def step(n, status, msg):
         return {"step": n, "total": total, "status": status, "msg": msg}
 
-    if port_open(dog["ip"], dog.get("ros_port", 9090)):
+    if _already_patrolling(dog):
+        _verified.add(dog["id"])
         yield {"done": True, "ok": True, "msg": "Already in patrol mode"}
         return
+
+    _verified.discard(dog["id"])
 
     yield step(1, "running", "Connecting and stopping the dog's app mode...")
     ok, out = _ssh(dog, "sudo -n systemctl stop pug_bringup.service")
@@ -195,6 +225,7 @@ def prepare_dog(dog, ready_timeout=90):
             ok, out = _ssh(dog, "rosnode list")
             missing = [n for n in ("/move_base_node", "/amcl") if n not in out]
             if ok and not missing:
+                _verified.add(dog["id"])
                 yield step(5, "ok", "Navigation and rosbridge are up")
                 yield {"done": True, "ok": True, "msg": "Ready for patrol"}
                 return
