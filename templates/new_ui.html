@@ -295,6 +295,7 @@
             padding: 13px;
             display: grid;
             grid-template-columns: 1.15fr .85fr;
+            grid-template-rows: minmax(0, 1fr);
             gap: 13px;
         }
 
@@ -409,7 +410,9 @@
         .right {
             padding: 12px;
             display: grid;
-            grid-template-rows: auto 1fr;
+            grid-template-rows: auto minmax(0, 1fr);
+            min-height: 0;
+            overflow: hidden;
         }
 
         .tabs {
@@ -440,17 +443,7 @@
         .thumb {
             border: 1px solid #36506b;
             border-radius: 7px;
-            background:
-                linear-gradient(
-                    90deg,
-                    #172530,
-                    #bec8c9 19%,
-                    #27343d 24% 43%,
-                    #c1c9c9 48%,
-                    #182630 53% 72%,
-                    #bdc6c7 77%,
-                    #192631
-                );
+            background: transparent;
         }
 
         .thumbs {
@@ -598,13 +591,15 @@
 
         .commands {
             height: 100%;
+            min-height: 0;
             display: grid;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: auto minmax(0, 1fr) auto;
             gap: 12px;
         }
 
         .history {
-            overflow: auto;
+            min-height: 0;
+            overflow-y: auto;
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 12px;
@@ -1975,8 +1970,7 @@
             main.className = "photo";
             main.innerHTML = "";
             thumbs.className = "thumbs";
-            thumbs.innerHTML =
-                '<div class="thumb"></div>'.repeat(3);
+            thumbs.innerHTML = "";
         } else {
             const index =
                 state.shown >= 0 ? state.shown : images.length - 1;
@@ -2049,8 +2043,6 @@
                 const result = state.results[img.label];
                 const badge = result && result.status
                     ? `<span class="badge ${escapeHtml(result.status)}">${escapeHtml(result.status)}</span>`
-                    : state.analyzing
-                    ? '<span class="badge WAIT">...</span>'
                     : "";
 
                 return `
