@@ -38,7 +38,19 @@
       ],
       "severity": "MEDIUM",
       "remediation": "Close and latch door",
-      "description": "Check for open door using keywords and flag according to severity."
+      "description": "Check for open door using keywords and flag according to severity.",
+      "flag_only_if": [
+        "the door is close to the camera and clearly in view (it fills a large part of the image, not a small door in the distance)",
+        "the door panel itself is visibly swung away from its frame, leaving a real gap or doorway you could walk through",
+        "you can see the edge of the door panel standing apart from the frame, or the floor continuing through the open doorway"
+      ],
+      "do_not_flag": [
+        "glass panes, glass panels or windows in a door - seeing through glass does NOT mean the door is open",
+        "glass walls, windows, glass partitions or reflections",
+        "a closed door, even if it has a window or is made of glass",
+        "doors that are far away, small in the image, blurry or only partly visible",
+        "empty door frames or hallways with no door panel visible"
+      ]
     },
     {
       "id": "SPILL_001",

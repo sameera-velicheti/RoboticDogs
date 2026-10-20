@@ -61,6 +61,22 @@ def check_compliance(description, image_path=None, timestamp=None):
     return findings
 
 
+def _rule_guidance(rule):
+    """Extra YES/NO instructions for a rule, from compliance_rules.json.
+
+    "flag_only_if": every condition must be true to answer YES.
+    "do_not_flag":  things that look similar but must be answered NO.
+    """
+    lines = []
+    if rule.get("flag_only_if"):
+        lines.append("Answer YES only if ALL of these are true:")
+        lines += [f"- {c}" for c in rule["flag_only_if"]]
+    if rule.get("do_not_flag"):
+        lines.append("Answer NO for these (they are NOT this issue):")
+        lines += [f"- {c}" for c in rule["do_not_flag"]]
+    return ("\n" + "\n".join(lines) + "\n") if lines else ""
+
+
 def check_compliance_with_nim(filepath, timestamp=None):
     """Query NIM for rule-by-rule compliance decisions on an image."""
     """Ask the NIM directly about each compliance rule with keyword hints."""
@@ -78,7 +94,7 @@ def check_compliance_with_nim(filepath, timestamp=None):
 
 Check for this specific safety issue: {rule['name']}
 Visual indicators to look for: {keywords_str}
-
+{_rule_guidance(rule)}
 Look carefully at the image. Can you clearly see this safety issue?
 Your answer MUST start with YES or NO.
 YES if the issue is clearly visible.
