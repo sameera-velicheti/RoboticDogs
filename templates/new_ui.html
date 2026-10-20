@@ -2331,7 +2331,7 @@
         const dogName = current;
         const dog = dogs[dogName];
         const state = dogStates[dogName];
-        }
+        
 
         if (!dog || !state || !state.images.length || state.analyzing) {
             return;
@@ -2428,7 +2428,7 @@
                 renderImages();
             }
         }
-    
+    }
 
     function renderBattery() {
         const dog = dogs[current];
