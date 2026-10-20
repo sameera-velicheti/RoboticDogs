@@ -313,7 +313,11 @@
         .map {
             position: relative;
             flex: 1;
-            min-height: 350px;
+            min-height: 440px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
             margin: 12px 0;
             border: 1px solid #34516e;
             border-radius: 7px;
@@ -323,30 +327,38 @@
             background-size: 28px 28px;
         }
 
-        .racks {
-            position: absolute;
-            inset: 88px 115px;
-            display: flex;
-            justify-content: space-between;
-            gap: 45px;
-            padding: 16px;
-        }
-
-        .rack {
-            width: 55px;
-            background:
-                repeating-linear-gradient(
-                    #283849 0 2px,
-                    #111f2e 2px 6px
-                );
-            border: 1px solid #617185;
-        }
-
         .routeSvg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+            /* Fixed size: never stretched or scaled with the panel */
+            flex: none;
+            width: 320px;
+            height: 420px;
+        }
+
+        .roomWall {
+            fill: none;
+            stroke: #9db1c9;
+            stroke-width: 3;
+        }
+
+        .rackShape {
+            fill: url(#rackLines);
+            stroke: #617185;
+        }
+
+        .loop {
+            fill: none;
+            stroke: #3a4d61;
+            stroke-width: 9;
+            stroke-linejoin: round;
+        }
+
+        .startArrow {
+            fill: var(--green);
+        }
+
+        .startLabel {
+            fill: #c5d3e2;
+            font-size: 12px;
         }
 
         .base,
@@ -1416,31 +1428,46 @@
                     </div>
 
                     <div class="map">
-                        <div class="racks">
-                            <div class="rack"></div>
-                            <div class="rack"></div>
-                            <div class="rack"></div>
-                            <div class="rack"></div>
-                        </div>
-
+                        <!--
+                            Fixed-size drawing (320 x 420 px). It is never
+                            scaled to the panel, so the room, racks and path
+                            cannot stretch. Only the blue line and the dog
+                            marker move (see setProgress).
+                        -->
                         <svg
                             class="routeSvg"
-                            viewBox="0 0 600 340"
-                            preserveAspectRatio="none"
+                            width="320"
+                            height="420"
+                            viewBox="0 0 320 420"
                         >
-                            <polyline
-                                id="base"
-                                class="base"
-                                points="70,140 530,140 530,200 70,200"
-                            ></polyline>
+                            <defs>
+                                <pattern id="rackLines" width="6" height="6" patternUnits="userSpaceOnUse">
+                                    <rect width="6" height="6" fill="#111f2e"></rect>
+                                    <rect width="6" height="2" fill="#283849"></rect>
+                                </pattern>
+                            </defs>
 
-                            <polyline
-                                id="done"
-                                class="done"
-                                points="70,140 530,140 530,200 70,200"
-                            ></polyline>
+                            <!-- Room walls -->
+                            <rect class="roomWall" x="20" y="14" width="280" height="392"></rect>
 
-                            <circle id="marker" class="marker" r="10"></circle>
+                            <!-- Racks: two columns, each split top / bottom -->
+                            <rect class="rackShape" x="92" y="72" width="58" height="125"></rect>
+                            <rect class="rackShape" x="92" y="225" width="58" height="125"></rect>
+                            <rect class="rackShape" x="170" y="72" width="58" height="125"></rect>
+                            <rect class="rackShape" x="170" y="225" width="58" height="125"></rect>
+
+                            <!-- Full aisle loop (for a future full-loop route) -->
+                            <path class="loop" d="M60,374 L60,42 L260,42 L260,374 Z"></path>
+
+                            <!-- Today's route: the far-left aisle, up and back -->
+                            <line id="base" class="base" x1="60" y1="374" x2="60" y2="42"></line>
+                            <line id="done" class="done" x1="60" y1="374" x2="60" y2="374"></line>
+
+                            <!-- Dog start, facing up the aisle -->
+                            <path class="startArrow" d="M51,400 L60,386 L69,400 Z"></path>
+                            <text class="startLabel" x="76" y="399">Dog start</text>
+
+                            <circle id="marker" class="marker" cx="60" cy="374" r="10"></circle>
                         </svg>
                     </div>
 
@@ -1449,7 +1476,7 @@
                         &nbsp;
                         🟢 Current Position
                         &nbsp;
-                        ⚪ Remaining
+                        ⚪ Remaining (left aisle, up and back)
                     </div>
 
                     <p>
@@ -2454,24 +2481,21 @@
         $("percent").textContent =
             `${safePercent}% Complete`;
 
-        const base = $("base");
-        const done = $("done");
-        const marker = $("marker");
+        // The left aisle runs from the start (bottom) to the far end (top).
+        // 0-50%: the dog walks up the aisle and the blue line grows.
+        // 50-100%: the dog walks back down; the whole aisle stays blue.
+        const START_Y = 374;
+        const END_Y = 42;
+        const AISLE = START_Y - END_Y;
 
-        const length = base.getTotalLength();
+        const goingUp = safePercent <= 50;
+        const dogY = goingUp
+            ? START_Y - AISLE * (safePercent / 50)
+            : END_Y + AISLE * ((safePercent - 50) / 50);
+        const doneTopY = goingUp ? dogY : END_Y;
 
-        done.style.strokeDasharray =
-            `${length} ${length}`;
-
-        done.style.strokeDashoffset =
-            length * (1 - safePercent / 100);
-
-        const point = base.getPointAtLength(
-            length * safePercent / 100
-        );
-
-        marker.setAttribute("cx", point.x);
-        marker.setAttribute("cy", point.y);
+        $("done").setAttribute("y2", doneTopY);
+        $("marker").setAttribute("cy", dogY);
     }
 
     async function startInspectionRoute() {
