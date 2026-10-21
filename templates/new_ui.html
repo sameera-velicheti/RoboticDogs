@@ -400,6 +400,31 @@
             width: 100%;
         }
 
+        .startingSide {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: #091927;
+            color: #c5d3e2;
+        }
+
+        .startingSide select {
+            border: 1px solid #34516e;
+            border-radius: 6px;
+            padding: 8px 10px;
+            background: #0b1b2b;
+            color: var(--text);
+        }
+
+        .startingSide select:disabled {
+            cursor: not-allowed;
+            opacity: .7;
+        }
+
         .emergencyStopBtn {
             border: 1px solid #ff6675;
             background: linear-gradient(#a92335, #751725);
@@ -1485,6 +1510,14 @@
                         <span id="task" style="color:#8ec5ff"></span>
                     </p>
 
+                    <label class="startingSide" for="startingSide">
+                        <span>Starting side</span>
+                        <select id="startingSide">
+                            <option value="near">Near end (Stop 1)</option>
+                            <option value="far">Far end (Stop 10)</option>
+                        </select>
+                    </label>
+
                     <div class="routeActions">
                         <button id="routeBtn" class="primary routeBtn">
                             ▶ Go on your inspection route
@@ -1787,6 +1820,7 @@
             dogStates[name] = {
                 stopped: false,
                 running: false,
+                startingSide: "near",
                 images: [],
                 shown: -1,
                 analyzing: false,
@@ -1953,6 +1987,8 @@
             : "▶ Go on your inspection route";
 
         $("routeBtn").disabled = state.running;
+        $("startingSide").value = state.startingSide;
+        $("startingSide").disabled = state.running;
 
         $("emergencyStopBtn").classList.toggle(
             "active",
@@ -2481,21 +2517,34 @@
         $("percent").textContent =
             `${safePercent}% Complete`;
 
-        // The left aisle runs from the start (bottom) to the far end (top).
-        // 0-50%: the dog walks up the aisle and the blue line grows.
-        // 50-100%: the dog walks back down; the whole aisle stays blue.
-        const START_Y = 374;
-        const END_Y = 42;
-        const AISLE = START_Y - END_Y;
+        const NEAR_END_Y = 374;
+        const FAR_END_Y = 42;
+        const farStart =
+            dogStates[current]?.startingSide === "far";
+        const startY = farStart ? FAR_END_Y : NEAR_END_Y;
+        const endY = farStart ? NEAR_END_Y : FAR_END_Y;
+        const outbound = safePercent <= 50;
+        const dogY = outbound
+            ? startY + (endY - startY) * (safePercent / 50)
+            : endY - (endY - startY) * ((safePercent - 50) / 50);
+        const doneY = outbound ? dogY : endY;
 
-        const goingUp = safePercent <= 50;
-        const dogY = goingUp
-            ? START_Y - AISLE * (safePercent / 50)
-            : END_Y + AISLE * ((safePercent - 50) / 50);
-        const doneTopY = goingUp ? dogY : END_Y;
-
-        $("done").setAttribute("y2", doneTopY);
+        $("done").setAttribute("x1", "60");
+        $("done").setAttribute("y1", startY);
+        $("done").setAttribute("x2", "60");
+        $("done").setAttribute("y2", doneY);
         $("marker").setAttribute("cy", dogY);
+
+        document.querySelector(".startArrow").setAttribute(
+            "d",
+            farStart
+                ? "M51,16 L60,30 L69,16 Z"
+                : "M51,400 L60,386 L69,400 Z"
+        );
+        document.querySelector(".startLabel").setAttribute(
+            "y",
+            farStart ? "25" : "399"
+        );
     }
 
     async function startInspectionRoute() {
@@ -2517,9 +2566,9 @@
             return;
         }
 
-        const routeFile =
-            rsRouteFiles[rsRoute]
-            || "data_center.json";
+        const routeFile = state.startingSide === "far"
+            ? "data_center_reverse.json"
+            : "data_center.json";
 
         state.stopped = false;
         state.running = true;
@@ -4054,6 +4103,18 @@
 
     $("routeBtn").onclick =
         startInspectionRoute;
+
+    $("startingSide").onchange = event => {
+        const state = dogStates[current];
+
+        if (!state || state.running) {
+            renderDogState();
+            return;
+        }
+
+        state.startingSide = event.target.value;
+        setProgress(dogs[current].progress || 0);
+    };
 
     $("emergencyStopBtn").onclick =
         stopInspectionRoute;
