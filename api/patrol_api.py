@@ -30,9 +30,9 @@ from runtime import (
     DOG_NAMES,
     PATROL_END,
     ROUTES_DIR,
-    cancel_event,
     emergency_stop_robot,
     get_bridge,
+    get_cancel_event,
     is_patrolling,
     register_patrol,
     remove_patrol,
@@ -401,7 +401,7 @@ def cancel():
         pass
 
     # Notify the old Phase 1 movement loop too.
-    cancel_event.set()
+    get_cancel_event(dog_id).set()
 
     return {
         "status": "cancelled"

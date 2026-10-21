@@ -35,8 +35,8 @@ from nim_config import (
 )
 
 from runtime import (
-    cancel_event,
     emergency_stop_robot,
+    get_cancel_event,
     get_bridge,
 )
 
@@ -155,6 +155,7 @@ def stream_command(user_input, dog_id="dog1"):
     for the UI.
     """
 
+    cancel_event = get_cancel_event(dog_id)
     cancel_event.clear()
 
     def event(kind, data):
@@ -252,6 +253,7 @@ def stream_command(user_input, dog_id="dog1"):
                 "msg": f"NIM error: {error}"
             },
         )
+
         return
 
     yield event(
@@ -271,6 +273,7 @@ def stream_command(user_input, dog_id="dog1"):
         )
 
         intent = json.loads(clean)
+
         actions = intent.get(
             "actions",
             [intent],
@@ -284,6 +287,7 @@ def stream_command(user_input, dog_id="dog1"):
                     f"Could not parse model response: {error}"
             },
         )
+
         return
 
     yield event(
@@ -308,6 +312,7 @@ def stream_command(user_input, dog_id="dog1"):
                 "msg": str(error)
             },
         )
+
         return
 
     all_captured_images = []
@@ -331,9 +336,11 @@ def stream_command(user_input, dog_id="dog1"):
             return
 
         action_name = action.get("action")
+
         duration = float(
             action.get("duration", 3.0)
         )
+
         speed = float(
             action.get("speed", 0.10)
         )
@@ -389,6 +396,7 @@ def stream_command(user_input, dog_id="dog1"):
                     for step in range(steps):
 
                         time.sleep(0.1)
+
                         elapsed_for_ui += 0.1
 
                         percent = int(
@@ -631,6 +639,7 @@ def stream_command(user_input, dog_id="dog1"):
                         time.sleep(1.2)
 
                         try:
+
                             yield event(
                                 "log",
                                 {
@@ -697,6 +706,7 @@ def stream_command(user_input, dog_id="dog1"):
                             )
 
                         except Exception as error:
+
                             yield event(
                                 "log",
                                 {
@@ -727,6 +737,7 @@ def stream_command(user_input, dog_id="dog1"):
             elif action_name == "take_picture":
 
                 try:
+
                     yield event(
                         "log",
                         {
@@ -816,15 +827,20 @@ def stream_command(user_input, dog_id="dog1"):
                     stop=False,
                 )
 
-                yield from _timed_motion(
+                stopped = yield from _timed_motion(
                     bridge=bridge,
                     index=i,
                     duration=duration,
                     event=event,
+                    cancel_event=cancel_event,
                 )
+
+                if stopped:
+                    return
 
                 # Capture after a longer turn.
                 if duration >= 4.0:
+
                     yield from _capture_after_turn(
                         bridge=bridge,
                         index=i,
@@ -848,12 +864,16 @@ def stream_command(user_input, dog_id="dog1"):
                     stop=False,
                 )
 
-                yield from _timed_motion(
+                stopped = yield from _timed_motion(
                     bridge=bridge,
                     index=i,
                     duration=duration,
                     event=event,
+                    cancel_event=cancel_event,
                 )
+
+                if stopped:
+                    return
 
             # ---------------------------------------------------------------
             # Turn right
@@ -866,15 +886,20 @@ def stream_command(user_input, dog_id="dog1"):
                     stop=False,
                 )
 
-                yield from _timed_motion(
+                stopped = yield from _timed_motion(
                     bridge=bridge,
                     index=i,
                     duration=duration,
                     event=event,
+                    cancel_event=cancel_event,
                 )
+
+                if stopped:
+                    return
 
                 # Capture after a longer turn.
                 if duration >= 4.0:
+
                     yield from _capture_after_turn(
                         bridge=bridge,
                         index=i,
@@ -936,6 +961,7 @@ def stream_command(user_input, dog_id="dog1"):
                 emergency_stop_robot(
                     bridge
                 )
+
             except Exception:
                 pass
 
@@ -964,9 +990,13 @@ def _timed_motion(
     index,
     duration,
     event,
+    cancel_event,
 ):
     """
     Handle duration/progress/cancellation for simple timed movement.
+
+    Returns True if the command was stopped, so the caller can end the
+    whole command instead of moving on to the next action.
     """
 
     steps = int(
@@ -1000,7 +1030,7 @@ def _timed_motion(
                 },
             )
 
-            return
+            return True
 
         percent = int(
             ((step + 1) / steps)
@@ -1022,6 +1052,8 @@ def _timed_motion(
     bridge.stop()
     time.sleep(0.3)
 
+    return False
+
 
 def _capture_after_turn(
     bridge,
@@ -1038,6 +1070,7 @@ def _capture_after_turn(
     time.sleep(1.2)
 
     try:
+
         yield event(
             "log",
             {

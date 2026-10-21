@@ -255,10 +255,21 @@ def emergency_stop_robot(bridge):
 # Phase 1 command cancellation
 # ---------------------------------------------------------------------------
 
-# The existing Phase 1 natural-language movement system uses this event
-# to stop an active command.
+# The existing Phase 1 natural-language movement system uses one event
+# per dog to stop an active command.
 
-cancel_event = threading.Event()
+_cancel_events = {}
+_cancel_events_lock = threading.Lock()
+
+
+def get_cancel_event(dog_id):
+    """Return the cancellation event for a specific dog."""
+
+    with _cancel_events_lock:
+        if dog_id not in _cancel_events:
+            _cancel_events[dog_id] = threading.Event()
+
+        return _cancel_events[dog_id]
 
 
 # ---------------------------------------------------------------------------

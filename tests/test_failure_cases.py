@@ -4,6 +4,7 @@ import pytest
 import requests
 
 import runtime
+from services import legacy_commands
 from vision import compliance_checker
 
 
@@ -41,6 +42,52 @@ def test_live_bridge_is_reused(monkeypatch):
     monkeypatch.setitem(runtime._bridges, "dog1", live)
 
     assert runtime.get_bridge("dog1") is live
+
+
+class _CommandBridge:
+    def _publish(self, **kwargs):
+        pass
+
+    def stop(self):
+        pass
+
+
+def _run_walk_command(monkeypatch, dog_id):
+    bridge = _CommandBridge()
+    monkeypatch.setattr(legacy_commands, "send_to_nim",
+                        lambda prompt: '{"actions": [{"action": "walk_backward", "duration": 0.2}]}')
+    monkeypatch.setattr(legacy_commands, "get_bridge",
+                        lambda selected_dog: bridge)
+    monkeypatch.setattr(legacy_commands, "emergency_stop_robot",
+                        lambda selected_bridge: None)
+    monkeypatch.setattr(legacy_commands.time, "sleep",
+                        lambda duration: None)
+    return legacy_commands.stream_command("walk backward", dog_id=dog_id)
+
+
+def test_cancelling_one_dog_does_not_cancel_another(monkeypatch):
+    runtime.get_cancel_event("dog1").clear()
+    runtime.get_cancel_event("dog2").clear()
+    command = _run_walk_command(monkeypatch, "dog2")
+
+    next(command)
+    runtime.get_cancel_event("dog1").set()
+    output = "".join(command)
+
+    assert runtime.get_cancel_event("dog1").is_set()
+    assert '"type": "action_done"' in output
+    assert '"msg": "Command stopped."' not in output
+
+
+def test_new_command_clears_cancel_for_same_dog(monkeypatch):
+    runtime.get_cancel_event("dog1").set()
+    command = _run_walk_command(monkeypatch, "dog1")
+
+    output = "".join(command)
+
+    assert not runtime.get_cancel_event("dog1").is_set()
+    assert '"type": "action_done"' in output
+    assert '"msg": "Command stopped."' not in output
 
 
 # --- Qwen problems show a clear message ---
