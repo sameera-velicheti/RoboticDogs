@@ -1,14 +1,34 @@
 #!/bin/bash
 # Paw Patrol launcher: starts the app if it isn't running, then opens the pairing screen.
+
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV="$HOME/pawpatrol-venv"
 STATUS_URL="http://localhost:5000/api/status"
 OPEN_URL="http://localhost:5000/new"
 LOG="$APP_DIR/pawpatrol.log"
 
+# Find the virtual environment: venv, then .venv, then ~/pawpatrol-venv
+VENV=""
+for candidate in "$APP_DIR/venv" "$APP_DIR/.venv" "$HOME/pawpatrol-venv"; do
+    if [ -f "$candidate/bin/activate" ]; then
+        VENV="$candidate"
+        break
+    fi
+done
+
 if ! curl -s -o /dev/null "$STATUS_URL"; then
+    if [ -z "$VENV" ]; then
+        echo "No virtual environment found. Looked in:" > "$LOG"
+        echo "  $APP_DIR/venv" >> "$LOG"
+        echo "  $APP_DIR/.venv" >> "$LOG"
+        echo "  $HOME/pawpatrol-venv" >> "$LOG"
+        notify-send "Paw Patrol" "No virtual environment found. See $LOG" 2>/dev/null
+        xdg-open "$LOG" > /dev/null 2>&1 &
+        exit 1
+    fi
+
     cd "$APP_DIR"
     source "$VENV/bin/activate"
+
     # Flask dev server for now; switch to serve.py once Waitress is tested
     nohup python3 app.py > "$LOG" 2>&1 &
 

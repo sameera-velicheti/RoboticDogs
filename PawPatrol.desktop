@@ -1,9 +1,12 @@
+# Template only. Don't edit the paths by hand.
+# Run "bash install_desktop_icon.sh" on the Dell. It fills in the real
+# paths and installs this icon on the desktop and in the app menu.
 [Desktop Entry]
 Type=Application
 Name=Agentic Paw Patrol
 Comment=Start the robotic dogs inspection application
-Exec=/home/YOURNAME/Downloads/RoboticDogs/start_pawpatrol.sh
-Path=/home/YOURNAME/Downloads/RoboticDogs
+Exec=/path/to/RoboticDogs/start_pawpatrol.sh
+Path=/path/to/RoboticDogs
 Icon=applications-science
 Terminal=false
 Categories=Utility;
