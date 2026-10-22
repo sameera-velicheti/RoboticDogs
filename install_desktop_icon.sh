@@ -28,7 +28,7 @@ Name=Agentic Paw Patrol
 Comment=Start the robotic dogs inspection application
 Exec="$LAUNCHER"
 Path=$APP_DIR
-Icon=applications-science
+Icon=$APP_DIR/static/app_icon.svg
 Terminal=false
 Categories=Utility;
 EOF

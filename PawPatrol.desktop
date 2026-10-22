@@ -7,6 +7,6 @@ Name=Agentic Paw Patrol
 Comment=Start the robotic dogs inspection application
 Exec=/path/to/RoboticDogs/start_pawpatrol.sh
 Path=/path/to/RoboticDogs
-Icon=applications-science
+Icon=$APP_DIR/static/app_icon.svg
 Terminal=false
 Categories=Utility;
