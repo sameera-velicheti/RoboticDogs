@@ -1,5 +1,6 @@
-"""Pair & Connect: app mode vs patrol mode, and fixing the dog's clock."""
+"""Pair & Connect: app mode vs patrol mode, fixing the dog's clock, and the camera."""
 
+import re
 import time
 
 import pytest
@@ -21,9 +22,10 @@ def clean(monkeypatch):
     monkeypatch.setattr(dog_prep.time, "sleep", lambda s: None)
 
 
-def fake_dog(monkeypatch, nodes, clock):
+def fake_dog(monkeypatch, nodes, clock, camera=True, camera_after_launch=True):
     """Pretend dog: answers SSH commands, remembers what was run."""
-    state = {"nodes": nodes, "clock": clock, "ran": []}
+    state = {"nodes": nodes, "clock": clock, "ran": [], "camera": camera,
+             "camera_after_launch": camera_after_launch}
 
     def ssh(dog, command, timeout=30):
         state["ran"].append(command)
@@ -32,10 +34,16 @@ def fake_dog(monkeypatch, nodes, clock):
             return True, ""
         if "patrol.launch" in command:
             state["nodes"] = PATROL
+            state["camera"] = state["camera_after_launch"]
             return True, ""
         if "pkill" in command:
             state["nodes"] = ""
+            state["camera"] = False
             return True, ""
+        if "rostopic hz" in command:
+            if state["camera"] and state["nodes"]:
+                return False, "subscribed to [/csi_camera/image_color/compressed]\naverage rate: 31.3"
+            return False, "subscribed to [/csi_camera/image_color/compressed]\nno new messages"
         if "CLOCK=" in command:
             return True, state["nodes"] + f"CLOCK={state['clock']}"
         if command == "rosnode list":
@@ -86,3 +94,39 @@ def test_dog_going_offline_forgets_ready(monkeypatch):
     monkeypatch.setattr(dog_prep, "port_open", lambda ip, port, timeout=0.6: False)
     assert dog_prep.dog_status(DOG)[0] == "offline"
     assert "dog1" not in dog_prep._verified
+
+
+def test_camera_service_is_reset_before_launch(monkeypatch):
+    dog = fake_dog(monkeypatch, APP_MODE, CLOCK_2023)
+    list(dog_prep.prepare_dog(DOG))
+
+    reset = next(i for i, c in enumerate(dog["ran"]) if "nvargus-daemon" in c)
+    launch = next(i for i, c in enumerate(dog["ran"]) if "patrol.launch" in c)
+    assert reset < launch
+
+
+def test_patrol_mode_with_dead_camera_is_restarted(monkeypatch):
+    # What happened to Pumbaa on 10/22: navigation up, camera never started.
+    dog = fake_dog(monkeypatch, PATROL, int(time.time()), camera=False)
+    updates = list(dog_prep.prepare_dog(DOG))
+
+    assert updates[-1]["ok"]
+    assert any("nvargus-daemon" in c for c in dog["ran"])
+    assert any("patrol.launch" in c for c in dog["ran"])
+
+
+def test_camera_that_never_starts_fails_pair_and_connect(monkeypatch):
+    dog = fake_dog(monkeypatch, APP_MODE, CLOCK_2023, camera_after_launch=False)
+    updates = list(dog_prep.prepare_dog(DOG))
+
+    assert updates[-1]["ok"] is False
+    assert "camera" in updates[-1]["msg"]
+    assert dog_prep.dog_status(DOG)[0] != "ready"
+
+
+def test_clear_step_does_not_kill_its_own_ssh_shell():
+    # pkill -f matches full command lines, including the shell running this
+    # command. None of the patterns may match the command's own text.
+    cmd = dog_prep.CLEAR_AND_RESET_CAMERA
+    for pattern in re.findall(r"-f '([^']+)'", cmd):
+        assert re.search(pattern, cmd) is None, pattern

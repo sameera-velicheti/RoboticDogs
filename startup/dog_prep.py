@@ -5,9 +5,11 @@ we used to type by hand after `ssh hiwonder@<ip>`:
 
     1. stop pug_bringup.service        (the dog's normal app mode)
     2. kill leftover ROS processes     (prevents "launched twice")
+       and reset the camera service    (a camera left busy = no images)
     3. set the dog's clock             (it resets to 2023 after a reboot)
     4. start patrol.launch             (navigation + rosbridge, saved map)
-    5. wait until patrol mode answers  (rosbridge port + move_base/amcl nodes)
+    5. wait until patrol mode answers  (rosbridge port + move_base/amcl nodes
+                                        + camera sending images)
 
 One-time setup on each dog (on site), so this runs without typing passwords:
     ssh-copy-id hiwonder@<DOG_IP>
@@ -32,6 +34,20 @@ DEFAULT_DOGS = [
 ]
 
 MAP_NAME = "datacenter_01"
+CAMERA_TOPIC = "/csi_camera/image_color/compressed"
+
+# Step 2. Stop patrol/app mode, wait for it to actually exit, then restart the
+# Jetson camera service (nvargus-daemon). If the old camera program doesn't let
+# go of the camera cleanly, the service gets stuck and the next launch fails
+# with "Failed to create CaptureSession" until the dog is rebooted.
+# The [r]oslaunch spelling matches "roslaunch" but not this command's own text,
+# so pkill doesn't kill the SSH shell running these steps halfway through.
+CLEAR_AND_RESET_CAMERA = (
+    "pkill -f '[r]oslaunch'; pkill -f '[r]osmaster'; "
+    "for i in $(seq 1 15); do pgrep -f '[r]oslaunch' >/dev/null || break; sleep 1; done; "
+    "pkill -9 -f '[r]oslaunch'; pkill -9 -f '[c]si_camera'; sleep 1; "
+    "sudo -n systemctl restart nvargus-daemon; sleep 3; true"
+)
 
 # Runs in the dog's own login shell (zsh on our dogs) so the ROS setup and the
 # Hiwonder LIDAR/CAMERA variables from its startup files are loaded, exactly
@@ -140,7 +156,16 @@ def _already_patrolling(dog):
         dog_clock = int(out.rsplit("CLOCK=", 1)[1].split()[0])
     except (IndexError, ValueError):
         return False
-    return nodes_up and abs(dog_clock - time.time()) <= CLOCK_TOLERANCE
+    if not (nodes_up and abs(dog_clock - time.time()) <= CLOCK_TOLERANCE):
+        return False
+    # Navigation is up, but a dead camera still needs a full restart.
+    return camera_sending(dog)
+
+
+def camera_sending(dog):
+    """True if the camera is publishing images on the dog right now."""
+    _, out = _ssh(dog, f"timeout 6 rostopic hz {CAMERA_TOPIC}", timeout=20)
+    return "average rate" in out
 
 
 # ----------------------------------------------------------------- ssh prep --
@@ -201,8 +226,8 @@ def prepare_dog(dog, ready_timeout=90):
         return
     yield step(1, "ok", "App mode stopped")
 
-    yield step(2, "running", "Clearing leftover ROS processes...")
-    _ssh(dog, "pkill -f roslaunch; pkill -f rosmaster; sleep 4; true")
+    yield step(2, "running", "Clearing leftover ROS processes and resetting the camera...")
+    _ssh(dog, CLEAR_AND_RESET_CAMERA, timeout=45)
     yield step(2, "ok", "Cleared")
 
     yield step(3, "running", "Setting the dog's clock...")
@@ -218,16 +243,25 @@ def prepare_dog(dog, ready_timeout=90):
         return
     yield step(4, "ok", "Patrol mode launched")
 
-    yield step(5, "running", "Waiting for navigation and rosbridge to come up...")
+    yield step(5, "running", "Waiting for navigation, rosbridge and the camera...")
     deadline = time.time() + ready_timeout
     while time.time() < deadline:
         if port_open(dog["ip"], dog.get("ros_port", 9090)):
             ok, out = _ssh(dog, "rosnode list")
             missing = [n for n in ("/move_base_node", "/amcl") if n not in out]
             if ok and not missing:
-                _verified.add(dog["id"])
-                yield step(5, "ok", "Navigation and rosbridge are up")
-                yield {"done": True, "ok": True, "msg": "Ready for patrol"}
+                # The camera can take a few seconds longer than navigation.
+                for _ in range(3):
+                    if camera_sending(dog):
+                        _verified.add(dog["id"])
+                        yield step(5, "ok", "Navigation, rosbridge and camera are up")
+                        yield {"done": True, "ok": True, "msg": "Ready for patrol"}
+                        return
+                    time.sleep(3)
+                msg = ("Navigation is up but the camera isn't sending images. "
+                       "Press Pair & Connect again; if it still fails, reboot the dog.")
+                yield step(5, "fail", msg)
+                yield {"done": True, "ok": False, "msg": msg}
                 return
         time.sleep(3)
 
