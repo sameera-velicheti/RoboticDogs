@@ -185,6 +185,14 @@ class RosPugBridge:
         listener.unsubscribe()
 
         if captured["data"] is None:
+            try:
+                from startup import camera_diagnostics
+                camera_diagnostics.collect_in_background(
+                    self.robot_ip,
+                    reason="Camera stopped sending images during photo",
+                )
+            except Exception:
+                logger.exception("Could not start camera diagnostics")
             raise RuntimeError("No image received from camera within timeout")
 
         img_bytes = base64.b64decode(captured["data"])
