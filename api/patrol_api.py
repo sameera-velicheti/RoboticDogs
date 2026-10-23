@@ -81,6 +81,21 @@ def patrol_start():
             "error": f"Could not load route {route_file}: {error}"
         }, 400
 
+    # Resume: start at a later stop and keep the dog's current position
+    # (don't reset it to the taped start spot).
+    resume = bool(data.get("resume"))
+    total_stops = len(route["waypoints"])
+
+    try:
+        start_at = int(data.get("start_at", 1))
+    except (TypeError, ValueError):
+        start_at = 0
+
+    if not 1 <= start_at <= total_stops:
+        return {
+            "error": f"Stop number must be between 1 and {total_stops}"
+        }, 400
+
     events = queue.Queue()
 
     def generate():
@@ -165,7 +180,11 @@ def patrol_start():
         def run():
 
             try:
-                runner.run(route)
+                runner.run(
+                    route,
+                    start_at=start_at,
+                    localize=not resume
+                )
 
             except Exception as error:
                 events.put({
@@ -203,7 +222,9 @@ def patrol_start():
             "plan",
             {
                 "actions": steps,
-                "total": len(steps)
+                "total": len(steps),
+                "start_at": start_at,
+                "resume": resume
             }
         )
 

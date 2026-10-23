@@ -64,10 +64,19 @@ class RouteRunner:
             "time": time.strftime("%H:%M:%S"),
         })
 
-    def run(self, route):
-        """Run every waypoint. Returns a summary dict."""
+    def run(self, route, start_at=1, localize=True):
+        """Run the route. Returns a summary dict.
+
+        start_at:  1-based stop number to begin at (Resume uses this).
+        localize:  tell the dog it is on the route's taped start spot.
+                   Must be False when resuming mid-route: the dog is NOT on
+                   the start spot, and resetting its position there would
+                   shift its whole idea of the map by that distance.
+        """
         waypoints = route["waypoints"]
         total = len(waypoints)
+        if not 1 <= start_at <= total:
+            raise ValueError(f"start_at must be between 1 and {total}, got {start_at}")
         summary = {"route": route["route_name"], "dog": self.dog_name,
                    "reached": [], "skipped": [], "images": [], "completed": False}
 
@@ -77,13 +86,16 @@ class RouteRunner:
 
         # Localize the dog automatically (replaces "2D Pose Estimate" in RViz)
         start = route.get("start_pose")
-        if start and hasattr(self.navigator, "set_initial_pose"):
+        if localize and start and hasattr(self.navigator, "set_initial_pose"):
             self.navigator.set_initial_pose(start["x"], start["y"], start["yaw"])
             self._emit("localizing", 0, total,
                        message=f"Start pose set to ({start['x']}, {start['y']})")
             time.sleep(2.0)  # give amcl a moment to settle
 
         for i, wp in enumerate(waypoints, start=1):
+            if i < start_at:
+                continue
+
             status.update_waypoint(self.dog_name, wp["name"])
 
             if self._stop_requested:

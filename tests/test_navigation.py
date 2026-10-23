@@ -180,3 +180,50 @@ def test_ros_timeout_cancels_goal(ros_nav):
     result = ros_nav.go_to(0, 0, 0, timeout=0.1)
     assert not result.success and "Timed out" in result.message
     assert FakeTopic.registry["/move_base/cancel"].published
+
+# --- Resume from a stop -------------------------------------------------------
+
+class _PoseNav(MockNavigator):
+    def __init__(self):
+        super().__init__(travel_time=0)
+        self.poses, self.goals = [], []
+
+    def set_initial_pose(self, x, y, yaw):
+        self.poses.append((x, y, yaw))
+
+    def go_to(self, x, y, yaw, timeout=60.0):
+        self.goals.append((x, y))
+        return super().go_to(x, y, yaw, timeout)
+
+
+def _route_with_start():
+    route = validate_route(copy.deepcopy(ROUTE))
+    route["start_pose"] = {"x": 0.0, "y": 0.0, "yaw": 0.0}
+    return route
+
+
+def test_resume_starts_at_chosen_stop_without_resetting_position():
+    nav = _PoseNav()
+    events = []
+    r = _route_with_start()
+    RouteRunner(nav, capture=lambda: "img.jpg", on_event=events.append).run(
+        r, start_at=2, localize=False)
+
+    assert nav.poses == []                                   # position NOT reset
+    first = r["waypoints"][1]
+    assert nav.goals[0] == (first["x"], first["y"])          # began at stop 2
+    assert len(nav.goals) == len(r["waypoints"]) - 1
+    started = [e for e in events if e["status"] == "navigating"]
+    assert started[0]["waypoint"] == 2                       # real stop numbers
+    assert events[-1]["status"] == "route_completed"
+
+
+def test_normal_start_still_resets_position():
+    nav = _PoseNav()
+    RouteRunner(nav, capture=lambda: "img.jpg").run(_route_with_start())
+    assert nav.poses == [(0.0, 0.0, 0.0)]
+
+
+def test_resume_rejects_stop_out_of_range():
+    with pytest.raises(ValueError):
+        RouteRunner(_PoseNav()).run(_route_with_start(), start_at=99)

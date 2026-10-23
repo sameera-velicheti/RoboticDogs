@@ -1,4 +1,4 @@
-<!doctype html>
+     <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -418,6 +418,44 @@
             padding: 8px 10px;
             background: #0b1b2b;
             color: var(--text);
+        }
+
+        .resumeRow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid #2fa0ff;
+            border-radius: 7px;
+            background: #0b2238;
+            color: #c5d3e2;
+        }
+
+        .resumeRow.hidden {
+            display: none;
+        }
+
+        .resumeText {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resumeText small {
+            color: #8ea7c2;
+        }
+
+        .resumeRow select {
+            border: 1px solid #34516e;
+            border-radius: 6px;
+            padding: 8px 10px;
+            background: #0b1b2b;
+            color: var(--text);
+        }
+
+        .resumeRow button {
+            padding: 9px 16px;
+            white-space: nowrap;
         }
 
         .startingSide select:disabled {
@@ -1518,6 +1556,15 @@
                         </select>
                     </label>
 
+                    <div id="resumeRow" class="resumeRow hidden">
+                        <div class="resumeText">
+                            <b>Resume from</b>
+                            <small>The dog carries on from where it is now.</small>
+                        </div>
+                        <select id="resumeStop"></select>
+                        <button id="resumeBtn" class="primary">▶ Resume</button>
+                    </div>
+
                     <div class="routeActions">
                         <button id="routeBtn" class="primary routeBtn">
                             ▶ Go on your inspection route
@@ -1980,11 +2027,15 @@
         // "Emergency stop activated" and "Route stopped. Press Go...".
         $("task").textContent = dog.task || "Not on patrol";
 
-        $("routeBtn").textContent = state.stopped
-            ? "▶ Send back on inspection route"
-            : state.running
+        const canResume = canResumeRoute(state, dog);
+
+        $("routeBtn").textContent = state.running
             ? "■ Route running"
+            : canResume
+            ? "↺ Start over from the beginning"
             : "▶ Go on your inspection route";
+
+        renderResume(state, dog, canResume);
 
         $("routeBtn").disabled = state.running;
         $("startingSide").value = state.startingSide;
@@ -2547,10 +2598,101 @@
         );
     }
 
-    async function startInspectionRoute() {
+    // Stops of the route for the selected starting side (from /api/routes).
+    function routeFileFor(state) {
+        return state.startingSide === "far"
+            ? "data_center_reverse.json"
+            : "data_center.json";
+    }
+
+    function routeStops(state) {
+        const file = routeFileFor(state);
+        const name = Object.keys(rsRouteFiles).find(
+            routeName => rsRouteFiles[routeName] === file
+        );
+        return (name && rsRoutes[name]) || [];
+    }
+
+    // Resume is offered after a route stopped part-way (Emergency Stop,
+    // a stop it couldn't reach, or a lost connection).
+    function canResumeRoute(state, dog) {
+        return Boolean(
+            state
+            && dog
+            && !state.running
+            && dog.currentWaypoint
+            && (dog.progress || 0) < 100
+        );
+    }
+
+    function renderResume(state, dog, canResume) {
+        $("resumeRow").classList.toggle("hidden", !canResume);
+
+        if (!canResume) {
+            return;
+        }
+
+        const stops = routeStops(state);
+        const total = stops.length || dog.routeTotal || 0;
+
+        if (!state.resumeFrom) {
+            // Default: the stop the dog was heading to when it stopped.
+            state.resumeFrom = Math.min(dog.currentWaypoint || 1, total || 1);
+        }
+
+        const options = [];
+        for (let n = 1; n <= total; n++) {
+            const label = stops[n - 1]
+                ? stops[n - 1].name
+                : `Stop ${n}`;
+            options.push(
+                `<option value="${n}" ${n === state.resumeFrom ? "selected" : ""}>${escapeHtml(label)}</option>`
+            );
+        }
+
+        $("resumeStop").innerHTML = options.join("");
+    }
+
+    function resumeInspectionRoute() {
+        const state = dogStates[current];
+
+        if (!state) {
+            return;
+        }
+
+        startInspectionRoute({
+            startAt: Number($("resumeStop").value) || 1,
+            resume: true
+        });
+    }
+
+    function startOverInspectionRoute() {
+        const state = dogStates[current];
+        const dog = dogs[current];
+
+        if (canResumeRoute(state, dog)) {
+            const ok = confirm(
+                "Start over from the beginning?\n\n"
+                + "First pick the dog up and put it back on the taped start spot, "
+                + "facing up the aisle. The dog will be told it is standing there.\n\n"
+                + "To carry on from where the dog is now, press Cancel and use Resume instead."
+            );
+
+            if (!ok) {
+                return;
+            }
+        }
+
+        startInspectionRoute();
+    }
+
+    async function startInspectionRoute(options = {}) {
         if (!current) {
             return;
         }
+
+        const resume = Boolean(options.resume);
+        const startAt = resume ? (options.startAt || 1) : 1;
 
         const dogName = current;
         const dog = dogs[dogName];
@@ -2566,19 +2708,23 @@
             return;
         }
 
-        const routeFile = state.startingSide === "far"
-            ? "data_center_reverse.json"
-            : "data_center.json";
+        const routeFile = routeFileFor(state);
 
         state.stopped = false;
         state.running = true;
+        state.resumeFrom = 0;
 
-        dog.progress = 0;
-        dog.routeCompleted = 0;
-        dog.routeTotal = 0;
-        dog.task = "Starting inspection route...";
+        if (resume) {
+            dog.task = `Resuming from Stop ${startAt}...`;
+        } else {
+            dog.progress = 0;
+            dog.routeCompleted = 0;
+            dog.routeTotal = 0;
+            dog.currentWaypoint = 0;
+            dog.task = "Starting inspection route...";
+            setProgress(0);
+        }
 
-        setProgress(0);
         renderDogState();
 
         try {
@@ -2591,7 +2737,9 @@
                     },
                     body: JSON.stringify({
                         dog_id: dog.id,
-                        route: routeFile
+                        route: routeFile,
+                        start_at: startAt,
+                        resume
                     })
                 }
             );
@@ -2679,7 +2827,7 @@
                 state.running = false;
                 dog.task =
                     "Lost connection to the patrol. "
-                    + "Check the dog, then press Go to start again.";
+                    + "Check the dog, then use Resume or Start over.";
 
                 if (dogName === current) {
                     renderDogState();
@@ -2710,7 +2858,22 @@
             return;
         }
 
-        if (event.type === "plan") {
+        if (event.type === "plan" && event.resume) {
+            // Resuming: keep the photos already taken and the progress so far.
+            state.warning = "";
+            dog.routeTotal = event.total || 0;
+            dog.routeCompleted = Math.max(0, (event.start_at || 1) - 1);
+            dog.progress = dog.routeTotal
+                ? Math.round((dog.routeCompleted / dog.routeTotal) * 100)
+                : 0;
+            dog.task = `Resumed from Stop ${event.start_at || 1}`;
+
+            if (dogName === current) {
+                setProgress(dog.progress);
+            }
+        }
+
+        else if (event.type === "plan") {
             state.warning = "";
             state.images = [];
             state.shown = -1;
@@ -2796,7 +2959,7 @@
 
             if (wasStopped) {
                 // Stopped early: keep the progress where the dog stopped.
-                dog.task = "Route stopped. Press Go to start again.";
+                dog.task = "Route stopped. Use Resume to carry on, or Start over.";
             } else {
                 state.stopped = false;
                 dog.progress = 100;
@@ -4102,7 +4265,18 @@
         nimButton;
 
     $("routeBtn").onclick =
-        startInspectionRoute;
+        startOverInspectionRoute;
+
+    $("resumeBtn").onclick =
+        resumeInspectionRoute;
+
+    $("resumeStop").onchange = event => {
+        const state = dogStates[current];
+
+        if (state) {
+            state.resumeFrom = Number(event.target.value) || 1;
+        }
+    };
 
     $("startingSide").onchange = event => {
         const state = dogStates[current];
@@ -4112,8 +4286,18 @@
             return;
         }
 
+        if (state.startingSide !== event.target.value) {
+            // A different route: the stopped run can't be resumed on it.
+            const dog = dogs[current];
+            dog.currentWaypoint = 0;
+            dog.routeCompleted = 0;
+            dog.progress = 0;
+            state.resumeFrom = 0;
+        }
+
         state.startingSide = event.target.value;
         setProgress(dogs[current].progress || 0);
+        renderDogState();
     };
 
     $("emergencyStopBtn").onclick =
