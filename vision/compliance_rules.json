@@ -18,7 +18,17 @@
       ],
       "severity": "LOW",
       "remediation": "Route cables through cable management or secure to walls/desk",
-      "description": "Check for loose cables using keywords and flag according to severity."
+      "description": "Check for loose cables using keywords and flag according to severity.",
+      "flag_only_if": [
+        "the cable is lying on the FLOOR, on the ground where people or robot walk",
+        "the cable is loose: not inside a cable tray, cover, conduit or taped down"
+      ],
+      "do_not_flag": [
+        "cables running along a wall, at any height",
+        "cables overhead, hanging in the air, or in the ceiling or overhead cable trays",
+        "cables neatly routed on racks or inside cable management",
+        "cables plugged into equipment that do not touch the floor"
+      ]
     },
     {
       "id": "DOOR_001",
@@ -85,7 +95,17 @@
       ],
       "severity": "MEDIUM",
       "remediation": "Secure cables with cable ties or management system",
-      "description": "Check for unsecured power cables using keywords and flag according to severity."
+      "description": "Check for unsecured power cables using keywords and flag according to severity.",
+      "flag_only_if": [
+        "the power cable is lying on the FLOOR, on the ground where people walk or the robot walk",
+        "the power cable is loose: not inside a cable tray, cover, conduit or taped down"
+      ],
+      "do_not_flag":[
+        "power cables running along a wall, at any height",
+        "power cables overhead, hanging in the air, or in the ceiling or overhead cable trays",
+        "power cables neatly routed on racks or inside cable management",
+        "power cables plugged into equipment that do not touch the floor"
+      ]
     },
     {
       "id": "OBST_001",
