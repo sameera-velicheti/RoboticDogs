@@ -69,7 +69,7 @@ class RouteRunner:
             "time": time.strftime("%H:%M:%S"),
         })
 
-        def _turn_to_start_direction(self, route, total):
+    def _turn_to_start_direction(self, route, total):
         """At the end, face the way the route starts, ready for the next run.
 
         Uses route["final_yaw"] if set, otherwise start_pose's yaw (near end:
@@ -177,7 +177,7 @@ class RouteRunner:
                     self._emit("capture_failed", i, total, wp, str(e))
 
         self._turn_to_start_direction(route, total)
-        
+
         summary["completed"] = True
         status.complete_route(self.dog_name)
         self._emit("route_completed", total, total, message=route["route_name"])
