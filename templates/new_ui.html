@@ -2161,6 +2161,9 @@
                 }
             `;
 
+            // Remember where the strip was scrolled, so redrawing it
+            // (clicking a photo, analysis results arriving) doesn't jump.
+            const previousScroll = thumbs.scrollLeft;
             thumbs.className = "thumbs live";
             thumbs.innerHTML = images.map((img, i) => {
                 const result = state.results[img.label];
@@ -2177,7 +2180,27 @@
                 `;
             }).join("");
 
-            thumbs.scrollLeft = thumbs.scrollWidth;
+                        if (state.shown >= 0) {
+                // You picked a photo: keep the strip where it was, only
+                // nudging it if the picked photo is off-screen.
+                thumbs.scrollLeft = previousScroll;
+
+                const picked = thumbs.querySelector(".thumb.sel");
+
+                if (picked) {
+                    const box = thumbs.getBoundingClientRect();
+                    const pic = picked.getBoundingClientRect();
+
+                    if (pic.left < box.left) {
+                        thumbs.scrollLeft -= box.left - pic.left;
+                    } else if (pic.right > box.right) {
+                        thumbs.scrollLeft += pic.right - box.right;
+                    }
+                }
+            } else {
+                // Following the newest photo during a patrol: show the end.
+                thumbs.scrollLeft = thumbs.scrollWidth;
+            }
         }
 
         renderAnalysis(state);
