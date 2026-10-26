@@ -450,6 +450,16 @@
             white-space: nowrap;
         }
 
+        .sideLocked {
+            display: block;
+            color: #8ea7c2;
+            font-size: 12px;
+        }
+
+        .sideLocked.hidden {
+            display: none;
+        }
+
         .startingSide select:disabled {
             cursor: not-allowed;
             opacity: .7;
@@ -1541,7 +1551,10 @@
                     </p>
 
                     <label class="startingSide" for="startingSide">
-                        <span>Starting side</span>
+                        <span>
+                            Starting side
+                            <small id="sideLocked" class="sideLocked hidden">Locked until this route finishes</small>
+                        </span>
                         <select id="startingSide">
                             <option value="near">Near end (Stop 1)</option>
                             <option value="far">Far end (Stop 10)</option>
@@ -2030,7 +2043,11 @@
 
         $("routeBtn").disabled = state.running;
         $("startingSide").value = state.startingSide;
-        $("startingSide").disabled = state.running;
+        // Once a route has started, the side stays fixed until that route
+        // finishes, including after an Emergency Stop.
+        const sideLocked = sideIsLocked(state, dog);
+        $("startingSide").disabled = sideLocked;
+        $("sideLocked").classList.toggle("hidden", !sideLocked);
 
         $("emergencyStopBtn").classList.toggle(
             "active",
@@ -2606,6 +2623,13 @@
 
     // Resume is offered after a route stopped part-way (Emergency Stop,
     // a stop it couldn't reach, or a lost connection).
+    // The starting side locks when a route is started (Go, Start over or
+    // Resume) and unlocks only when that route completes. An Emergency Stop,
+    // a failed stop or a lost connection keeps it locked.
+    function sideIsLocked(state, dog) {
+        return Boolean(state && (state.running || state.sideLocked));
+    }
+
     function canResumeRoute(state, dog) {
         return Boolean(
             state
@@ -2698,6 +2722,7 @@
         state.stopped = false;
         state.running = true;
         state.resumeFrom = 0;
+        state.sideLocked = true;
 
         if (resume) {
             dog.task = `Resuming from Stop ${startAt}...`;
@@ -2947,6 +2972,7 @@
                 dog.task = "Route stopped. Use Resume to carry on, or Start over.";
             } else {
                 state.stopped = false;
+                state.sideLocked = false;
                 dog.progress = 100;
                 dog.task = "Inspection route complete";
 
@@ -4259,18 +4285,10 @@
     $("startingSide").onchange = event => {
         const state = dogStates[current];
 
-        if (!state || state.running) {
+        if (!state || sideIsLocked(state, dogs[current])) {
+            // Locked: put the menu back to the route's side.
             renderDogState();
             return;
-        }
-
-        if (state.startingSide !== event.target.value) {
-            // A different route: the stopped run can't be resumed on it.
-            const dog = dogs[current];
-            dog.currentWaypoint = 0;
-            dog.routeCompleted = 0;
-            dog.progress = 0;
-            state.resumeFrom = 0;
         }
 
         state.startingSide = event.target.value;
