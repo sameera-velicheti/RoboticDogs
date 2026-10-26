@@ -24,6 +24,7 @@ from flask import Blueprint, Response, request, stream_with_context
 from navigation.navigator import RosNavigator
 from navigation.route_loader import load_route
 from navigation.route_runner import RouteRunner
+from navigation import traffic
 
 from runtime import (
     CAPTURE_DIR,
@@ -163,11 +164,20 @@ def patrol_start():
 
             return new_path
 
+        # Keep right to pass other dogs in the aisle (navigation/traffic.py).
+        try:
+            traffic.track(dog_id, bridge.client)
+        except Exception:
+            pass
+
         runner = RouteRunner(
             navigator,
             dog_name,
             capture=capture,
-            on_event=events.put
+            on_event=events.put,
+            adjust_goal=lambda x, y, yaw: traffic.adjust_goal(
+                dog_id, x, y, yaw, names=DOG_NAMES
+            )
         )
 
         register_patrol(
@@ -203,6 +213,7 @@ def patrol_start():
                     pass
 
                 remove_patrol(dog_id)
+                traffic.forget(dog_id)
 
                 # End the server-sent event stream.
                 events.put(None)

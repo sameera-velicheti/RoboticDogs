@@ -26,19 +26,24 @@ from status.system_status import status
 
 class RouteRunner:
 
-    def __init__(self, navigator, dog_name="Pumbaa", capture=None, on_event=None):
+    def __init__(self, navigator, dog_name="Pumbaa", capture=None, on_event=None,
+                 adjust_goal=None):
         """
         navigator: MockNavigator or RosNavigator
         capture:   function that takes a picture and returns its file path
                    (for a real dog: bridge.take_picture). If it accepts one
                    argument, it is given the waypoint name.
         on_event:  function that receives each status event dict
+        adjust_goal: optional function (x, y, yaw) -> (x, y, yaw, note) that
+                   may move a stop slightly, e.g. keep right to pass another
+                   dog (navigation/traffic.py). note is None or a message.
         """
         self.navigator = navigator
         self.dog_name = dog_name
         self.capture = capture or (lambda: None)
         self.on_event = on_event or (lambda e: print(json.dumps(e)))
         self._stop_requested = False
+        self.adjust_goal = adjust_goal
 
     def _take_picture(self, waypoint_name):
         try:
@@ -104,8 +109,16 @@ class RouteRunner:
 
             result = None
             for attempt in range(1, wp["retries"] + 2):
-                self._emit("navigating", i, total, wp, f"Attempt {attempt}")
-                result = self.navigator.go_to(wp["x"], wp["y"], wp["yaw"])
+                gx, gy, gyaw = wp["x"], wp["y"], wp["yaw"]
+                note = None
+                if self.adjust_goal:
+                    try:
+                        gx, gy, gyaw, note = self.adjust_goal(gx, gy, gyaw)
+                    except Exception:
+                        gx, gy, gyaw, note = wp["x"], wp["y"], wp["yaw"], None
+                self._emit("navigating", i, total, wp,
+                           note or f"Attempt {attempt}")
+                result = self.navigator.go_to(gx, gy, gyaw)
                 if result.success or self._stop_requested:
                     break
                 self._emit("retrying", i, total, wp, result.message)
