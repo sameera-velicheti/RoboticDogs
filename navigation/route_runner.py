@@ -69,6 +69,33 @@ class RouteRunner:
             "time": time.strftime("%H:%M:%S"),
         })
 
+        def _turn_to_start_direction(self, route, total):
+        """At the end, face the way the route starts, ready for the next run.
+
+        Uses route["final_yaw"] if set, otherwise start_pose's yaw (near end:
+        facing up the aisle; far end: facing back down it). Never fails the
+        route: a turn that doesn't work is reported and the route completes.
+        """
+        face = getattr(self.navigator, "face", None)
+        start = route.get("start_pose") or {}
+        yaw = route.get("final_yaw", start.get("yaw"))
+        if not face or yaw is None or self._stop_requested:
+            return
+
+        last = route["waypoints"][-1]
+        self._emit("turning", total, total, last,
+                   "Turning to face the start direction")
+        try:
+            result = face(last["x"], last["y"], yaw)
+        except Exception as error:
+            self._emit("turn_failed", total, total, last, str(error))
+            return
+        if result.success:
+            self._emit("turned", total, total, last, "Facing the start direction")
+        else:
+            self._emit("turn_failed", total, total, last, result.message)
+    
+
     def run(self, route, start_at=1, localize=True):
         """Run the route. Returns a summary dict.
 
@@ -149,6 +176,8 @@ class RouteRunner:
                 except Exception as e:  # a bad photo should not end the route
                     self._emit("capture_failed", i, total, wp, str(e))
 
+        self._turn_to_start_direction(route, total)
+        
         summary["completed"] = True
         status.complete_route(self.dog_name)
         self._emit("route_completed", total, total, message=route["route_name"])

@@ -83,6 +83,13 @@ class RosNavigator(Navigator):
     `rostopic list | grep move_base` and change action_ns if needed.
     """
 
+    # Heading accuracy for the final turn at the end of a route (radians).
+    # Normal stops keep the dog's relaxed yaw_goal_tolerance (3.14 = any
+    # heading) so it doesn't circle at every stop.
+    FACE_TOLERANCE = 0.25        # ~15 degrees
+    RELAXED_TOLERANCE = 3.14
+    PLANNER_PARAMS = "/move_base_node/TebLocalPlannerROS/set_parameters"
+
     def __init__(self, ros_client, action_ns="/move_base", frame_id="map"):
         import roslibpy  # imported here so tests run without roslibpy
 
@@ -159,6 +166,29 @@ class RosNavigator(Navigator):
             pub.publish(msg)
             time.sleep(0.3)
         pub.unadvertise()
+
+    def _set_yaw_tolerance(self, value):
+        """Change the local planner's yaw_goal_tolerance (dynamic_reconfigure)."""
+        service = self._roslibpy.Service(
+            self.client, self.PLANNER_PARAMS, "dynamic_reconfigure/Reconfigure")
+        service.call(self._roslibpy.ServiceRequest({"config": {
+            "bools": [], "ints": [], "strs": [], "groups": [],
+            "doubles": [{"name": "yaw_goal_tolerance", "value": float(value)}],
+        }}), timeout=5)
+
+    def face(self, x, y, yaw, timeout=40.0):
+        """Turn in place at (x, y) to face yaw, then restore the relaxed tolerance."""
+        try:
+            self._set_yaw_tolerance(self.FACE_TOLERANCE)
+        except Exception as error:
+            return NavResult(False, f"Could not tighten heading tolerance: {error}")
+        try:
+            return self.go_to(x, y, yaw, timeout=timeout)
+        finally:
+            try:
+                self._set_yaw_tolerance(self.RELAXED_TOLERANCE)
+            except Exception:
+                pass
 
     def cancel(self):
         if self._goal_id:
