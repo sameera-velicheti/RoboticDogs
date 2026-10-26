@@ -1,4 +1,4 @@
-     <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -443,14 +443,6 @@
 
         .resumeText small {
             color: #8ea7c2;
-        }
-
-        .resumeRow select {
-            border: 1px solid #34516e;
-            border-radius: 6px;
-            padding: 8px 10px;
-            background: #0b1b2b;
-            color: var(--text);
         }
 
         .resumeRow button {
@@ -1558,10 +1550,9 @@
 
                     <div id="resumeRow" class="resumeRow hidden">
                         <div class="resumeText">
-                            <b>Resume from</b>
+                            <b>Resume from <span id="resumeStop"></span></b>
                             <small>The dog carries on from where it is now.</small>
                         </div>
-                        <select id="resumeStop"></select>
                         <button id="resumeBtn" class="primary">▶ Resume</button>
                     </div>
 
@@ -2640,17 +2631,11 @@
             state.resumeFrom = Math.min(dog.currentWaypoint || 1, total || 1);
         }
 
-        const options = [];
-        for (let n = 1; n <= total; n++) {
-            const label = stops[n - 1]
-                ? stops[n - 1].name
-                : `Stop ${n}`;
-            options.push(
-                `<option value="${n}" ${n === state.resumeFrom ? "selected" : ""}>${escapeHtml(label)}</option>`
-            );
-        }
+        const stop = stops[state.resumeFrom - 1];
 
-        $("resumeStop").innerHTML = options.join("");
+        $("resumeStop").textContent = stop
+            ? stop.name
+            : `Stop ${state.resumeFrom}`;
     }
 
     function resumeInspectionRoute() {
@@ -2661,7 +2646,7 @@
         }
 
         startInspectionRoute({
-            startAt: Number($("resumeStop").value) || 1,
+            startAt: state.resumeFrom || 1,
             resume: true
         });
     }
@@ -4270,13 +4255,6 @@
     $("resumeBtn").onclick =
         resumeInspectionRoute;
 
-    $("resumeStop").onchange = event => {
-        const state = dogStates[current];
-
-        if (state) {
-            state.resumeFrom = Number(event.target.value) || 1;
-        }
-    };
 
     $("startingSide").onchange = event => {
         const state = dogStates[current];
