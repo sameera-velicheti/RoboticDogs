@@ -290,6 +290,17 @@
             margin-left: auto;
         }
 
+        .batteryAlert {
+            margin: 10px 13px 0;
+            padding: 10px 14px;
+            border: 1px solid #ff6574;
+            border-left: 4px solid #ff6574;
+            border-radius: 7px;
+            background: #2a1218;
+            color: #ffb3bb;
+            font-weight: 600;
+        }
+
         .workspace {
             height: calc(100vh - 88px);
             padding: 13px;
@@ -1484,6 +1495,8 @@
                     Disconnect
                 </button>
             </header>
+            
+            <div id="batteryAlert" class="batteryAlert hidden"></div>
 
             <div class="workspace">
                 <section class="routeCard card">
@@ -1849,6 +1862,7 @@
     const dogs = {};
     const dogStates = {};
     const histories = {};
+    const LOW_BATTERY_PERCENT = 10;
 
     let selected = new Set();
     let current = "";
@@ -2588,6 +2602,22 @@
             ? `${dog.battery_volts} V`
             : "No battery reading yet";
         el.style.color = dog.battery_low ? "#ff5d5d" : "";
+        
+        const percent = Number(dog.battery);
+        const lowBattery =
+            dog.battery !== null
+            && dog.battery !== undefined
+            && !Number.isNaN(percent)
+            && percent <= LOW_BATTERY_PERCENT;
+
+        if (lowBattery) {
+            el.style.color = "#ff5d5d";
+            $("batteryAlert").textContent =
+                `⚠ ${current}'s battery is at ${percent}%. `
+                + "Stop or finish the current route and charge the dog.";
+        }
+
+        $("batteryAlert").classList.toggle("hidden", !lowBattery);
     }
 
     function setProgress(percent) {
