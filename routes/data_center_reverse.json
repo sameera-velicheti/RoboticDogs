@@ -1,7 +1,7 @@
 {
   "_note": "Same aisle as data_center.json, run from the far end. Photos on the way down, travel only on the way back. START_POSE IS A PLACEHOLDER: record the real far-end taped spot in person with RViz before using this route.",
   "route_name": "Data Center Left Aisle (From Far End)",
-  "map": "datacenter_01",
+  "map": "datacenter_02",
   "start_pose": {
     "x": 16.2,
     "y": -0.45,

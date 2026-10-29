@@ -1,7 +1,7 @@
 {
     "_note": "Far-left aisle of the data center (map datacenter_01). Points recorded 2026-10-12 with RViz Publish Point and straightened to y=-0.45. Photos are taken on the way up; the way back is travel only. Change action to capture_image on return stops for photos both ways.",
     "route_name": "Data Center Left Aisle",
-    "map": "datacenter_01",
+    "map": "datacenter_02",
     "start_pose": {
         "x": 0.0,
         "y": 0.0,

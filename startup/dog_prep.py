@@ -33,7 +33,11 @@ DEFAULT_DOGS = [
     {"id": "dog2", "name": "Timon", "ip": "192.168.0.85", "ssh_user": "hiwonder", "ros_port": 9090},
 ]
 
-MAP_NAME = "datacenter_01"
+# The map the dogs navigate on (saved in ~/pug/src/pug_slam/maps/ on each dog).
+# datacenter_02 = the whole data center (mapped 2026-10-29).
+# datacenter_01 = the original left-aisle-only map, kept as a backup.
+# To go back to the old map for a run:  PAWPATROL_MAP=datacenter_01 python3 app.py
+MAP_NAME = os.environ.get("PAWPATROL_MAP", "datacenter_02")
 CAMERA_TOPIC = "/csi_camera/image_color/compressed"
 
 # Step 2. Stop patrol/app mode, wait for it to actually exit, then restart the
@@ -148,10 +152,14 @@ def _already_patrolling(dog):
 
     Checked over SSH because the dog's app mode also opens port 9090.
     """
-    ok, out = _ssh(dog, "rosnode list 2>/dev/null; echo CLOCK=$(date +%s)")
+    ok, out = _ssh(dog, "rosnode list 2>/dev/null; pgrep -af '[p]atrol.launch'; "
+                        "echo CLOCK=$(date +%s)")
     if not ok and "CLOCK=" not in out:
         return False
     nodes_up = all(n in out for n in ("/move_base_node", "/amcl", "/rosbridge_websocket"))
+    # Patrol mode on a different (older) map must be restarted on the right one.
+    if f"map:={MAP_NAME}" not in out:
+        return False
     try:
         dog_clock = int(out.rsplit("CLOCK=", 1)[1].split()[0])
     except (IndexError, ValueError):

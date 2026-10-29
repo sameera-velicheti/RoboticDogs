@@ -22,18 +22,24 @@ def clean(monkeypatch):
     monkeypatch.setattr(dog_prep.time, "sleep", lambda s: None)
 
 
-def fake_dog(monkeypatch, nodes, clock, camera=True, camera_after_launch=True):
-    """Pretend dog: answers SSH commands, remembers what was run."""
+def fake_dog(monkeypatch, nodes, clock, camera=True, camera_after_launch=True,
+             running_map=None):
+    """Pretend dog: answers SSH commands, remembers what was run.
+
+    running_map: the map patrol mode was started with (default: the app's map).
+    """
     state = {"nodes": nodes, "clock": clock, "ran": [], "camera": camera,
-             "camera_after_launch": camera_after_launch}
+             "camera_after_launch": camera_after_launch,
+             "map": running_map or dog_prep.MAP_NAME}
 
     def ssh(dog, command, timeout=30):
         state["ran"].append(command)
         if command.startswith("sudo -n date -s @"):
             state["clock"] = int(command.split("@")[1])
             return True, ""
-        if "patrol.launch" in command:
+        if "pgrep" not in command and "patrol.launch" in command:
             state["nodes"] = PATROL
+            state["map"] = command.split("map:=")[1].split()[0]
             state["camera"] = state["camera_after_launch"]
             return True, ""
         if "pkill" in command:
@@ -45,7 +51,9 @@ def fake_dog(monkeypatch, nodes, clock, camera=True, camera_after_launch=True):
                 return False, "subscribed to [/csi_camera/image_color/compressed]\naverage rate: 31.3"
             return False, "subscribed to [/csi_camera/image_color/compressed]\nno new messages"
         if "CLOCK=" in command:
-            return True, state["nodes"] + f"CLOCK={state['clock']}"
+            launch = (f"4242 roslaunch pug_navigation patrol.launch map:={state['map']}\n"
+                      if "/move_base_node" in state["nodes"] else "")
+            return True, state["nodes"] + launch + f"CLOCK={state['clock']}"
         if command == "rosnode list":
             return True, state["nodes"]
         return True, ""
@@ -130,3 +138,16 @@ def test_clear_step_does_not_kill_its_own_ssh_shell():
     cmd = dog_prep.CLEAR_AND_RESET_CAMERA
     for pattern in re.findall(r"-f '([^']+)'", cmd):
         assert re.search(pattern, cmd) is None, pattern
+
+def test_patrol_mode_on_the_old_map_is_restarted_on_the_new_one(monkeypatch):
+    dog = fake_dog(monkeypatch, PATROL, int(time.time()), running_map="datacenter_01")
+    updates = list(dog_prep.prepare_dog(DOG))
+
+    assert updates[-1]["ok"]
+    launches = [c for c in dog["ran"] if "pgrep" not in c and "patrol.launch" in c]
+    assert launches and f"map:={dog_prep.MAP_NAME}" in launches[-1]
+    assert dog["map"] == dog_prep.MAP_NAME
+
+
+def test_default_map_is_the_full_data_center():
+    assert dog_prep.MAP_NAME == "datacenter_02"
