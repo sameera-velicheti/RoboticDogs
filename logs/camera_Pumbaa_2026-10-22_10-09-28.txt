@@ -1,0 +1,167 @@
+Camera diagnostics for Pumbaa (192.168.0.60)
+Time:   2026-10-22 10:09:37
+Reason: Camera stopped sending images during photo
+
+What to look for:
+  - Uptime: Failures only after hours of running point to heat or memory build-up
+  - Memory: 'available' close to 0 = out of memory
+  - Disk space: Use% close to 100% = storage full (try: rosclean purge)
+  - Power / throttling: Anything other than throttled=0x0 = under-voltage or overheating happened
+  - Temperature: Above about 80'C = overheating
+  - Running ROS nodes: No camera node in the list = the camera program crashed
+  - Camera frame rate (on the dog): 'no new messages' = camera dead. A steady rate = camera fine, problem is rosbridge/Wi-Fi
+  - Kernel messages: Lines mentioning camera, unicam, mmal or under-voltage
+  - Patrol log: Crashes or errors from navigation/rosbridge
+
+环境初始化中...                                       
+                                   
+LIDAR TYPE: [32mMS_200[0m
+CAMERA TYPE: [32mCSI[0m
+ROS_HOSTNAME: [32mlocalhost[0m
+ROS_MASTER_URI: [32mhttp://localhost:11311[0m
+===== Uptime =====
+ 10:09:28 up 43 min,  1 user,  load average: 1.59, 0.66, 0.56
+
+===== Memory =====
+              total        used        free      shared  buff/cache   available
+Mem:           3.9G        1.7G        889M         32M        1.3G        2.4G
+Swap:          3.9G        272M        3.7G
+
+===== Disk space =====
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/mmcblk1p1   59G   47G   13G  80% /
+
+===== Power / throttling =====
+zsh:1: command not found: vcgencmd
+
+===== Temperature =====
+zsh:1: command not found: vcgencmd
+
+===== Running ROS nodes =====
+/amcl
+/csi_camera/csi_camera_image_proc
+/ekf_se
+/front_laser
+/imu_calib
+/imu_filter
+/joint_state_publisher
+/map_server
+/move_base_node
+/oradar_scan
+/publish_point
+/pug_control
+/rf2o_laser_odometry
+/robot_state_publisher
+/ros_robot_controller
+/rosapi
+/rosbridge_websocket
+/rosout
+/web_video_server
+
+===== Camera frame rate (on the dog) =====
+subscribed to [/csi_camera/image_color/compressed]
+no new messages
+no new messages
+no new messages
+no new messages
+no new messages
+
+===== Kernel messages =====
+[   15.025962] [<ffffff800125a998>] join_cmd_hdl+0x238/0x330 [rtl8822ce]
+[   15.026304] [<ffffff8001217420>] rtw_cmd_thread+0x308/0x608 [rtl8822ce]
+[   15.026310] [<ffffff80080db0bc>] kthread+0xec/0xf0
+[   15.026315] [<ffffff80080838a0>] ret_from_fork+0x10/0x30
+[   15.136864] IPv6: ADDRCONF(NETDEV_CHANGE): wlan0: link becomes ready
+[   21.126207] i2c i2c-1: Setting clock rate 100000 on next transfer
+[   33.906434] vdd-usb-vbus: disabling
+[   33.906438] vdd-usb-vbus2: disabling
+[   33.906449] vddio-sdmmc-ap: disabling
+[   33.906533] vdd-3v3-sd: disabling
+[   33.906539] avdd-io-edp-1v05: disabling
+[   33.906542] vdd-usb-hub-en: disabling
+[  101.419353] tegradc tegradc.0: blank - powerdown
+[  196.351741] tegradc tegradc.0: blank - powerdown
+[  287.308961] tegradc tegradc.0: blank - powerdown
+[  378.306198] tegradc tegradc.0: blank - powerdown
+[  469.304058] tegradc tegradc.0: blank - powerdown
+[  560.307684] tegradc tegradc.0: blank - powerdown
+[  651.298824] tegradc tegradc.0: blank - powerdown
+[  742.303130] tegradc tegradc.0: blank - powerdown
+[  833.296837] tegradc tegradc.0: blank - powerdown
+[  924.295245] tegradc tegradc.0: blank - powerdown
+[ 1015.223765] tegradc tegradc.0: blank - powerdown
+[ 1106.265434] tegradc tegradc.0: blank - powerdown
+[ 1197.259259] tegradc tegradc.0: blank - powerdown
+[ 1288.272155] tegradc tegradc.0: blank - powerdown
+[ 1379.284138] tegradc tegradc.0: blank - powerdown
+[ 1470.275693] tegradc tegradc.0: blank - powerdown
+[ 1561.254375] tegradc tegradc.0: blank - powerdown
+[ 1652.267166] tegradc tegradc.0: blank - powerdown
+[ 1743.256199] tegradc tegradc.0: blank - powerdown
+[ 1834.223465] tegradc tegradc.0: blank - powerdown
+[ 1925.231907] tegradc tegradc.0: blank - powerdown
+[ 2016.239775] tegradc tegradc.0: blank - powerdown
+[ 2107.253494] tegradc tegradc.0: blank - powerdown
+[ 2198.218899] tegradc tegradc.0: blank - powerdown
+[ 2289.213693] tegradc tegradc.0: blank - powerdown
+[ 2380.234580] tegradc tegradc.0: blank - powerdown
+[ 2471.172452] tegradc tegradc.0: blank - powerdown
+[ 2562.233823] tegradc tegradc.0: blank - powerdown
+
+===== Patrol log =====
+[1mprocess[ros_robot_controller-5]: started with pid [16437][0m
+[1mprocess[imu_calib-6]: started with pid [16453][0m
+[1mprocess[imu_filter-7]: started with pid [16455get lidar type:MS200
+get serial port:/dev/lidar, baudrate:230400
+lidar device connect succuss.
+get lidar scan data
+ROS topic:/scan_raw
+Error generated. /dvs/git/dirty/git-master_linux/multimedia/nvgstreamer/gst-nvarguscamera/gstnvarguscamerasrc.cpp, execute:751 Failed to create CaptureSession
+[33m[ WARN] [1792678051.814307207]: Waiting for laser_scans....[0m
+[31m[ERROR] [1792678052.544037324]: Could not get gstreamer sample.[0m
+2026-10-22 10:07:33-0400 [-] Log opened.
+2026-10-22 10:07:33-0400 [-] registered capabilities (classes):
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.call_service.CallService
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.advertise.Advertise
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.publish.Publish
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.subscribe.Subscribe
+2026-10-22 10:07:33-0400 [-]  - <class 'rosbridge_library.capabilities.defragmentation.Defragment'>
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.advertise_service.AdvertiseService
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.service_response.ServiceResponse
+2026-10-22 10:07:33-0400 [-]  - rosbridge_library.capabilities.unadvertise_service.UnadvertiseService
+2026-10-22 10:07:34-0400 [-] WebSocketServerFactory starting on 9090
+2026-10-22 10:07:34-0400 [-] Starting factory <autobahn.twisted.websocket.WebSocketServerFactory object at 0x7fa1eb8790>
+2026-10-22 10:07:34-0400 [-] [INFO] [1792678054.278014]: Rosbridge WebSocket server started at ws://0.0.0.0:9090
+[33m[ WARN] [1792678054.387060541]: The input topic '/csi_camera/image_raw' is not yet advertised[0m
+[33m[ WARN] [1792678054.401248363]: The input topic '/csi_camera/camera_info' is not yet advertised[0m
+2026-10-22 10:07:35-0400 [-] [INFO] [1792678055.178423]: Client connected.  1 clients total.
+2026-10-22 10:07:37-0400 [-] [INFO] [1792678057.720931]: Client connected.  2 clients total.
+2026-10-22 10:07:38-0400 [-] [INFO] [1792678058.304943]: [Client 0] Subscribed to /scan
+2026-10-22 10:07:38-0400 [-] [INFO] [1792678058.348946]: [Client 0] Subscribed to /ros_robot_controller/battery
+2026-10-22 10:07:40-0400 [-] [INFO] [1792678060.036538]: Client connected.  3 clients total.
+2026-10-22 10:07:43-0400 [-] [INFO] [1792678063.562236]: Client connected.  4 clients total.
+[33m[ WARN] [1792678114.381410402]: The input topic '/csi_camera/image_raw' is not yet advertised[0m
+[33m[ WARN] [1792678114.381628532]: The input topic '/csi_camera/camera_info' is not yet advertised[0m
+2026-10-22 10:09:11-0400 [-] [INFO] [1792678151.545182]: Client connected.  5 clients total.
+2026-10-22 10:09:12-0400 [-] [INFO] [1792678152.557745]: [Client 4] Subscribed to /scan
+2026-10-22 10:09:13-0400 [-] [INFO] [1792678153.682046]: [Client 4] Subscribed to /move_base/result
+2026-10-22 10:09:21-0400 [-] [INFO] [1792678161.384976]: [Client 4] Subscribed to /csi_camera/image_color/compressed
+2026-10-22 10:09:26-0400 [-] [INFO] [1792678166.479126]: [Client 4] Unsubscribed from /csi_camera/image_color/compressed
+[33m[ WARN] [1792678174.381867277]: The input topic '/csi_camera/image_raw' is not yet advertised[0m
+[33m[ WARN] [1792678174.382139991]: The input topic '/csi_camera/camera_info' is not yet advertised[0m
+
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+(anon):setopt:7: can't change option: monitor
+
+[[31mERROR[39m]: gitstatus failed to initialize.
+
+
+  Add the following parameter to ~/.zshrc for extra diagnostics on error:
+
+    GITSTATUS_LOG_LEVEL=DEBUG
+
+  Restart Zsh to retry gitstatus initialization:
+
+    [32mexec zsh[39m

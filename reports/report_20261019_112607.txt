@@ -1,0 +1,23 @@
+# Data Center Left Aisle Report
+
+**Inspection Date**
+
+- October 19, 2026
+
+**Route**
+
+- Data Center Left Aisle
+
+**Images Collected**
+
+- 19
+
+**Findings**
+
+- Stop 8: Open Door detected
+- Stop 2 (return): Open Door detected
+- Stop 1 (return): Open Door detected
+
+**Overall Assessment**
+
+- 3 issues found requiring review
