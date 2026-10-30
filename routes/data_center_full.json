@@ -2,7 +2,7 @@
     "route_name": "Data Center Full Patrol",
     "waypoints": [
         {
-            "name": "Stop 1",
+            "name": "Start area 1",
             "x": 4.404,
             "y": -0.078,
             "yaw": -1.881,
@@ -10,7 +10,7 @@
             "required": true
         },
         {
-            "name": "Stop 2",
+            "name": "Start area 2",
             "x": 4.404,
             "y": -0.078,
             "yaw": -1.881,
@@ -18,7 +18,7 @@
             "required": true
         },
         {
-            "name": "Stop 3",
+            "name": "Start area 3",
             "x": 4.404,
             "y": -0.078,
             "yaw": -1.881,
@@ -26,7 +26,7 @@
             "required": true
         },
         {
-            "name": "Stop 4",
+            "name": "Start area 4",
             "x": 4.404,
             "y": -0.078,
             "yaw": -1.881,
@@ -34,7 +34,7 @@
             "required": true
         },
         {
-            "name": "Stop 5",
+            "name": "Start area 5",
             "x": 4.404,
             "y": -0.078,
             "yaw": -1.881,
@@ -154,7 +154,7 @@
             "required": false
         },
         {
-            "name": "Stop 12",
+            "name": "Checkpoint20",
             "x": -3.885,
             "y": -12.997,
             "yaw": -2.291,
