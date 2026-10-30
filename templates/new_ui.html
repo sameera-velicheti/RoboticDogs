@@ -1528,17 +1528,6 @@
                             <!-- Room walls -->
                             <rect class="roomWall" x="20" y="14" width="280" height="392"></rect>
 
-                            <!-- Full data center route: drawn from the route's own stops (see drawFullRoute) -->
-                            <g id="fullView" class="hidden">
-                                <path id="fullBase" class="base" d=""></path>
-                                <path id="fullDone" class="done" d=""></path>
-
-                            <!-- Full data center route: blue fills the gray loop as stops are done -->
-                            <path id="fullDone" class="done hidden" d="M60,374 L60,42 L260,42 L260,374 L60,374"></path>
-                            </g>
-
-                            <!-- Left aisle routes (near end / far end) -->
-                            <g id="aisleView">
                             <!-- Racks: two columns, each split top / bottom -->
                             <rect class="rackShape" x="92" y="72" width="58" height="125"></rect>
                             <rect class="rackShape" x="92" y="225" width="58" height="125"></rect>
@@ -1548,6 +1537,9 @@
                             <!-- Full aisle loop (for a future full-loop route) -->
                             <path class="loop" d="M60,374 L60,42 L260,42 L260,374 Z"></path>
 
+                            <!-- Full data center route: blue fills the gray loop as stops are done -->
+                            <path id="fullDone" class="done hidden" d="M60,374 L60,42 L260,42 L260,374 L60,374"></path>
+
                             <!-- Today's route: the far-left aisle, up and back -->
                             <line id="base" class="base" x1="60" y1="374" x2="60" y2="42"></line>
                             <line id="done" class="done" x1="60" y1="374" x2="60" y2="374"></line>
@@ -1555,7 +1547,6 @@
                             <!-- Dog start, facing up the aisle -->
                             <path class="startArrow" d="M51,400 L60,386 L69,400 Z"></path>
                             <text class="startLabel" x="76" y="399">Dog start</text>
-                            </g>
 
                             <circle id="marker" class="marker" cx="60" cy="374" r="10"></circle>
                         </svg>
@@ -1583,7 +1574,8 @@
                         <select id="startingSide">
                             <option value="near">Near end (Stop 1)</option>
                             <option value="far">Far end (Stop 10)</option>
-                            <option value="full">Full data center (perimeter)</option>
+                            <option value="full">Full data center – main start</option>
+                            <option value="full_far">Full data center – far side start (Stop 18)</option>
                         </select>
                     </label>
 
@@ -2642,30 +2634,22 @@
         $("percent").textContent =
             `${safePercent}% Complete`;
 
-        const fullRoute = dogStates[current]?.startingSide === "full";
-        $("fullView").classList.toggle("hidden", !fullRoute);
-        $("aisleView").classList.toggle("hidden", fullRoute);
-
-        if (fullRoute) {
-            drawFullRoute(safePercent);
-            return;
-        }
-
-        $("marker").setAttribute("cx", "60");
-                const fullRoute = dogStates[current]?.startingSide === "full";
+        const fullRoute = ["full", "full_far"].includes(
+            dogStates[current]?.startingSide
+        );
         $("fullDone").classList.toggle("hidden", !fullRoute);
         $("base").classList.toggle("hidden", fullRoute);
         $("done").classList.toggle("hidden", fullRoute);
 
         if (fullRoute) {
-            document.querySelector(".startArrow").setAttribute("d", "M51,400 L60,386 L69,400 Z");
-            document.querySelector(".startLabel").setAttribute("y", "399");
             drawFullRoute(safePercent);
             return;
         }
 
         $("marker").setAttribute("cx", "60");
-        
+        document.querySelector(".startLabel").setAttribute("x", "76");
+        document.querySelector(".startLabel").setAttribute("text-anchor", "start");
+
         const NEAR_END_Y = 374;
         const FAR_END_Y = 42;
         const farStart =
@@ -2697,9 +2681,12 @@
     }
 
     // Stops of the route for the selected starting side (from /api/routes).
-        function routeFileFor(state) {
+    function routeFileFor(state) {
         if (state.startingSide === "full") {
             return "data_center_full.json";
+        }
+        if (state.startingSide === "full_far") {
+            return "data_center_full_far.json";
         }
         return state.startingSide === "far"
             ? "data_center_reverse.json"
@@ -2709,6 +2696,9 @@
     // Full data center: the dog moves around the gray loop on the room
     // drawing, one equal step per stop (Stop 1 at the start, last stop back
     // at the start). The recorded coordinates aren't used for drawing.
+    // The far side start begins FULL_FAR_START of the way around the loop.
+    const FULL_FAR_START = 27 / 44;
+
     function drawFullRoute(percent) {
         const stops = routeStops(dogStates[current] || {});
         const total = stops.length || 1;
@@ -2720,59 +2710,29 @@
         const loop = $("fullDone");
         const length = loop.getTotalLength();
         const done = length * reached / total;
+        const farSide = dogStates[current]?.startingSide === "full_far";
+        const start = farSide ? length * FULL_FAR_START : 0;
 
-        loop.style.strokeDasharray = `${done} ${length}`;
-        const point = loop.getPointAtLength(done);
+        loop.style.strokeDasharray = `${done} ${length - done}`;
+        loop.style.strokeDashoffset = `${-start}`;
+        const point = loop.getPointAtLength((start + done) % length);
         $("marker").setAttribute("cx", point.x.toFixed(1));
         $("marker").setAttribute("cy", point.y.toFixed(1));
-    }
 
-    // Full data center: draw the route's own stops, scaled to fit the
-    // 320 x 420 box without stretching (same scale across and down).
-    function drawFullRoute(percent) {
-        const stops = routeStops(dogStates[current] || {});
-        if (!stops.length) {
-            return;
-        }
-
-        const xs = stops.map(s => s.x);
-        const ys = stops.map(s => s.y);
-        const minX = Math.min(...xs), maxX = Math.max(...xs);
-        const minY = Math.min(...ys), maxY = Math.max(...ys);
-        const scale = Math.min(
-            260 / Math.max(maxX - minX, 0.1),
-            372 / Math.max(maxY - minY, 0.1)
+        // Dog start triangle + label at this route's start spot.
+        const s = loop.getPointAtLength(start);
+        const below = s.y > 300;
+        document.querySelector(".startArrow").setAttribute(
+            "d",
+            below
+                ? `M${s.x - 9},${s.y + 26} L${s.x},${s.y + 12} L${s.x + 9},${s.y + 26} Z`
+                : `M${s.x - 9},${s.y - 26} L${s.x},${s.y - 12} L${s.x + 9},${s.y - 26} Z`
         );
-        const offsetX = 160 - (minX + maxX) / 2 * scale;
-        const offsetY = 210 + (minY + maxY) / 2 * scale;
-        const pts = stops.map(s => [
-            (offsetX + s.x * scale).toFixed(1),
-            (offsetY - s.y * scale).toFixed(1)
-        ]);
-
-        // Don't draw a line between stops more than 4 m apart.
-        function pathTo(count) {
-            let d = "";
-            for (let i = 0; i < count; i++) {
-                const far = i === 0 || Math.hypot(
-                    stops[i].x - stops[i - 1].x,
-                    stops[i].y - stops[i - 1].y
-                ) > 4;
-                d += `${far ? "M" : "L"}${pts[i][0]},${pts[i][1]} `;
-            }
-            return d;
-        }
-
-        const dog = dogs[current] || {};
-        const reached = Math.max(1, Math.min(
-            stops.length,
-            dog.currentWaypoint || Math.round(stops.length * percent / 100) || 1
-        ));
-
-        $("fullBase").setAttribute("d", pathTo(stops.length));
-        $("fullDone").setAttribute("d", percent > 0 ? pathTo(reached) : "");
-        $("marker").setAttribute("cx", pts[reached - 1][0]);
-        $("marker").setAttribute("cy", pts[reached - 1][1]);
+        const label = document.querySelector(".startLabel");
+        const rightSide = s.x > 200;
+        label.setAttribute("text-anchor", rightSide ? "end" : "start");
+        label.setAttribute("x", (rightSide ? s.x - 16 : s.x + 16).toFixed(1));
+        label.setAttribute("y", (below ? s.y + 25 : s.y - 14).toFixed(1));
     }
 
     function routeStops(state) {
