@@ -1574,8 +1574,8 @@
                         <select id="startingSide">
                             <option value="near">Near end (Stop 1)</option>
                             <option value="far">Far end (Stop 10)</option>
-                            <option value="full">Full data center – main start</option>
-                            <option value="full_far">Full data center – far side start (Stop 18)</option>
+                            <option value="full">Full data center – door start</option>
+                            <option value="full_far">Full data center – corner start (top right)</option>
                         </select>
                     </label>
 
@@ -2683,10 +2683,10 @@
     // Stops of the route for the selected starting side (from /api/routes).
     function routeFileFor(state) {
         if (state.startingSide === "full") {
-            return "data_center_full.json";
+            return "full_door.json";
         }
         if (state.startingSide === "full_far") {
-            return "data_center_full_far.json";
+            return "full_corner.json";
         }
         return state.startingSide === "far"
             ? "data_center_reverse.json"
@@ -2697,7 +2697,7 @@
     // drawing, one equal step per stop (Stop 1 at the start, last stop back
     // at the start). The recorded coordinates aren't used for drawing.
     // The far side start begins FULL_FAR_START of the way around the loop.
-    const FULL_FAR_START = 27 / 44;
+    const FULL_FAR_START = 13 / 26;   // Corner Start is stop 13 of 26 in full_door.json
 
     function drawFullRoute(percent) {
         const stops = routeStops(dogStates[current] || {});
@@ -2714,6 +2714,7 @@
         const start = farSide ? length * FULL_FAR_START : 0;
 
         loop.style.strokeDasharray = `${done} ${length - done}`;
+        loop.style.visibility = done > 0 ? "visible" : "hidden";   // no dot at 0%
         loop.style.strokeDashoffset = `${-start}`;
         const point = loop.getPointAtLength((start + done) % length);
         $("marker").setAttribute("cx", point.x.toFixed(1));

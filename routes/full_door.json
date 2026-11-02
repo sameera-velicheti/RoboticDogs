@@ -1,0 +1,220 @@
+{
+    "_note": "Stop 1 to Stop 17 recorded on site 2026-11-02. Stop 18 to Home filled in along the right aisle (y about -6.45) and the door end (x about -0.6), following the straight aisles in the recorded part. Watch the first run of that stretch.",
+    "route_name": "Full Data Center (Door Start)",
+    "map": "datacenter_02",
+    "start_pose": {
+        "x": -0.598,
+        "y": 0.353,
+        "yaw": 0.076
+    },
+    "waypoints": [
+        {
+            "name": "Stop 1",
+            "x": 0.99,
+            "y": 0.203,
+            "yaw": -0.111,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 2",
+            "x": 2.745,
+            "y": 0.177,
+            "yaw": -0.022,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 3",
+            "x": 4.861,
+            "y": 0.238,
+            "yaw": 0.02,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 4",
+            "x": 6.72,
+            "y": 0.243,
+            "yaw": -0.046,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 5",
+            "x": 8.326,
+            "y": 0.249,
+            "yaw": 0.004,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 6",
+            "x": 10.31,
+            "y": 0.272,
+            "yaw": -0.037,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 7",
+            "x": 11.953,
+            "y": 0.259,
+            "yaw": 0.042,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Before Corner 2",
+            "x": 13.82,
+            "y": 0.197,
+            "yaw": -0.071,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Corner 2",
+            "x": 15.431,
+            "y": 0.281,
+            "yaw": -1.516,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "After Corner 2",
+            "x": 15.487,
+            "y": -1.136,
+            "yaw": -1.413,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 11",
+            "x": 15.594,
+            "y": -2.953,
+            "yaw": -1.584,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 12",
+            "x": 15.562,
+            "y": -4.706,
+            "yaw": -1.69,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Corner Start",
+            "x": 15.335,
+            "y": -6.183,
+            "yaw": -3.017,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 13",
+            "x": 14.0,
+            "y": -6.349,
+            "yaw": -3.102,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 14",
+            "x": 11.93,
+            "y": -6.407,
+            "yaw": 3.125,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 15",
+            "x": 10.269,
+            "y": -6.436,
+            "yaw": 3.066,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 16",
+            "x": 8.496,
+            "y": -6.372,
+            "yaw": -3.056,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 17",
+            "x": 6.616,
+            "y": -6.545,
+            "yaw": -3.132,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 18",
+            "x": 5.0,
+            "y": -6.45,
+            "yaw": 3.142,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Stop 19",
+            "x": 3.3,
+            "y": -6.45,
+            "yaw": 3.142,
+            "action": "capture_image",
+            "required": true
+        },
+        {
+            "name": "Before Corner 4",
+            "x": 2.3,
+            "y": -6.4,
+            "yaw": 3.117,
+            "action": "capture_image",
+            "required": false
+        },
+        {
+            "name": "Corner 4",
+            "x": -0.45,
+            "y": -6.4,
+            "yaw": 1.637,
+            "action": "capture_image",
+            "required": false
+        },
+        {
+            "name": "After Corner 4",
+            "x": -0.55,
+            "y": -4.9,
+            "yaw": 1.6,
+            "action": "capture_image",
+            "required": false
+        },
+        {
+            "name": "Stop 20",
+            "x": -0.6,
+            "y": -3.2,
+            "yaw": 1.571,
+            "action": "capture_image",
+            "required": false
+        },
+        {
+            "name": "Stop 21",
+            "x": -0.6,
+            "y": -1.5,
+            "yaw": 1.57,
+            "action": "capture_image",
+            "required": false
+        },
+        {
+            "name": "Home",
+            "x": -0.598,
+            "y": 0.353,
+            "yaw": 0.076,
+            "action": "capture_image",
+            "required": true
+        }
+    ]
+}
