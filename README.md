@@ -1,6 +1,6 @@
 # Agentic Paw Patrol
 
-An AI-powered autonomous safety inspection system built on NVIDIA technology. NemoClaw pairs a locally-run large language model with ROSPug quadruped robots to autonomously inspect physical spaces, detect safety hazards, and generate documented compliance reports, with no cloud dependency.
+An AI-powered autonomous safety inspection system built on NVIDIA technology. Qwen pairs a locally-run large language model with ROSPug quadruped robots to autonomously inspect physical spaces, detect safety hazards, and generate documented compliance reports, with no cloud dependency.
 
 ---
 
@@ -74,13 +74,13 @@ Through a web interface, users pair one or more robots and send each one on a sa
 
 ## Current Limitations
 
-This is a validated proof of concept, not a production-hardened deployment. Known limitations:
+This is a validated proof of concept, not a production-hardened deployment. 
+Known limitations:
 - Battery life of ~30–45 minutes per robot unit
 - No support for stairs or uneven terrain
 - LiDAR reliability is reduced on certain surfaces (e.g. wire mesh, chain-link)
 - No authentication currently implemented on the web interface
 - Single point-in-time inspections; no persistent historical tracking across sessions
-- Only one aisle route is currently mapped; a full facility loop requires new mapping
 - The desktop launcher is Linux only
 - The application runs on Flask's development server; a production server is being tested on the `production-server` branch
 
