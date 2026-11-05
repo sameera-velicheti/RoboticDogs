@@ -36,7 +36,7 @@ Through a web interface, users pair one or more robots and send each one on a sa
 
 ## Key Capabilities
 
-- **Route-based inspections** — robots walk a saved route stop by stop, from either end of the aisle, and return to their start spot when finished
+- **Route-based inspections** — robots walk a saved route stop by stop, from either end of the aisle, near-end or far-end of the data center on a full route and return to their start spot when finished
 - **Live progress** — the interface shows each robot's position on a route map, its current task, its battery level, and each photo as it is taken
 - **Inspection-wide compliance analysis** — analyze all captured images together for one report, with findings linked to their source image and named stop; the text report includes inspection date, route, image count, findings, and overall assessment
 - **Emergency Stop** — stops a robot's route and any running command at once, without affecting other robots
@@ -93,6 +93,7 @@ Known limitations:
 - NVIDIA Isaac Sim / Omniverse integration for digital twin simulation and route testing prior to deployment
 - Fine-tuned vision model trained on facility-specific hazard catalogs for improved compliance accuracy
 - Authentication, audit logging, and access controls for enterprise deployment
+- Notification for findings on patrol routes
 - Integration with existing facility management / compliance software systems
 
 ---
