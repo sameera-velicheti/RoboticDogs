@@ -107,25 +107,37 @@
         "power cables plugged into equipment that do not touch the floor"
       ]
     },
-    {
+        {
       "id": "OBST_001",
       "name": "Blocked Walkway",
       "keywords": [
-        "table leg",
-        "chair leg",
-        "furniture blocking",
-        "wall blocking path",
-        "object in path",
-        "robot will collide",
+        "box in the aisle",
+        "cart in the aisle",
+        "chair in the aisle",
+        "object left on the floor",
+        "item left in the walkway",
+        "debris on the floor",
+        "equipment left in the aisle",
         "blocking the walkway",
         "blocking the exit",
-        "obstructing the path",
-        "blocks the corridor",
         "walkway is blocked"
       ],
       "severity": "HIGH",
       "remediation": "Remove obstruction from walkway immediately",
-      "description": "Check for blocked walkway using keywords and flag according to severity."
+      "description": "Check for blocked walkway using keywords and flag according to severity.",
+      "flag_only_if": [
+        "a loose, movable object (box, cart, chair, ladder, tool, bag, trash or debris) is sitting ON THE FLOOR in the open aisle where people walk",
+        "the object is in the middle of the walkway and would force a person to step around it or stop"
+      ],
+      "do_not_flag": [
+        "server racks, cabinets or equipment lined up along the sides of the aisle - they are supposed to be there",
+        "walls, corners, columns, handrails, mesh or wire cages and fences",
+        "doors, glass doors, windows and door frames",
+        "floor tiles of any kind, including glass, vented, perforated or shiny raised-floor tiles",
+        "the end of an aisle or a turn in the corridor",
+        "anything at the edge of the photo or far away in the distance",
+        "a clear aisle with nothing loose on the floor"
+      ]
     },
     {
       "id": "PHONE_001",
