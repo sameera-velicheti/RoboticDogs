@@ -243,8 +243,10 @@ class RosPugBridge:
         try:
             self.stop()
             self.publisher.unadvertise()
-            self.client.terminate()
+            # close() ends THIS dog's connection only. terminate() would stop
+            # roslibpy's shared event loop for the whole app, after which no
+            # dog can connect ("Failed to connect to ROS") until a restart.
+            self.client.close()
         except Exception as e:
             logger.warning(f"Error during close: {e}")
-
-    
+        
