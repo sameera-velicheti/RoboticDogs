@@ -40,6 +40,30 @@ for target in "$DESKTOP_DIR/$ENTRY_NAME" "$APPS_DIR/$ENTRY_NAME"; do
 done
 rm -f "$TMP_ENTRY"
 
+
+# Second icon: same app, big-screen layout for the ViewSonic kiosk.
+KIOSK_ENTRY="PawPatrolKiosk.desktop"
+TMP_ENTRY="$(mktemp)"
+cat > "$TMP_ENTRY" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Agentic Paw Patrol (Kiosk)
+Comment=Open Paw Patrol full screen with the big-screen layout
+Exec="$LAUNCHER" kiosk
+Path=$APP_DIR
+Icon=$APP_DIR/static/app_icon.svg
+Terminal=false
+Categories=Utility;
+EOF
+
+for target in "$DESKTOP_DIR/$KIOSK_ENTRY" "$APPS_DIR/$KIOSK_ENTRY"; do
+    cp "$TMP_ENTRY" "$target"
+    chmod +x "$target"
+    echo "Installed $target"
+done
+rm -f "$TMP_ENTRY"
+gio set "$DESKTOP_DIR/$KIOSK_ENTRY" metadata::trusted true 2>/dev/null || true
+
 # Mark the desktop icon as trusted so Ubuntu lets it launch
 if gio set "$DESKTOP_DIR/$ENTRY_NAME" metadata::trusted true 2>/dev/null; then
     echo "Marked desktop icon as trusted"

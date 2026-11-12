@@ -4,6 +4,10 @@
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 STATUS_URL="http://localhost:5000/api/status"
 OPEN_URL="http://localhost:5000/new"
+MODE="${1:-normal}"          # "kiosk" = big-screen layout, full screen
+if [ "$MODE" = "kiosk" ]; then
+    OPEN_URL="http://localhost:5000/new?kiosk=1"
+fi
 LOG="$APP_DIR/pawpatrol.log"
 
 # Find the virtual environment: venv, then .venv, then ~/pawpatrol-venv
@@ -40,7 +44,12 @@ if ! curl -s -o /dev/null "$STATUS_URL"; then
 fi
 
 if curl -s -o /dev/null "$STATUS_URL"; then
-    xdg-open "$OPEN_URL" > /dev/null 2>&1 &
+    if [ "$MODE" = "kiosk" ] && command -v firefox > /dev/null; then
+        # Full screen, no address bar. Alt+F4 closes it.
+        firefox --new-tab "$OPEN_URL" > /dev/null 2>&1 &
+    else
+        xdg-open "$OPEN_URL" > /dev/null 2>&1 &
+    fi
 else
     notify-send "Paw Patrol" "The app didn't start. See $LOG" 2>/dev/null
     xdg-open "$LOG" > /dev/null 2>&1 &

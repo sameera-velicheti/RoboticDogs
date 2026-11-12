@@ -1049,6 +1049,103 @@
                 display: none;
             }
         }
+
+        /* ---------------------------------------------------------------
+           Kiosk layout (ViewSonic EP5542 big screen). Turned on with
+           ?kiosk=1 in the address - the "Agentic Paw Patrol (Kiosk)" desktop
+           icon opens it that way. Without it the page is unchanged.
+           Map on top, big photos underneath, larger title.
+           --------------------------------------------------------------- */
+        body.kiosk .app {
+            grid-template-columns: 280px 1fr;
+        }
+
+        body.kiosk .brand {
+            font-size: 34px;
+            line-height: 1.15;
+            margin: 0 10px 40px;
+        }
+
+        body.kiosk .brand small {
+            font-size: 22px;
+            margin-top: 6px;
+        }
+
+        body.kiosk .nav button {
+            padding: 14px 12px;
+            font-size: 18px;
+        }
+
+        /* One column: route on top, photos below */
+        body.kiosk .workspace {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto minmax(0, 1fr);
+        }
+
+        /* Route card: map on the left, details and buttons on the right */
+        body.kiosk .routeCard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            column-gap: 28px;
+            align-content: start;
+        }
+
+        body.kiosk .routeCard > * {
+            grid-column: 2;
+        }
+
+        body.kiosk .routeCard > .map {
+            grid-column: 1;
+            grid-row: 1 / span 8;
+            min-height: 0;
+            margin: 0;
+        }
+
+        body.kiosk .routeSvg {
+            width: 220px;
+            height: 289px;
+        }
+
+        body.kiosk .routeCard p,
+        body.kiosk .legend {
+            font-size: 17px;
+        }
+
+        /* Photos: big main photo, larger thumbnails */
+        body.kiosk .right {
+            min-height: 0;
+        }
+
+        body.kiosk .imgHead b {
+            font-size: 20px;
+        }
+
+        /* Fit the whole photo inside its box (no cropping) */
+        body.kiosk .photo {
+            min-height: 0;
+        }
+
+        body.kiosk .photo:not(.photoFocus) img {
+            position: absolute;
+            inset: 0;
+        }
+
+        body.kiosk .photo .cap {
+            font-size: 18px;
+            padding: 10px 14px;
+        }
+
+        body.kiosk .thumbs.live {
+            height: 104px;
+        }
+
+        body.kiosk .thumbs.live .thumb {
+            flex: 0 0 170px;
+        }
+
+        body.kiosk .analysis {
+            font-size: 17px;
+        }
     </style>
 </head>
 
@@ -1351,6 +1448,11 @@
 <div id="photoFocusBackdrop" class="photoFocusBackdrop"></div>
 
 <script>
+    // Kiosk layout for the big screen (?kiosk=1). Normal page otherwise.
+    document.body.classList.toggle(
+        "kiosk",
+        new URLSearchParams(location.search).get("kiosk") === "1"
+    );
     const $ = id => document.getElementById(id);
 
     const dogs = {};
